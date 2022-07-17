@@ -92,38 +92,38 @@ class openNeural:
             if not self.interpreting:
                 if self.EQ_layer[i] == sym.simplify('softmax'):  # normalize the output value
                     self.A_layer[a_next: a_next + a_shape] = softmax(
-                        self.Z_layer[a_next: a_next + a_shape])
+                        self.X_layer[a_next: a_next + a_shape])
                 elif self.EQ_layer[i] == sym.simplify('max_min_lmit'):  # normalize the values between -1, 1, always the max = 1 and min = -1
                     self.A_layer[a_next: a_next + a_shape] = max_min_lmit(
-                        self.Z_layer[a_next: a_next + a_shape])
+                        self.X_layer[a_next: a_next + a_shape])
                 elif self.EQ_layer[i] == sym.simplify('normal'):  # normalize the output value without consider variance
                     self.A_layer[a_next: a_next + a_shape] = normalminmax(
-                        self.Z_layer[a_next: a_next + a_shape])
+                        self.X_layer[a_next: a_next + a_shape])
                 elif self.EQ_layer[i] == sym.simplify('znormal'):  # normalize the output value consider variance within -1, 1
                     self.A_layer[a_next: a_next + a_shape] = znormal(
-                        self.Z_layer[a_next: a_next + a_shape])
+                        self.X_layer[a_next: a_next + a_shape])
                 elif self.EQ_layer[i] == sym.simplify('sigmoid'):  # The typical activation function make between 0 1
                     self.A_layer[a_next: a_next + a_shape] = sigmoid(
-                        self.Z_layer[a_next: a_next + a_shape])
+                        self.X_layer[a_next: a_next + a_shape])
                 elif self.EQ_layer[i] == sym.simplify('tanh(x)'):  # The typical -1, 1 activation function
                     self.A_layer[a_next: a_next + a_shape] = HyperBolic(
-                        self.Z_layer[a_next: a_next + a_shape])
+                        self.X_layer[a_next: a_next + a_shape])
                 elif self.EQ_layer[i] == sym.simplify('ReLU'):  # Fast and prevent gradient vanishing
-                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0, self.Z_layer[
+                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0, self.X_layer[
                                                                                                a_next: a_next + a_shape])
                 elif self.EQ_layer[i] == sym.simplify('leakReLU'):  # prevent dead neuron
-                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0.3 * self.Z_layer[
+                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0.3 * self.X_layer[
                                                                                                a_next: a_next + a_shape],
-                                                                                             self.Z_layer[
+                                                                                             self.X_layer[
                                                                                                a_next: a_next + a_shape])
                 elif self.EQ_layer[i] == sym.simplify(
                         'parametricReLU'):  # prevent dead neuron and also negative flliping
-                    self.A_layer[a_next: a_next + a_shape] = np.maximum(-0.3 * self.Z_layer[
+                    self.A_layer[a_next: a_next + a_shape] = np.maximum(-0.3 * self.X_layer[
                                                                                                a_next: a_next + a_shape],
-                                                                                             self.Z_layer[
+                                                                                             self.X_layer[
                                                                                                a_next: a_next + a_shape])
                 else:
-                    self.A_layer[a_next: a_next + a_shape] = self.Z_layer[
+                    self.A_layer[a_next: a_next + a_shape] = self.X_layer[
                                                                                  a_next: a_next + a_shape]
             else:
                 v_x = sym.Symbol('x')
