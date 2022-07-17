@@ -510,13 +510,3 @@ class openNeural:
         print(f' Each_error : {self.Er_layer[-self.Layer_shape[-1]:] * -1}')
         print(f' Error : {self.error * 100:.20f} %')
         print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-
-if __name__ == '__main__':
-    B = openNeural()
-    B.add_layer(4, 'x')
-    B.add_layer(10, 'softReLU')
-    B.add_layer(4, 'x')
-    B.generate_weight()
-    B.xavier_initialization()
-    B.learn_set([1,2,3,4],[4,3,2,1], dropout = 0, optima = False)
-    B.learn_start(max_trial= 100000, show_result=True)
