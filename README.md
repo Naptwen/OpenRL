@@ -17,12 +17,15 @@ https://sites.google.com/view/gesope/projects/a-i/reinforcement-neural-network-p
 ```python
 import OpenNeural
 if __name__ == '__main__':
+# this is one iteration if you want to epoch do while and check the error for data
     B = openNeural()
     B.add_layer(4, 'x')
     B.add_layer(10, 'softReLU')
     B.add_layer(4, 'x')
     B.generate_weight()
     B.xavier_initialization()
-    B.learn_set([1,2,3,4],[4,3,2,1], dropout = 0, optima = False)
     B.learn_start(max_trial= 100000, show_result=True)
+    B.learning_reset()
+    B.learning_set(learning_rate=learning_rate, dropout_rate=dropout_rate, loss_fun=loss_fun, adam_rmsp=adam_rmsp, Error_optimaization=Error_optimaization)
+    print(B.errror)
 ```
