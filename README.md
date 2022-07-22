@@ -23,7 +23,7 @@ if __name__ == '__main__':
 # this is one iteration if you want to epoch do while and check the error for data
     B = openNeural()
     B.add_layer(4, 'x')
-    B.add_layer(10, 'softReLU')
+    B.add_layer(10, 'ReLU')
     B.add_layer(4, 'x')
     B.generate_weight()
     B.xavier_initialization()
