@@ -1,6 +1,6 @@
 # OpenNeural
 GNU license 2022(c) Useop Gim\
-v1.3.0\
+v1.4.0\
 Change the variable name of algorithm\
 Fix forget Load and Save csv for Bias layer\
 
