@@ -43,7 +43,7 @@ def dropOut(layer, drop_per):
     return mask * layer.shape[0] / (1.0 - drop_per)
 
 class openNeural:
-     """
+    """
     This is the neural network class\n
     After declare, follow below process \n
     [1]. add_layer : adding layer as much as you want (at least 2 times are required for input layer and output layer)\n
@@ -76,12 +76,16 @@ class openNeural:
     epsilon = 0.00000001 # For using velocity rate (to prevent dividing by 0)
     adamRMSP = True
     output = np.empty(0)
+
     def cpu_run(self):
         """
-       It is calculating forward propagation and save each values in Z,A layers\n
-       The output should be saved in last layer's A layer\n
-       If interpreting is True then interpreting equation as user input at add layer function\n
-       It must take much longer than default function leakReLU\n
+       It is calculating forward propagation and save each values in Z,X,A layers
+
+       The output should be saved in last layer's A  and also output value
+
+       If interpreting is True then interpreting equation as user input at add layer function
+
+       It must take much longer than given functions
         """
         a_next = 0
         w_next = 0
@@ -156,8 +160,9 @@ class openNeural:
 
     def cpu_back_propagation(self):
         """
-        Back propagation, if the interpreting is False then the dA_dZ is based on the derivative of soft ReLU (default)\n
-        If not, it follows the derivative function by sympy (it makes the delay of calculating)
+        Back propagation, if the interpreting is False then the dA_dZ is based on the derivative of typed functions (default is x)
+
+        If True, it follows the derivative function by sympy (it makes the delay of calculating)
          """
         a_next = len(self.A_layer) - self.Layer_shape[-1]
         w_next = len(self.W_layer) - self.Layer_shape[-1] * self.Layer_shape[-2]
@@ -245,106 +250,135 @@ class openNeural:
 
     def csv_save(self, file_name):
         """
-        It only exports the W_layer for current neural network\n
-        :param file_name: it is file name for export the file should be written as "file_name.csv"
-        :return:
+        It only exports the W_layer and B_layer for current neural network
+
+        :param file_name: it is file name for export the file should be written as "file_name_W.csv" and "file_name_B.csv"
         """
         np.savetxt(file_name + '_W.csv', self.W_layer, delimiter = ',')
         np.savetxt(file_name + '_B.csv', self.B_layer, delimiter=',')
 
     def csv_load(self, file_name):
         """
-        It is overlapping the W layer of current neural network\n
-        The overlapped neural network's W_layer should be generated and also have the same shape\n
-        :param file_name: it is file name which is in the same directory with this python script
-        """
-        self.W_layer = np.loadtxt(file_name + '_W.csv', delimiter = ',')
-        self.B_layer = np.loadtxt(file_name + '_B.csv', delimiter=',')
+        It is overlapping the W and B layer of current neural network
 
-    def run_init(self, input_val, dropout = 0.0):
+        The overlapped neural network's W and B layer should be generated and also have the same shape
+
+        :param file_name: it is file name which is in the same directory with this python script
+        If file is not exists, it will not load the file
         """
-        :param input_val: it is the input value which will be contained in the first A_layer
-        :param dropout: it is the drop out rate between [0~1], recommend 0 when doing reinforcement learnin
-        :return:
+        if os.path.isfile(file_name + '_W.csv') and os.path.isfile(file_name + '_B.csv'):
+            self.W_layer = np.loadtxt(file_name + '_W.csv', delimiter = ',')
+            self.B_layer = np.loadtxt(file_name + '_B.csv', delimiter=',')
+        else:
+            print(Fore.LIGHTRED_EX + ' FILE IS NOT EXITS' + Fore.RESET)
+
+    def run_init(self, input_val, dropout_rate = 0.0):
         """
-        # initializing
-        self.gE_layer = np.zeros(self.gE_layer.size)
+        :param input_val: it is the input value which will be contained in the first Z_layer
+        :param dropout: it is the drop out rate between [0~1], recommend 0 when doing reinforcement learning and for just checking
+        """
+        self.Z_layer[0:self.Layer_shape[0]] = np.array(input_val)[0:self.Layer_shape[0]] #input
+        self.drop_out = dropout_rate
+
+    def learning_reset(self):
         self.VtW_layer = np.zeros(self.VtW_layer.size)
         self.MtW_layer = np.zeros(self.MtW_layer.size)
         self.VtB_layer = np.zeros(self.VtB_layer.size)
         self.MtB_layer = np.zeros(self.MtB_layer.size)
-        self.Z_layer = np.zeros(self.Z_layer.size)
-        self.X_layer = np.zeros(self.X_layer.size)
-        self.A_layer = np.zeros(self.A_layer.size)
-        self.Z_layer[0:self.Layer_shape[0]] = np.array(input_val)[0:self.Layer_shape[0]] #input
-        self.drop_out = dropout
-
-    def learn_set(self, input_val, target_val, learning_rate  = 0.001, dropout = 0.0, adam_rmsp = True, Error_optimaization = 'NONE'):
-        """
-        :param input_val: it is the input value which will be contained in the first A_layer
-        :param target_val: it is the target value which will be using for the measure cost value
-        :param learning_rate: it is the learning rate for back propgation
-        :param dropout: it is the drop out rate between [0~1], recommend 0 when doing reinforcement learning
-        :return:
-        """
-        # initializing
-        self.run_init(input_val, dropout = dropout)
-        self.error = 100
-        self.learning_rate = learning_rate
         self.step = 1
-        self.target_val = np.array(target_val)[0:self.Layer_shape[-1]] #target
+
+    def learning_set(self, learning_rate  = 0.001, dropout_rate = 0.0, loss_fun = 'RMSE', adam_rmsp = True, Error_optimaization = 'NONE'):
+        """
+        :param learning_rate: learning rate
+        :param dropout_rate: droup out rate
+        :param loss_fun: Cost function types; DIRECT is just directly put the error, it will not do the forward for checking error
+        :param adam_rmsp: this is optimization for the back propagation
+        :param Error_optimaization: this is optimization for the Error
+        """
+        self.drop_out = dropout_rate
+        self.learning_rate = learning_rate
         self.adamRMSP = adam_rmsp
         self.Error_optimaization = Error_optimaization
+        self.loss_fun = loss_fun
 
-    def learn_start(self, max_step = 200, accruancy = 0.01, loss_fun = 'RMSE', show_result = False):
+    def learn_start(self, input_val, target_val, show_result = False):
         """
-        :param max_step: it is the maximum trials for backpropagation
-        :param accruancy: it decides the break point for the allowed minimum error
-        :param loss_fun: MSE, CROSS, RMSE, MPE, BINARY_CROSS, RELATIVE_ENTROPY, HUBER_LOSS  default : MSE
-        :param show_result: True or False for showing the result when the learning is terminated
-        :return:
+        1 learning_reset is required. if tou were not change the step(iteration), only once.
+
+        2 learning_set is required. if you were not change dropout rate, learning rate during the program, only once.
+
+        3 learning_start can be as much as you want (one learn_start do one cycle forward->Error->backpropagation).
+
+        The Nan, inf error don't affect to the weight update, it will be just ignored but taking process to measure it.
+
+        :param input_val: innput value should be as same as the number of input layer nodes
+        :param target_val: target value should be as same as the number of output layer nodes
+        :param show_result: If you want to see the infomaration of error and output value after the back propgation
         """
+        # initializing
+        self.Z_layer[0:self.Layer_shape[0]] = np.array(input_val)[0:self.Layer_shape[0]] #input
+        self.target_val = np.array(target_val)[0:self.Layer_shape[-1]] #target
+        # learn start
         copy_W_layer = np.copy(self.W_layer)
         start = time.time()
-        self.step = 1
-        while True:
+        self.step += 1 # it is used for the adamRMSP, if you need reset for adamRMSP, reset this before learning as 1
+        if self.loss_fun != 'DIRECT':
+            self.gE_layer[-self.Layer_shape[-1]:] = self.target_val[0:self.Layer_shape[-1]]
+        else:
             self.cpu_run()
-            if loss_fun == 'RMSE':
+            if self.loss_fun == 'RMSE':
                 self.RMSE()
-            elif loss_fun == 'MPE':
+            elif self.loss_fun == 'MPE':
                 self.MPE()
-            elif loss_fun == 'CROSS':
+            elif self.loss_fun == 'CROSS':
                 self.CROSS_ENTROPY()
-            elif loss_fun == 'BINARY_CROSS':
+            elif self.loss_fun == 'BINARY_CROSS':
                 self.BINARY_CROSS()
-            elif loss_fun == 'RELATIVE_ENTROPY':
+            elif self.loss_fun == 'RELATIVE_ENTROPY':
+                self.RELATIVE_ENTROPY()
+            elif self.loss_fun == 'DIRECT':
                 self.RELATIVE_ENTROPY()
             else:
                 self.MSE()
-            if self.step >= max_step or self.error < accruancy:
-                break
-            self.cpu_back_propagation()
-            if show_result:
-                print(self.step, self.error, self.A_layer[-self.Layer_shape[-1]:])
-            if np.any(np.isnan(self.W_layer)) \
-                    or np.any(np.isinf(self.W_layer)) \
-                    or np.any(np.isnan(self.A_layer)) \
-                    or np.any(np.isinf(self.A_layer)) \
-                    or np.any(np.isnan(self.VtW_layer))\
-                    or np.any(np.isinf(self.VtW_layer)):
-                self.W_layer = copy_W_layer
-                if show_result:
-                    self.learn_show('Cyan', time.time() - start)
-                break
-            if self.step % 200 == 0 and show_result:
-                self.show(True)
+        self.cpu_back_propagation()
         end = time.time()
-        if self.step >= max_step:
+        if show_result:
+            print(self.step, self.error, self.A_layer[-self.Layer_shape[-1]:])
+        if np.any(np.isnan(self.W_layer)) \
+                or np.any(np.isinf(self.W_layer)) \
+                or np.any(np.isnan(self.A_layer)) \
+                or np.any(np.isinf(self.A_layer)) \
+                or np.any(np.isnan(self.VtW_layer))\
+                or np.any(np.isinf(self.VtW_layer)):
+            self.W_layer = copy_W_layer
             if show_result:
-                self.learn_show('Red', end - start)
-        elif self.error < accruancy :
-            if show_result:
-                self.learn_show('Green', end - start)
+                self.learn_show('Cyan', end - start)
+
+    def get_error(self, input_val, target_val):
+        """
+        :param input_val:
+        :param target_val:
+        :return: error, if loss_fun is set as DIRECT, it will return jsut the target_val
+        """
+        self.Z_layer[0:self.Layer_shape[0]] = np.array(input_val)[0:self.Layer_shape[0]]  # input
+        self.target_val = np.array(target_val)[0:self.Layer_shape[-1]] #target
+        if self.loss_fun != 'DIRECT':
+            return self.target_val
+        else:
+            self.cpu_run()
+            if self.loss_fun == 'RMSE':
+                self.RMSE()
+            elif self.loss_fun == 'MPE':
+                self.MPE()
+            elif self.loss_fun == 'CROSS':
+                self.CROSS_ENTROPY()
+            elif self.loss_fun == 'BINARY_CROSS':
+                self.BINARY_CROSS()
+            elif self.loss_fun == 'RELATIVE_ENTROPY':
+                self.RELATIVE_ENTROPY()
+            else:
+                self.MSE()
+        return self.error
 
     def learn_show(self, color, time):
         np.set_printoptions(precision = 4)
@@ -523,3 +557,4 @@ class openNeural:
         print(f' Each_error : {self.gE_layer[-self.Layer_shape[-1]:] * -1}')
         print(f' Error : {self.error * 100:.20f} %')
         print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+
