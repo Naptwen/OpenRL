@@ -3,6 +3,7 @@ import time
 import sympy as sym
 from sympy import sqrt, diff
 import numpy as np
+import os
 
 def softmax(values):
     val2exp = np.exp(values)
@@ -258,7 +259,7 @@ class openNeural:
         :param file_name: it is file name which is in the same directory with this python script
         """
         self.W_layer = np.loadtxt(file_name + '_W.csv', delimiter = ',')
-        self.W_layer = np.loadtxt(file_name + '_B.csv', delimiter=',')
+        self.B_layer = np.loadtxt(file_name + '_B.csv', delimiter=',')
 
     def run_init(self, input_val, dropout = 0.0):
         """
