@@ -315,16 +315,16 @@ class openNeural:
         :param target_val: target value should be as same as the number of output layer nodes
         :param show_result: If you want to see the infomaration of error and output value after the back propgation
         """
-        # initializing
-        self.Z_layer[0:self.Layer_shape[0]] = np.array(input_val)[0:self.Layer_shape[0]] #input
-        self.target_val = np.array(target_val)[0:self.Layer_shape[-1]] #target
         # learn start
         copy_W_layer = np.copy(self.W_layer)
         start = time.time()
         self.step += 1 # it is used for the adamRMSP, if you need reset for adamRMSP, reset this before learning as 1
         if self.loss_fun != 'DIRECT':
-            self.gE_layer[-self.Layer_shape[-1]:] = self.target_val[0:self.Layer_shape[-1]]
-        else:
+            self.gE_layer[-self.Layer_shape[-1]:] = target_val[0:self.Layer_shape[-1]]
+        else:        
+            # initializing
+            self.Z_layer[0:self.Layer_shape[0]] = np.array(input_val)[0:self.Layer_shape[0]] #input
+            self.target_val = np.array(target_val)[0:self.Layer_shape[-1]] #target
             self.cpu_run()
             if self.loss_fun == 'RMSE':
                 self.RMSE()
