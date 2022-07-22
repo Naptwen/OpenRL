@@ -2,10 +2,10 @@
 GNU license 2022(c) Useop Gim\
 v1.5.0\
 Change algorithm order for SGD and others\
-This version I tested for DDQN and DQN and it success! 
-I am so happy that I finally make it for RL!
-*The RL version will be publish as soon as possible after some additional work for optimization 
-**paraller and GPGPU will be publised as soon as after add some function for mutiple network parallel algorithm
+This version I tested for DDQN and DQN and it success! \
+I am so happy that I finally make it for RL!\
+*The RL version will be publish as soon as possible after some additional work for optimization \
+**paraller and GPGPU will be publised as soon as after add some function for mutiple network parallel algorith
 
 v1.4.0\
 Change the variable name of algorithm\
