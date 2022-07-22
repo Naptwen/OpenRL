@@ -1,5 +1,9 @@
 # OpenNeural
 GNU license 2022(c) Useop Gim\
+v1.5.0\
+Change algorithm order for SGD and others\
+This version I tested for DDQN and DQN and it success! I am so impressived my working actually be used for RL
+
 v1.4.0\
 Change the variable name of algorithm\
 Fix forget Load and Save csv for Bias layer\
