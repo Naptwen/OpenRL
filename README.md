@@ -27,8 +27,13 @@ if __name__ == '__main__':
     B.add_layer(4, 'x')
     B.generate_weight()
     B.xavier_initialization()
-    B.learn_start(max_trial= 100000, show_result=True)
     B.learning_reset()
-    B.learning_set(learning_rate=learning_rate, dropout_rate=dropout_rate, loss_fun=loss_fun, adam_rmsp=adam_rmsp, Error_optimaization=Error_optimaization)
-    print(B.errror)
+    B.learning_set()
+    start = time.time()
+    for i in range(1000):
+        B.learn_start(input_val=[1,2,3,4], target_val=[4,3,2,1])
+        if B.error <= 0.01:
+            break
+        print(B.error)
+    print('Hello NEURAL : ', time.time() - start)
 ```
