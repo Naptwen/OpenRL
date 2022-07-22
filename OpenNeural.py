@@ -319,7 +319,7 @@ class openNeural:
         copy_W_layer = np.copy(self.W_layer)
         start = time.time()
         self.step += 1 # it is used for the adamRMSP, if you need reset for adamRMSP, reset this before learning as 1
-        if self.loss_fun != 'DIRECT':
+        if self.loss_fun == 'DIRECT':
             self.gE_layer[-self.Layer_shape[-1]:] = target_val[0:self.Layer_shape[-1]]
         else:        
             # initializing
