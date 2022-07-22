@@ -42,7 +42,7 @@ def dropOut(layer, drop_per):
     return mask * layer.shape[0] / (1.0 - drop_per)
 
 class openNeural:
-    """
+     """
     This is the neural network class\n
     After declare, follow below process \n
     [1]. add_layer : adding layer as much as you want (at least 2 times are required for input layer and output layer)\n
@@ -56,24 +56,25 @@ class openNeural:
     A_layer = np.empty(0, dtype = np.double)
     EQ_layer = np.empty(0, dtype = np.double) # Equation layer, it is only used if interpreting were true
     DE_layer = np.empty(0, dtype = np.double) # Derivative Equation layer, it is only used if interpreting were true
-    Layer_shape = np.empty(0, dtype = np.int32) # it contains Layer shapes information
+    Layer_shape = np.empty(0, dtype = np.int64) # it contains Layer shapes information
     VtW_layer = np.empty(0, dtype = np.double) # Velocity layer by W for RMSP
     MtW_layer = np.empty(0, dtype = np.double) # Momentum layer by W for Adam
     VtB_layer = np.empty(0, dtype = np.double) # as same as above but by B
     MtB_layer = np.empty(0, dtype = np.double) # as same as above but by B
-    Er_layer = np.empty(0, dtype = np.double) # It contains the error for each result and A layer
+    gE_layer = np.empty(0, dtype = np.double) # It contains the error for each result and A layer
+    Limit_layer = np.empty(0, dtype = np.double) # it is used for limit the output value of A layer
     target_val = np.empty(0, dtype = np.double) # It is target value, the size is as same as the last value of the layer shape
-    soft_on = False # using for soft max in last layer
-    normal_on = False # using for norma min max in last layer
+    Error_optimaization = 'NONE'
     drop_out = 0.0 # drop out rate
     error = 1000 # loss function's error
     learning_rate = 0.01
     interpreting = False # it is using for when forward and backward, do the sympy's equation calculating or not
-    iteration_time = 0 # For using the AdamRMSP iteration value
+    step = 1 # For using the AdamRMSP iteration value
     beta_1 = 0.9 # For using velocity rate
     beta_2 = 0.9 # For using momentum rate
     epsilon = 0.00000001 # For using velocity rate (to prevent dividing by 0)
     adamRMSP = True
+    output = np.empty(0)
     def cpu_run(self):
         """
        It is calculating forward propagation and save each values in Z,A layers\n
@@ -90,41 +91,48 @@ class openNeural:
                 = self.Z_layer[a_next: a_next + a_shape] + self.B_layer[a_next: a_next + a_shape]
             # activation function part
             if not self.interpreting:
-                if self.EQ_layer[i] == sym.simplify('softmax'):  # normalize the output value
+                if self.EQ_layer[i] == 'softmax':  # normalize the output value
                     self.A_layer[a_next: a_next + a_shape] = softmax(
                         self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == sym.simplify('max_min_lmit'):  # normalize the values between -1, 1, always the max = 1 and min = -1
-                    self.A_layer[a_next: a_next + a_shape] = max_min_lmit(
+                elif self.EQ_layer[i] == 'softmax_normal':  # normalize the output value
+                    self.A_layer[a_next: a_next + a_shape] = softmax_normal(
                         self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == sym.simplify('normal'):  # normalize the output value without consider variance
+                elif self.EQ_layer[i] == 'max_min_limit':  # normalize the values between -1, 1, always the max = 1 and min = -1
+                    self.A_layer[a_next: a_next + a_shape] = max_min_limit(
+                        self.X_layer[a_next: a_next + a_shape])
+                elif self.EQ_layer[i] == 'normal':  # normalize the output value without consider variance
                     self.A_layer[a_next: a_next + a_shape] = normalminmax(
                         self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == sym.simplify('znormal'):  # normalize the output value consider variance within -1, 1
+                elif self.EQ_layer[i] == 'znormal':  # normalize the output value consider variance within -1, 1
                     self.A_layer[a_next: a_next + a_shape] = znormal(
                         self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == sym.simplify('sigmoid'):  # The typical activation function make between 0 1
+                elif self.EQ_layer[i] == 'sigmoid':  # The typical activation function make between 0 1
                     self.A_layer[a_next: a_next + a_shape] = sigmoid(
                         self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == sym.simplify('tanh(x)'):  # The typical -1, 1 activation function
+                elif self.EQ_layer[i] == 'tanh(x)':  # The typical -1, 1 activation function
                     self.A_layer[a_next: a_next + a_shape] = HyperBolic(
                         self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == sym.simplify('ReLU'):  # Fast and prevent gradient vanishing
-                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0, self.X_layer[
-                                                                                               a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == sym.simplify('leakReLU'):  # prevent dead neuron
-                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0.3 * self.X_layer[
-                                                                                               a_next: a_next + a_shape],
-                                                                                             self.X_layer[
-                                                                                               a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == sym.simplify(
-                        'parametricReLU'):  # prevent dead neuron and also negative flliping
-                    self.A_layer[a_next: a_next + a_shape] = np.maximum(-0.3 * self.X_layer[
-                                                                                               a_next: a_next + a_shape],
-                                                                                             self.X_layer[
-                                                                                               a_next: a_next + a_shape])
+                elif self.EQ_layer[i] == 'ReLU':  # Fast and prevent gradient vanishing
+                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0, self.X_layer[a_next: a_next + a_shape])
+                elif self.EQ_layer[i] == 'leakReLU':  # prevent dead neuron
+                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0.3 * self.X_layer[a_next: a_next + a_shape],
+                                                                        self.X_layer[a_next: a_next + a_shape])
+                elif self.EQ_layer[i] == 'parametricReLU':  # prevent dead neuron and also negative flliping
+                    self.A_layer[a_next: a_next + a_shape] = np.maximum(-0.3 * self.X_layer[a_next: a_next + a_shape],
+                                                                        self.X_layer[a_next: a_next + a_shape])
+                elif self.EQ_layer[i] == 'ReLU:1.0':  # Fast and prevent gradient vanishing
+                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0, self.X_layer[a_next: a_next + a_shape])
+                    self.A_layer[a_next: a_next + a_shape] = np.where(self.A_layer[a_next: a_next + a_shape] > 1, 1, self.A_layer[a_next: a_next + a_shape])
+                elif self.EQ_layer[i] == 'leakReLU:1.0':  # prevent dead neuron
+                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0.3 * self.X_layer[a_next: a_next + a_shape],
+                                                                        self.X_layer[a_next: a_next + a_shape])
+                    self.A_layer[a_next: a_next + a_shape] = np.where(self.A_layer[a_next: a_next + a_shape] > 1, 1, self.A_layer[a_next: a_next + a_shape])
+                elif self.EQ_layer[i] == 'parametricReLU:1.0':  # prevent dead neuron and also negative flliping
+                    self.A_layer[a_next: a_next + a_shape] = np.maximum(-0.3 * self.X_layer[a_next: a_next + a_shape],
+                                                                        self.X_layer[a_next: a_next + a_shape])
+                    self.A_layer[a_next: a_next + a_shape] = np.where(self.A_layer[a_next: a_next + a_shape] > 1, 1, self.A_layer[a_next: a_next + a_shape])
                 else:
-                    self.A_layer[a_next: a_next + a_shape] = self.X_layer[
-                                                                                 a_next: a_next + a_shape]
+                    self.A_layer[a_next: a_next + a_shape] = self.X_layer[a_next: a_next + a_shape]
             else:
                 v_x = sym.Symbol('x')
                 self.A_layer[a_next: a_next + a_shape] = np.array(
@@ -143,9 +151,10 @@ class openNeural:
                                self.W_layer[w_next: w_next + w_shape].reshape(self.Layer_shape[i],  self.Layer_shape[i + 1]) ).flatten()
                 w_next += w_shape
             a_next += a_shape
+            self.output = self.A_layer[-self.Layer_shape[-1]:]
 
     def cpu_back_propagation(self):
-            """
+        """
         Back propagation, if the interpreting is False then the dA_dZ is based on the derivative of soft ReLU (default)\n
         If not, it follows the derivative function by sympy (it makes the delay of calculating)
          """
@@ -154,7 +163,7 @@ class openNeural:
         for i in reversed(range(1, len(self.Layer_shape))):
             a_shape = self.Layer_shape[i]
             w_shape = self.Layer_shape[i] * self.Layer_shape[i - 1]
-            dE_dA = self.Er_layer[a_next: a_next + a_shape]
+            dE_dA = self.gE_layer[a_next: a_next + a_shape]
             # calculate partial derivative of A
             dA_dX = np.ones(a_shape)  # typical x
             if self.interpreting:
@@ -163,16 +172,19 @@ class openNeural:
                     v_x = sym.Symbol('x')
                     val = self.Z_layer[a_next + k]
                     dA_dX = np.append(dA_dX, float(self.DE_layer[i].subs(v_x, val).evalf()))
-            if self.EQ_layer[i] == sym.simplify('sigmoid'):
-                dA_dX = self.X_layer[a_next: a_next + a_shape] * (1 - self.X_layer[a_next: a_next + a_shape])
-            elif self.EQ_layer[i] == sym.simplify('tanh(x)'):
-                dA_dX = HyperBolic(self.X_layer[a_next: a_next + a_shape]) ** 2
-            elif self.EQ_layer[i] == sym.simplify('ReLU'):
-                dA_dX = np.where(self.X_layer[a_next: a_next + a_shape]> 0, 1, 0)
-            elif self.EQ_layer[i] == sym.simplify('parametricReLU'):
-                dA_dX = np.where(self.X_layer[a_next: a_next + a_shape] > 0, 1, -0.3)
-            elif self.EQ_layer[i] == sym.simplify('leakReLU'):
-                dA_dX = np.where(self.X_layer[a_next: a_next + a_shape] > 0, 1, 0.3)
+            else:
+                if self.EQ_layer[i] == 'softmax':
+                    dA_dX = self.A_layer[a_next: a_next + a_shape] - self.A_layer[a_next: a_next + a_shape]**2
+                elif self.EQ_layer[i] == 'sigmoid':
+                    dA_dX = self.X_layer[a_next: a_next + a_shape] * (1 - self.X_layer[a_next: a_next + a_shape])
+                elif self.EQ_layer[i] == 'tanh(x)':
+                    dA_dX = HyperBolic(self.X_layer[a_next: a_next + a_shape]) ** 2
+                elif self.EQ_layer[i] == 'ReLU':
+                    dA_dX = np.where(self.X_layer[a_next: a_next + a_shape]> 0, 1, 0)
+                elif self.EQ_layer[i] == 'parametricReLU':
+                    dA_dX = np.where(self.X_layer[a_next: a_next + a_shape] > 0, 1, -0.3)
+                elif self.EQ_layer[i] == 'leakReLU':
+                    dA_dX = np.where(self.X_layer[a_next: a_next + a_shape] > 0, 1, 0.3)
             dE_dZ = dE_dA * dA_dX
             #converting dZ_dA for multiplication
             repeat_dZ_dA = np.repeat([self.A_layer[a_next - self.Layer_shape[i - 1] : a_next]], repeats = a_shape, axis = 0)
@@ -185,16 +197,16 @@ class openNeural:
                     self.beta_1 * self.MtW_layer[w_next:w_next + w_shape] + (1 - self.beta_1) * dE_dW
                 self.VtW_layer[w_next:w_next + w_shape] =\
                     self.beta_2 * self.VtW_layer[w_next:w_next + w_shape] + (1 - self.beta_2) * dE_dW**2
-                mdw_corr = self.MtW_layer[w_next:w_next + w_shape] / (1 - self.beta_1 ** self.iteration_time)
-                vdw_corr = self.VtW_layer[w_next:w_next + w_shape] / (1 - self.beta_2 ** self.iteration_time)
+                mdw_corr = self.MtW_layer[w_next:w_next + w_shape] / (1 - self.beta_1 ** self.step)
+                vdw_corr = self.VtW_layer[w_next:w_next + w_shape] / (1 - self.beta_2 ** self.step)
                 w_update = self.learning_rate * (mdw_corr/(np.sqrt(vdw_corr) + self.epsilon))
                 # AdamRMSP Bias
                 self.MtB_layer[a_next: a_next + a_shape] = \
                     self.beta_1 * self.MtB_layer[a_next: a_next + a_shape] + (1 - self.beta_1) * dE_dZ
                 self.VtB_layer[a_next : a_next + a_shape] =\
                     self.beta_2 * self.VtB_layer[a_next : a_next + a_shape] + (1 - self.beta_2) * dE_dZ**2
-                vdb_corr = self.VtB_layer[a_next : a_next + a_shape] / (1 - self.beta_2 ** self.iteration_time)
-                mdb_corr = self.MtB_layer[a_next : a_next + a_shape] / (1 - self.beta_1 ** self.iteration_time)
+                vdb_corr = self.VtB_layer[a_next : a_next + a_shape] / (1 - self.beta_2 ** self.step)
+                mdb_corr = self.MtB_layer[a_next : a_next + a_shape] / (1 - self.beta_1 ** self.step)
                 b_update = self.learning_rate * (mdb_corr/(np.sqrt(vdb_corr) + self.epsilon))
             else:
                 w_update = self.learning_rate * dE_dW
@@ -206,29 +218,29 @@ class openNeural:
             self.B_layer[a_next : a_next + a_shape] =\
                 self.B_layer[a_next : a_next + a_shape] - b_update
             # dE_dA
-            self.Er_layer[a_next - self.Layer_shape[i - 1]: a_next] =\
+            self.gE_layer[a_next - self.Layer_shape[i - 1]: a_next] =\
                 np.matmul(self.W_layer[w_next:w_next + w_shape].reshape(self.Layer_shape[i-1],self.Layer_shape[i]),
                           np.transpose(dE_dZ) ).flatten() #transpose multiplication
             #next iteration
             a_next -= self.Layer_shape[i - 1]
             w_next -= self.Layer_shape[i - 1] * self.Layer_shape[i - 2]
-        self.iteration_time += 1
+        self.step += 1
 
-    def cl_run(self):
-        """
-        It is calculating forward propagation and save each values in Z,A layers\n
-        The output should be saved in last layer's A layer\n
-        If interpreting is True then interpreting equation as user input at add layer function\n
-        It must take much longer than default function leakReLU\n
-        """
-        pass # too lazy to do it again I will do it later
-
-    def cl_back_propagation(self):
-        """
-        Back propagation, if the interpreting is False then the dA_dZ is based on the derivative of soft ReLU (default)\n
-        If not, it follows the derivative function by sympy (it makes the delay of calculating)
-        """
-        pass # too lazy to do it again I will do it later
+    # def cl_run(self):
+    #     """
+    #     It is calculating forward propagation and save each values in Z,A layers\n
+    #     The output should be saved in last layer's A layer\n
+    #     If interpreting is True then interpreting equation as user input at add layer function\n
+    #     It must take much longer than default function leakReLU\n
+    #     """
+    #     pass # latter too lazy to do it again
+    #
+    # def cl_back_propagation(self):
+    #     """
+    #     Back propagation, if the interpreting is False then the dA_dZ is based on the derivative of soft ReLU (default)\n
+    #     If not, it follows the derivative function by sympy (it makes the delay of calculating)
+    #     """
+    #     pass # too lazy to do it again
 
     def csv_save(self, file_name):
         """
@@ -236,7 +248,8 @@ class openNeural:
         :param file_name: it is file name for export the file should be written as "file_name.csv"
         :return:
         """
-        np.savetxt(file_name, self.W_layer, delimiter = ',')
+        np.savetxt(file_name + '_W.csv', self.W_layer, delimiter = ',')
+        np.savetxt(file_name + '_B.csv', self.B_layer, delimiter=',')
 
     def csv_load(self, file_name):
         """
@@ -244,16 +257,17 @@ class openNeural:
         The overlapped neural network's W_layer should be generated and also have the same shape\n
         :param file_name: it is file name which is in the same directory with this python script
         """
-        self.W_layer = np.loadtxt(file_name, delimiter = ',')
+        self.W_layer = np.loadtxt(file_name + '_W.csv', delimiter = ',')
+        self.W_layer = np.loadtxt(file_name + '_B.csv', delimiter=',')
 
-    def run_init(self, input_val, dropout = 0.0, interpreting = False):
+    def run_init(self, input_val, dropout = 0.0):
         """
         :param input_val: it is the input value which will be contained in the first A_layer
         :param dropout: it is the drop out rate between [0~1], recommend 0 when doing reinforcement learnin
         :return:
         """
         # initializing
-        self.Er_layer = np.zeros(self.Er_layer.size)
+        self.gE_layer = np.zeros(self.gE_layer.size)
         self.VtW_layer = np.zeros(self.VtW_layer.size)
         self.MtW_layer = np.zeros(self.MtW_layer.size)
         self.VtB_layer = np.zeros(self.VtB_layer.size)
@@ -263,9 +277,8 @@ class openNeural:
         self.A_layer = np.zeros(self.A_layer.size)
         self.Z_layer[0:self.Layer_shape[0]] = np.array(input_val)[0:self.Layer_shape[0]] #input
         self.drop_out = dropout
-        self.interpreting = interpreting
 
-    def learn_set(self, input_val, target_val, learning_rate  = 0.001, dropout = 0.02, optima = True):
+    def learn_set(self, input_val, target_val, learning_rate  = 0.001, dropout = 0.0, adam_rmsp = True, Error_optimaization = 'NONE'):
         """
         :param input_val: it is the input value which will be contained in the first A_layer
         :param target_val: it is the target value which will be using for the measure cost value
@@ -277,41 +290,41 @@ class openNeural:
         self.run_init(input_val, dropout = dropout)
         self.error = 100
         self.learning_rate = learning_rate
-        self.iteration_time = 1
+        self.step = 1
         self.target_val = np.array(target_val)[0:self.Layer_shape[-1]] #target
+        self.adamRMSP = adam_rmsp
+        self.Error_optimaization = Error_optimaization
 
-    def learn_start(self, max_trial = 300, accruancy = 0.01, loss_fun = 'RMSE', DQN_ACT = 0, show_result = True):
+    def learn_start(self, max_step = 200, accruancy = 0.01, loss_fun = 'RMSE', show_result = False):
         """
-        :param max_trial: it is the maximum trials for backpropagation
+        :param max_step: it is the maximum trials for backpropagation
         :param accruancy: it decides the break point for the allowed minimum error
-        :param loss_fun: MSE, RMSE, MPE, BINARY_CROSS, RELATIVE_ENTROPY, HUBER_LOSS  default : MSE
+        :param loss_fun: MSE, CROSS, RMSE, MPE, BINARY_CROSS, RELATIVE_ENTROPY, HUBER_LOSS  default : MSE
         :param show_result: True or False for showing the result when the learning is terminated
         :return:
         """
         copy_W_layer = np.copy(self.W_layer)
         start = time.time()
-        self.iteration_time = 1
+        self.step = 1
         while True:
             self.cpu_run()
             if loss_fun == 'RMSE':
                 self.RMSE()
             elif loss_fun == 'MPE':
                 self.MPE()
+            elif loss_fun == 'CROSS':
+                self.CROSS_ENTROPY()
             elif loss_fun == 'BINARY_CROSS':
                 self.BINARY_CROSS()
             elif loss_fun == 'RELATIVE_ENTROPY':
                 self.RELATIVE_ENTROPY()
-            elif loss_fun == 'TD_LOSS':
-                self.TD_LOSS(DQN_ACT)
-            elif loss_fun == 'HUBER_LOSS':
-                self.HUBER_LOSS(DQN_ACT)
             else:
                 self.MSE()
-            if self.iteration_time >= max_trial or self.error < accruancy:
+            if self.step >= max_step or self.error < accruancy:
                 break
             self.cpu_back_propagation()
             if show_result:
-                print(self.iteration_time, self.error)
+                print(self.step, self.error, self.A_layer[-self.Layer_shape[-1]:])
             if np.any(np.isnan(self.W_layer)) \
                     or np.any(np.isinf(self.W_layer)) \
                     or np.any(np.isnan(self.A_layer)) \
@@ -322,8 +335,10 @@ class openNeural:
                 if show_result:
                     self.learn_show('Cyan', time.time() - start)
                 break
+            if self.step % 200 == 0 and show_result:
+                self.show(True)
         end = time.time()
-        if self.iteration_time >= max_trial:
+        if self.step >= max_step:
             if show_result:
                 self.learn_show('Red', end - start)
         elif self.error < accruancy :
@@ -335,30 +350,30 @@ class openNeural:
         if color == 'Green':
             print(Fore.GREEN + f'[save] ',
                     f'inp :{self.A_layer[0:self.Layer_shape[0]]}',
-                    f'tri :{self.iteration_time} '
-                    f'trg :{self.target_val[0:self.Layer_shape[-1]]}',
+                    f'tri :{self.step} '
+                    f'trg :{self.target_val}',
                     f'out :{self.A_layer[-self.Layer_shape[-1]:]}',
-                    f'ech :{np.power(self.target_val[0:self.Layer_shape[-1]] - self.A_layer[-self.Layer_shape[-1]:], 2)} '
+                    f'ech :{np.power(self.target_val - self.A_layer[-self.Layer_shape[-1]:], 2)} '
                     f'err :{self.error:.4f}% '
                     f'tim :{time :.2f}s'
                     + Fore.RESET)
         elif color == 'Red':
             print(Fore.RED + f'[save] ',
                     f'inp :{self.A_layer[0:self.Layer_shape[0]]}',
-                    f'tri :{self.iteration_time} '
-                    f'trg :{self.target_val[0:self.Layer_shape[-1]]}',
+                    f'tri :{self.step} '
+                    f'trg :{self.target_val}',
                     f'out :{self.A_layer[-self.Layer_shape[-1]:]}',
-                    f'ech :{np.power(self.target_val[0:self.Layer_shape[-1]] - self.A_layer[-self.Layer_shape[-1]:], 2)} '
+                    f'ech :{np.power(self.target_val - self.A_layer[-self.Layer_shape[-1]:], 2)} '
                     f'err :{self.error:.4f}% '
                     f'tim :{time :.2f}s'
                     + Fore.RESET)
         elif color == 'Cyan':
             print(Fore.CYAN + f'[error] ',
                     f'inp :{self.A_layer[0:self.Layer_shape[0]]}',
-                    f'tri :{self.iteration_time} '
-                    f'trg :{self.target_val[0:self.Layer_shape[-1]]}',
+                    f'tri :{self.step} '
+                    f'trg :{self.target_val}',
                     f'out :{self.A_layer[-self.Layer_shape[-1]:]}',
-                    f'ech :{np.power(self.target_val[0:self.Layer_shape[-1]] - self.A_layer[-self.Layer_shape[-1]:], 2)} '
+                    f'ech :{np.power(self.target_val - self.A_layer[-self.Layer_shape[-1]:], 2)} '
                     f'err :{self.error:.4f}% '
                     f'tim :{time :.2f}s'
                     + Fore.RESET)
@@ -391,8 +406,8 @@ class openNeural:
         """
         Add layer\n
         :param number: The # of neuron in layer
-        :param active_fn: softmax, max_min_lmit, normal, znormal, sigmoid, tanh(x), ReLU, leakReLU, parametricReLU if not set then it works aas 'x'
-        :return:
+        :param active_fn: 'softmax', 'softmax_normal', 'max_min_limit', 'normal', 'znormal',
+        'sigmoid', 'tanh(x)', 'ReLU', 'leakReLU', 'parametricReLU' if not set then it works aas 'x'
         """
         self.Z_layer = np.append(self.Z_layer, np.zeros(number))
         self.X_layer = np.append(self.X_layer, np.zeros(number))
@@ -400,25 +415,37 @@ class openNeural:
         self.A_layer = np.append(self.A_layer, np.zeros(number))
         self.VtB_layer = np.append(self.VtB_layer, np.zeros(number))
         self.MtB_layer = np.append(self.MtB_layer, np.zeros(number))
-        self.Er_layer = np.append(self.Er_layer, np.zeros(number))
-        self.EQ_layer = np.append(self.EQ_layer, sym.simplify(active_fn))
-        self.DE_layer = np.append(self.DE_layer, sym.simplify(diff(active_fn)))
+        self.gE_layer = np.append(self.gE_layer, np.zeros(number))
+        self.EQ_layer = np.append(self.EQ_layer, active_fn)
+        self.DE_layer = np.append(self.DE_layer, active_fn)
         self.Layer_shape = np.append(self.Layer_shape, number)
+
+    def sym_simplify_eq(self):
+        for i, val in enumerate(self.EQ_layer):
+            sym.Symbol('x')
+            self.EQ_layer[i] = sym.simplify(val)
+            self.DE_layer[i] = sym.simplify(diff(val))
+        self.interpreting = True
+
     #LOSS FUNCTIONS
     def MPE(self):
         """
         Mean Absolute Percentage Error
         """
-        x = self.A_layer[-self.Layer_shape[-1]:]
-        y = self.target_val[0:self.Layer_shape[-1]]
+        x = self.output
+        y = self.target_val
         a = np.empty(0)
         for i,j in zip(x,y):
             if j != 0 and i != j:
                 a = np.append(a, (i - j) / (j * np.abs(i - j)))
             else:
                 a = np.append(a, 0)
-        self.Er_layer[-self.Layer_shape[-1]:] = a
-        self.error = 100 * np.mean( np.abs((y-x)/y) )
+        self.gE_layer[-self.Layer_shape[-1]:] = a
+        if y != 0:
+            self.error = 100 * np.mean( np.abs((y-x)/y) )
+        else:
+            print('MPE gonna 0 divide check the program')
+            exit()
 
     def MSE(self):
         """
@@ -426,58 +453,43 @@ class openNeural:
         """
         # the constant value of power doesn't consider since the iteration will be convergence to the average value
         # Therefore -> dE_dA = -(target - out)
-        self.Er_layer[-self.Layer_shape[-1]:] = -(self.target_val - self.A_layer[-self.Layer_shape[-1]:])
-        self.error = np.mean((self.target_val - self.A_layer[-self.Layer_shape[-1]:])** 2)
+        self.gE_layer[-self.Layer_shape[-1]:] = -(self.target_val - self.output)
+        self.error = np.mean((self.target_val - self.output)** 2)
 
     def RMSE(self):
         """
         Root Mean Squared Error
         """
-        self.Er_layer[-self.Layer_shape[-1]:] = -(self.target_val - self.A_layer[-self.Layer_shape[-1]:])
-        self.error = np.sqrt(np.mean((self.target_val[0:self.Layer_shape[-1]] - self.A_layer[-self.Layer_shape[-1]:])**2))
+        self.gE_layer[-self.Layer_shape[-1]:] = -(self.target_val - self.output)
+        self.error = np.sqrt(np.mean((self.target_val - self.output)**2))
+
+    def CROSS_ENTROPY(self):
+        self.gE_layer[-self.Layer_shape[-1]:] = self.target_val/self.output
+        self.error = -np.sum(self.target_val*np.log(self.output))
 
     def BINARY_CROSS(self):
         """
         Binary Cross Entropy
         """
-        self.Er_layer[-self.Layer_shape[-1]:]  = \
+        self.gE_layer[-self.Layer_shape[-1]:]  = \
             -(  #y * log(a)
-                self.target_val[0:self.Layer_shape[-1]] * np.log(self.A_layer[-self.Layer_shape[-1]:])
+                self.target_val * np.log(self.output)
                 #+(1-y)
-                + (np.ones(self.Layer_shape[-1]) - self.target_val[0:self.Layer_shape[-1]])
+                + (np.ones(self.Layer_shape[-1]) - self.target_val)
                 #*log(1-a)
-                * np.log(np.ones(self.Layer_shape[-1]) -self.A_layer[-self.Layer_shape[-1]:])
+                * np.log(np.ones(self.Layer_shape[-1]) -self.output)
               )
-        self.error = -sum(self.target_val[0:self.Layer_shape[-1]] * np.log(self.A_layer[-self.Layer_shape[-1]:]))
+        self.error = -sum(self.target_val * np.log(self.output))
 
     def RELATIVE_ENTROPY(self):
         """
         Relative Entropy Error
         """
-        self.Er_layer[-self.Layer_shape[-1]:]  = \
-            -self.target_val[0:self.Layer_shape[-1]]/self.A_layer[-self.Layer_shape[-1]:]
-        self.error = np.sum(self.target_val[0:self.Layer_shape[-1]] * np.log(self.target_val[0:self.Layer_shape[-1]] / self.A_layer[-self.Layer_shape[-1]:]))
+        self.gE_layer[-self.Layer_shape[-1]:]  = \
+            -self.target_val/self.output
+        self.error = np.sum(self.target_val * np.log(self.target_val / self.output))
 
-    def TD_LOSS(self, ACT):
-        self.Er_layer[-self.Layer_shape[-1]:] = (self.target_val - self.A_layer[-self.Layer_shape[-1]:])
-        self.error = np.mean((self.target_val - self.A_layer[-self.Layer_shape[-1]:])** 2)
-
-    def HUBER_LOSS(self, ACT):
-        """
-        Huber Loss for using DQN Loss
-        """
-        self.Er_layer[-self.Layer_shape[-1]:] = self.target_val[0:self.Layer_shape[-1]] - self.A_layer[-self.Layer_shape[-1]:]
-        y = self.target_val[0:self.Layer_shape[-1]][ACT]
-        x = self.A_layer[-self.Layer_shape[-1]:][ACT]
-        a = y - x
-        if np.abs(a) < a**2 :
-            self.error = 0.5 * a ** 2
-            self.Er_layer[-self.Layer_shape[-1]:][ACT] = -2 * (y-x)
-        else:
-            self.error = a**2 * (np.abs(a)-0.5*a**2)
-            self.Er_layer[-self.Layer_shape[-1]:][ACT] = a*(x-y)/np.abs(x-y)
-
-    def show(self, detail):
+    def show(self, detail = False):
         print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>')
         print(f' == = == input == = == ')
         print(f'{self.A_layer[0:self.Layer_shape[0]]}')
@@ -505,8 +517,8 @@ class openNeural:
         print('\n == = == Layer Shape == = == ')
         print(self.Layer_shape)
         print(' == = == RESULT == = == ')
-        print(f' Target : {self.target_val[0:self.Layer_shape[-1]]}')
-        print(f' OutPut : {self.A_layer[-self.Layer_shape[-1]:]}')
-        print(f' Each_error : {self.Er_layer[-self.Layer_shape[-1]:] * -1}')
+        print(f' Target : {self.target_val}')
+        print(f' OutPut : {self.output}')
+        print(f' Each_error : {self.gE_layer[-self.Layer_shape[-1]:] * -1}')
         print(f' Error : {self.error * 100:.20f} %')
         print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>')
