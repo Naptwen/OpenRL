@@ -1,5 +1,5 @@
 # OpenNeural
-GNU license 2022(c) Useop Gim\
+GNU license 2022(c) Useop Gim
 
 v1.6.0\
 New option feature : normlization between each layer \
@@ -7,7 +7,7 @@ New function : he initialization\
 New variable type : using function pointer\
 Remove functino : instead using run_int and cpu_run, merge it as run function\
 Change function : change the comments for function explanation\
-ETC : to avoid variable distortion, using private\
+ETC : to avoid variable distortion, using private
 
 v1.5.0\
 Change algorithm order for SGD and others\
@@ -18,7 +18,7 @@ I am so happy that I finally make it for RL!\
 
 v1.4.0\
 Change the variable name of algorithm\
-Fix forget Load and Save csv for Bias layer\
+Fix forget Load and Save csv for Bias layer
 
 v1.3.0\
 -Change the matrix form of the neural network algorithm\
