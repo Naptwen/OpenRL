@@ -37,7 +37,6 @@ if __name__ == '__main__':
     B.add_layer(4)
     B.generate_weight()
     B.xavier_initialization()
-    B.learning_reset()
     B.learning_set()
     start = time.time()
     for i in range(1000):
