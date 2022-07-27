@@ -1,5 +1,14 @@
 # OpenNeural
 GNU license 2022(c) Useop Gim\
+
+v1.6.0\
+New option feature : normlization between each layer \
+New function : he initialization\
+New variable type : using function pointer\
+Remove functino : instead using run_int and cpu_run, merge it as run function\
+Change function : change the comments for function explanation\
+ETC : to avoid variable distortion, using private\
+
 v1.5.0\
 Change algorithm order for SGD and others\
 This version I tested for DDQN and DQN and it success! \
@@ -22,16 +31,17 @@ import OpenNeural
 if __name__ == '__main__':
 # this is one iteration if you want to epoch do while and check the error for data
     B = openNeural()
-    B.add_layer(4, 'x')
-    B.add_layer(10, 'ReLU')
-    B.add_layer(4, 'x')
+    B.add_layer(4)
+    B.add_layer(10, ReLU, znormal)
+    B.add_layer(4)
     B.generate_weight()
     B.xavier_initialization()
     B.learning_reset()
     B.learning_set()
     start = time.time()
     for i in range(1000):
-        B.learn_start(input_val=[1,2,3,4], target_val=[4,3,2,1])
+        B.run(input_val = [1,2,3,4])
+        B.learn_start(out_val = B.output, target_val=[4,3,2,1])
         if B.error <= 0.01:
             break
         print(B.error)
