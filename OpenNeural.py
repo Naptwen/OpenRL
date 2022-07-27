@@ -5,556 +5,481 @@ from sympy import sqrt, diff
 import numpy as np
 import os
 
-def softmax(values):
-    val2exp = np.exp(values)
-    return val2exp / np.sum(val2exp)
+def normalminmax(values):
+    values = np.array(values)
+    if np.min(values) != np.max(values):
+        val2norm = (values - np.min(values)) / (np.max(values) - np.min(values) + 0.00000001)  # pretend the divide by 0
+        return 2 * val2norm - 1
+    return np.zeros(len(values))
+
+
+def user_fn(values, gradient=False):
+    return_values = np.zeors(len(values))
+    if gradient:
+        for i, val in enumerate(values):
+            sym.Symbol('x')
+            return_values[i] = sym.simplify(diff(val))
+    else:
+        for i, val in enumerate(values):
+            sym.Symbol('x')
+            return_values[i] = sym.simplify(val)
+    return return_values
+
+
+def linear_x(values, gradient=False):
+    if gradient:
+        return np.ones(len(values))
+    return values
+
+
+def softmax(values, gradient=False):
+    if gradient:
+        return values - values ** 2
+    f = np.exp(values)
+    return f / np.sum(f)
+
+
+def softmax_normal(values):
+    f = np.exp(values - np.max(values))
+    return f / np.sum(f)
+
 
 def HyperBolic(values):
     ex = np.exp(values)
     e_x = np.exp(-values)
-    return  (ex - e_x) / (ex + e_x)
+    return (ex - e_x) / (ex + e_x)
 
-def sigmoid(values):
+
+def sigmoid(values, gradient=False):
+    if gradient:
+        return values * (1 - values)
     values = np.exp(-values)
     return 1 / (1 + values)
 
-def normalminmax(values):
-    values = np.array(values)
-    if np.min(values) != np.max(values):
-        val2norm = (values - np.min(values))/(np.max(values) - np.min(values))
-        return 2 * val2norm - 1
-    return np.zeros(len(values))
 
-def znormal(values):
-    normalized = np.empty(0)
-    for value in values:
-        normalized_num = (value - np.mean(values)) / np.std(values)
-        normalized  = np.append(normalized, normalized_num)
-    return normalized
+def ReLU(values, gradient=False):
+    if gradient:
+        return np.where(values > 0, 1, 0)
+    return np.where(values > 0, values, 0)
 
-def max_min_lmit(values):
+
+def parametricReLU(values, gradient=False):
+    if gradient:
+        return np.where(values > 0, 1, -0.3)
+    return np.where(values > -0.3 * values, values, -0.3 * values)
+
+
+def leakReLU(values, gradient=False):
+    if gradient:
+        return np.where(values > 0, 1, 0.3)
+    return np.where(values > 0.3 * values, values, 0.3 * values)
+
+
+def znormal(values, gradient=False):
+    if gradient:
+        return (values - np.mean(values)) / (np.std(values) + 0.00000001)  # pretend the divide by 0
+    else:
+        return (np.std(values) + 0.00000001) * values + np.mean(values)
+
+
+def max_min_limit(values):
     values = np.where(values < -2, -2, values)
     values = np.where(values > 2, 2, values)
     return values
+
 
 def dropOut(layer, drop_per):
     assert 0 <= drop_per < 1
     mask = np.random.uniform(0, 1, layer.shape[0]) > drop_per
     return mask * layer.shape[0] / (1.0 - drop_per)
 
+
+# LOSS FUNCTIONS
+
+def DIRECT(x, y):
+    return -2 * (y - x), np.sum((y - x) ** 2)
+
+
+def MPE(x, y):
+    """
+    Mean Absolute Percentage Error
+    """
+    a = np.empty(0)
+    for i, j in zip(x, y):
+        if j != 0 and i != j:
+            a = np.append(a, (i - j) / (j * np.abs(i - j)))
+        else:
+            a = np.append(a, 0)
+    error = 100 * np.mean(np.abs((y - x) / (y + 0.000000000001)))
+    return a, error
+
+
+def MSE(x, y):
+    """
+    Mean Square Error
+    """
+    # the constant value of power doesn't consider since the iteration will be convergence to the average value
+    # Therefore -> dE_dA = -(target - out)
+    return -2 * (y - x), np.mean((y - x) ** 2)
+
+
+def RMSE(x, y):
+    """
+    Root Mean Squared Error
+    """
+    return -(y - x), np.sqrt(np.mean((y - x) ** 2))
+
+
+def CROSS_ENTROPY(x, y):
+    return y / x, -np.sum(y * np.log(x))
+
+
+def BINARY_CROSS(x, y):
+    """
+    Binary Cross Entropy
+    """
+    return -(  # y * log(a)
+            y * np.log(x)
+            # +(1-y)
+            + (np.ones(len(x)) - y)
+            # *log(1-a)
+            * np.log(np.ones(len(x)) - x)
+    ), -sum(y * np.log(x))
+
+
+def RELATIVE_ENTROPY(x, y):
+    """
+    Relative Entropy Error
+    """
+    return -y / x, np.sum(y * np.log(y / x))
+
+
+@njit(parallel=True)
+def p_matmul(A, B, mA, nA, nB):
+    res = np.zeros(mA * nB, np.float64)
+    for i in prange(mA):
+        for k in range(nA):
+            for j in range(nB):
+                res[i * nB + j] += A[i * nA + k] * B[k * nB + j]
+    return res
+
+
 class openNeural:
     """
-    This is the neural network class\n
-    After declare, follow below process \n
-    [1]. add_layer : adding layer as much as you want (at least 2 times are required for input layer and output layer)\n
-    [2]. generate_weight : After finish the adding layer, must generate weight to create the weight layer\n
-    [3]. xavier_initialization : initializing the weight layer by xavier
+    This is the neural network class by Useop Gim
+    After declare class below functions must be
+
+    * add_layer() : adding layer
+
+    * generate_weight() : generating the weight after adding layer
+
     """
-    W_layer = np.empty(0, dtype = np.double) # Weight Layer
-    B_layer = np.empty(0, dtype = np.double) # Basis Layer
-    Z_layer = np.empty(0, dtype = np.double)
-    X_layer = np.empty(0, dtype = np.double)
-    A_layer = np.empty(0, dtype = np.double)
-    EQ_layer = np.empty(0, dtype = np.double) # Equation layer, it is only used if interpreting were true
-    DE_layer = np.empty(0, dtype = np.double) # Derivative Equation layer, it is only used if interpreting were true
-    Layer_shape = np.empty(0, dtype = np.int64) # it contains Layer shapes information
-    VtW_layer = np.empty(0, dtype = np.double) # Velocity layer by W for RMSP
-    MtW_layer = np.empty(0, dtype = np.double) # Momentum layer by W for Adam
-    VtB_layer = np.empty(0, dtype = np.double) # as same as above but by B
-    MtB_layer = np.empty(0, dtype = np.double) # as same as above but by B
-    gE_layer = np.empty(0, dtype = np.double) # It contains the error for each result and A layer
-    Limit_layer = np.empty(0, dtype = np.double) # it is used for limit the output value of A layer
-    target_val = np.empty(0, dtype = np.double) # It is target value, the size is as same as the last value of the layer shape
-    Error_optimaization = 'NONE'
-    drop_out = 0.0 # drop out rate
-    error = 1000 # loss function's error
-    learning_rate = 0.01
-    interpreting = False # it is using for when forward and backward, do the sympy's equation calculating or not
-    step = 1 # For using the AdamRMSP iteration value
-    beta_1 = 0.9 # For using velocity rate
-    beta_2 = 0.9 # For using momentum rate
-    epsilon = 0.00000001 # For using velocity rate (to prevent dividing by 0)
-    adamRMSP = True
+    __W_layer = np.empty(0, dtype=np.double)  # Weight Layer
+    __B_layer = np.empty(0, dtype=np.double)  # Bias Layer
+    __Z_layer = np.empty(0, dtype=np.double)  # Sum of weight times value Layer
+    __X_layer = np.empty(0, dtype=np.double)  # Z + B Layer
+    __N_layer = np.empty(0, dtype=object)  # Batch normal Layer
+    __A_layer = np.empty(0, dtype=np.double)  # Activation Layer
+    __EQ_layer = np.empty(0, dtype=object)  # Equation layer function pointer
+    __DE_layer = np.empty(0, dtype=object)  # Derivative Equation layer function pointer
+    __Layer_shape = np.empty(0, dtype=np.int64)  # it contains Layer shapes information
+    __VtW_layer = np.empty(0, dtype=np.double)  # Velocity layer by W for RMSP
+    __MtW_layer = np.empty(0, dtype=np.double)  # Momentum layer by W for Adam
+    __VtB_layer = np.empty(0, dtype=np.double)  # as same as above but by B
+    __MtB_layer = np.empty(0, dtype=np.double)  # as same as above but by B
+    __gE_layer = np.empty(0, dtype=np.double)  # It contains the error for each result and A layer
+    __processor = 'NONE'
+    __drop_out = 0.0  # drop out rate
+    __learning_rate = 0.01
+    __learn_optima = 'ADAMRMSP'
+    __loss_fun = MSE
+    __step = 1  # For using the AdamRMSP iteration value
+    __beta_1 = 0.9  # For using velocity rate
+    __beta_2 = 0.9  # For using momentum rate
+    __epsilon = 0.00000001  # For using velocity rate (to prevent dividing by 0)
+
+    iteration = 0
     output = np.empty(0)
+    target_val = np.empty(0, dtype=np.double)  # It is target value, same size of last value of the layer shape
+    error = 1000  # loss function's error
 
-    def cpu_run(self):
+    def __init__(self):
+        pass
+    
+    def __cpu_run(self) -> None:
         """
-       It is calculating forward propagation and save each values in Z,X,A layers
-
-       The output should be saved in last layer's A  and also output value
-
-       If interpreting is True then interpreting equation as user input at add layer function
-
-       It must take much longer than given functions
+        This is cpu process forward
         """
         a_next = 0
         w_next = 0
-        for i in range(len(self.Layer_shape)):
-            a_shape = self.Layer_shape[i]
-            #linearly sum
-            self.X_layer[a_next: a_next + a_shape] \
-                = self.Z_layer[a_next: a_next + a_shape] + self.B_layer[a_next: a_next + a_shape]
+        for i in range(len(self.__Layer_shape)):
+            a_shape = self.__Layer_shape[i]
+            # linearly sum
+            self.__X_layer[a_next: a_next + a_shape] \
+                = self.__Z_layer[a_next: a_next + a_shape] + self.__B_layer[a_next: a_next + a_shape]
+            # normalization
+            XN_array = self.__N_layer[i](self.__X_layer[a_next: a_next + a_shape])
             # activation function part
-            if not self.interpreting:
-                if self.EQ_layer[i] == 'softmax':  # normalize the output value
-                    self.A_layer[a_next: a_next + a_shape] = softmax(
-                        self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == 'softmax_normal':  # normalize the output value
-                    self.A_layer[a_next: a_next + a_shape] = softmax_normal(
-                        self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == 'max_min_limit':  # normalize the values between -1, 1, always the max = 1 and min = -1
-                    self.A_layer[a_next: a_next + a_shape] = max_min_limit(
-                        self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == 'normal':  # normalize the output value without consider variance
-                    self.A_layer[a_next: a_next + a_shape] = normalminmax(
-                        self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == 'znormal':  # normalize the output value consider variance within -1, 1
-                    self.A_layer[a_next: a_next + a_shape] = znormal(
-                        self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == 'sigmoid':  # The typical activation function make between 0 1
-                    self.A_layer[a_next: a_next + a_shape] = sigmoid(
-                        self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == 'tanh(x)':  # The typical -1, 1 activation function
-                    self.A_layer[a_next: a_next + a_shape] = HyperBolic(
-                        self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == 'ReLU':  # Fast and prevent gradient vanishing
-                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0, self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == 'leakReLU':  # prevent dead neuron
-                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0.3 * self.X_layer[a_next: a_next + a_shape],
-                                                                        self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == 'parametricReLU':  # prevent dead neuron and also negative flliping
-                    self.A_layer[a_next: a_next + a_shape] = np.maximum(-0.3 * self.X_layer[a_next: a_next + a_shape],
-                                                                        self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == 'ReLU:1.0':  # Fast and prevent gradient vanishing
-                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0, self.X_layer[a_next: a_next + a_shape])
-                    self.A_layer[a_next: a_next + a_shape] = np.where(self.A_layer[a_next: a_next + a_shape] > 1, 1, self.A_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == 'leakReLU:1.0':  # prevent dead neuron
-                    self.A_layer[a_next: a_next + a_shape] = np.maximum(0.3 * self.X_layer[a_next: a_next + a_shape],
-                                                                        self.X_layer[a_next: a_next + a_shape])
-                    self.A_layer[a_next: a_next + a_shape] = np.where(self.A_layer[a_next: a_next + a_shape] > 1, 1, self.A_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == 'parametricReLU:1.0':  # prevent dead neuron and also negative flliping
-                    self.A_layer[a_next: a_next + a_shape] = np.maximum(-0.3 * self.X_layer[a_next: a_next + a_shape],
-                                                                        self.X_layer[a_next: a_next + a_shape])
-                    self.A_layer[a_next: a_next + a_shape] = np.where(self.A_layer[a_next: a_next + a_shape] > 1, 1, self.A_layer[a_next: a_next + a_shape])
-                else:
-                    self.A_layer[a_next: a_next + a_shape] = self.X_layer[a_next: a_next + a_shape]
-            else:
-                v_x = sym.Symbol('x')
-                self.A_layer[a_next: a_next + a_shape] = np.array(
-                    [float(sym.simplify(eq).subs(v_x, val)) for eq, val in
-                     zip(self.EQ_layer[i],self.Z_layer[a_next: a_next + a_shape])])
+            self.__A_layer[a_next: a_next + a_shape] = self.__EQ_layer[i](XN_array)
             # checking drop out
-            if self.drop_out != 0 and i < len(self.Layer_shape) - 2:
-                self.A_layer[a_next: a_next + a_shape] = dropOut(self.A_layer[a_next: a_next + a_shape], self.drop_out)
-            elif self.drop_out == 1 and i < len(self.Layer_shape) - 2:
-                self.A_layer[a_next: a_next + a_shape] = np.zeors(self.A_layer[a_next: a_next + a_shape].shape[0])
-            #obtained multiply weight
-            if i < len(self.Layer_shape) - 1:
-                w_shape = self.Layer_shape[i] * self.Layer_shape[i + 1]
-                self.Z_layer[a_next + a_shape: a_next + a_shape + self.Layer_shape[i+1]] =\
-                    np.matmul( self.A_layer[a_next: a_next + a_shape],
-                               self.W_layer[w_next: w_next + w_shape].reshape(self.Layer_shape[i],  self.Layer_shape[i + 1]) ).flatten()
+            if self.__drop_out != 0 and i < len(self.__Layer_shape) - 1:
+                self.__A_layer[a_next: a_next + a_shape] = dropOut(self.__A_layer[a_next: a_next + a_shape], self.__drop_out)
+            elif self.__drop_out == 1 and i < len(self.__Layer_shape) - 1:
+                self.__A_layer[a_next: a_next + a_shape] = np.zeors(self.__Layer_shape[i])
+            # obtained multiply weight
+            if i < len(self.__Layer_shape) - 1:
+                w_shape = self.__Layer_shape[i] * self.__Layer_shape[i + 1]
+                self.__Z_layer[a_next + a_shape: a_next + a_shape + self.__Layer_shape[i + 1]] = \
+                    np.matmul(self.__A_layer[a_next: a_next + a_shape],
+                              self.__W_layer[w_next: w_next + w_shape].reshape(self.__Layer_shape[i],
+                                                                             self.__Layer_shape[i + 1])).flatten()
                 w_next += w_shape
             a_next += a_shape
-            self.output = self.A_layer[-self.Layer_shape[-1]:]
+        self.output = self.__A_layer[-self.__Layer_shape[-1]:]
+        return self.output
 
-    def cpu_back_propagation(self):
+    def __cpu_back(self) -> None:
         """
-        Back propagation, if the interpreting is False then the dA_dZ is based on the derivative of typed functions (default is x)
-
-        If True, it follows the derivative function by sympy (it makes the delay of calculating)
-         """
-        a_next = len(self.A_layer) - self.Layer_shape[-1]
-        w_next = len(self.W_layer) - self.Layer_shape[-1] * self.Layer_shape[-2]
-        for i in reversed(range(1, len(self.Layer_shape))):
-            a_shape = self.Layer_shape[i]
-            w_shape = self.Layer_shape[i] * self.Layer_shape[i - 1]
-            dE_dA = self.gE_layer[a_next: a_next + a_shape]
+        This is cpu process back propagation
+        """
+        a_next = len(self.__A_layer) - self.__Layer_shape[-1]
+        w_next = len(self.__W_layer) - self.__Layer_shape[-1] * self.__Layer_shape[-2]
+        for i in reversed(range(1, len(self.__Layer_shape))):
+            a_shape = self.__Layer_shape[i]
+            w_shape = self.__Layer_shape[i] * self.__Layer_shape[i - 1]
+            dE_dA = self.__gE_layer[a_next: a_next + a_shape]
+            # batch normal recovery
+            XN = self.__N_layer[i](self.__X_layer[a_next: a_next + a_shape], True)
             # calculate partial derivative of A
-            dA_dX = np.ones(a_shape)  # typical x
-            if self.interpreting:
-                dA_dX = np.empty(0)
-                for k in range(a_shape):
-                    v_x = sym.Symbol('x')
-                    val = self.Z_layer[a_next + k]
-                    dA_dX = np.append(dA_dX, float(self.DE_layer[i].subs(v_x, val).evalf()))
-            else:
-                if self.EQ_layer[i] == 'softmax':
-                    dA_dX = self.A_layer[a_next: a_next + a_shape] - self.A_layer[a_next: a_next + a_shape]**2
-                elif self.EQ_layer[i] == 'sigmoid':
-                    dA_dX = self.X_layer[a_next: a_next + a_shape] * (1 - self.X_layer[a_next: a_next + a_shape])
-                elif self.EQ_layer[i] == 'tanh(x)':
-                    dA_dX = HyperBolic(self.X_layer[a_next: a_next + a_shape]) ** 2
-                elif self.EQ_layer[i] == 'ReLU':
-                    dA_dX = np.where(self.X_layer[a_next: a_next + a_shape]> 0, 1, 0)
-                elif self.EQ_layer[i] == 'parametricReLU':
-                    dA_dX = np.where(self.X_layer[a_next: a_next + a_shape] > 0, 1, -0.3)
-                elif self.EQ_layer[i] == 'leakReLU':
-                    dA_dX = np.where(self.X_layer[a_next: a_next + a_shape] > 0, 1, 0.3)
+            dA_dX = self.__DE_layer[i](XN, True)
+            # dX_dZ = 1
             dE_dZ = dE_dA * dA_dX
-            #converting dZ_dA for multiplication
-            repeat_dZ_dA = np.repeat([self.A_layer[a_next - self.Layer_shape[i - 1] : a_next]], repeats = a_shape, axis = 0)
+            # converting dZ_dA for multiplication
+            repeat_dZ_dA = np.repeat([self.__A_layer[a_next - self.__Layer_shape[i - 1]: a_next]], repeats=a_shape, axis=0)
             dig_dE_dZ = np.diag(dE_dZ)
-            #gradient dE_dW
-            dE_dW = np.matmul(dig_dE_dZ, repeat_dZ_dA).transpose().flatten() #(dig * repeat)^T is [a,b][2a 2b][3a 3b]
-            if self.adamRMSP:
+            # gradient dE_dW
+            dE_dW = np.matmul(dig_dE_dZ, repeat_dZ_dA).transpose().flatten()  # (dig * repeat)^T is [a,b][2a 2b][3a 3b]
+            if self.__learn_optima == 'ADAMRMSP':
                 # AdamRMSP Weight
-                self.MtW_layer[w_next:w_next + w_shape] =\
-                    self.beta_1 * self.MtW_layer[w_next:w_next + w_shape] + (1 - self.beta_1) * dE_dW
-                self.VtW_layer[w_next:w_next + w_shape] =\
-                    self.beta_2 * self.VtW_layer[w_next:w_next + w_shape] + (1 - self.beta_2) * dE_dW**2
-                mdw_corr = self.MtW_layer[w_next:w_next + w_shape] / (1 - self.beta_1 ** self.step)
-                vdw_corr = self.VtW_layer[w_next:w_next + w_shape] / (1 - self.beta_2 ** self.step)
-                w_update = self.learning_rate * (mdw_corr/(np.sqrt(vdw_corr) + self.epsilon))
+                self.__MtW_layer[w_next:w_next + w_shape] = \
+                    self.__beta_1 * self.__MtW_layer[w_next:w_next + w_shape] + (1 - self.__beta_1) * dE_dW
+                self.__VtW_layer[w_next:w_next + w_shape] = \
+                    self.__beta_2 * self.__VtW_layer[w_next:w_next + w_shape] + (1 - self.__beta_2) * dE_dW ** 2
+                mdw_corr = self.__MtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_1 ** self.iteration)
+                vdw_corr = self.__VtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_2 ** self.iteration)
+                w_update = self.__learning_rate * (mdw_corr / (np.sqrt(vdw_corr) + self.__epsilon))
                 # AdamRMSP Bias
-                self.MtB_layer[a_next: a_next + a_shape] = \
-                    self.beta_1 * self.MtB_layer[a_next: a_next + a_shape] + (1 - self.beta_1) * dE_dZ
-                self.VtB_layer[a_next : a_next + a_shape] =\
-                    self.beta_2 * self.VtB_layer[a_next : a_next + a_shape] + (1 - self.beta_2) * dE_dZ**2
-                vdb_corr = self.VtB_layer[a_next : a_next + a_shape] / (1 - self.beta_2 ** self.step)
-                mdb_corr = self.MtB_layer[a_next : a_next + a_shape] / (1 - self.beta_1 ** self.step)
-                b_update = self.learning_rate * (mdb_corr/(np.sqrt(vdb_corr) + self.epsilon))
+                self.__MtB_layer[a_next: a_next + a_shape] = \
+                    self.__beta_1 * self.__MtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_1) * dE_dZ
+                self.__VtB_layer[a_next: a_next + a_shape] = \
+                    self.__beta_2 * self.__VtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_2) * dE_dZ ** 2
+                vdb_corr = self.__VtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_2 ** self.iteration)
+                mdb_corr = self.__MtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_1 ** self.iteration)
+                b_update = self.__learning_rate * (mdb_corr / (np.sqrt(vdb_corr) + self.__epsilon))
             else:
-                w_update = self.learning_rate * dE_dW
-                b_update = self.learning_rate * dE_dZ
+                w_update = self.__learning_rate * dE_dW
+                b_update = self.__learning_rate * dE_dZ
             # weight update
-            self.W_layer[w_next:w_next + w_shape] =\
-                self.W_layer[w_next:w_next + w_shape] - w_update
+            self.__W_layer[w_next:w_next + w_shape] = \
+                self.__W_layer[w_next:w_next + w_shape] - w_update
             # bias update
-            self.B_layer[a_next : a_next + a_shape] =\
-                self.B_layer[a_next : a_next + a_shape] - b_update
+            self.__B_layer[a_next: a_next + a_shape] = \
+                self.__B_layer[a_next: a_next + a_shape] - b_update
             # dE_dA
-            self.gE_layer[a_next - self.Layer_shape[i - 1]: a_next] =\
-                np.matmul(self.W_layer[w_next:w_next + w_shape].reshape(self.Layer_shape[i-1],self.Layer_shape[i]),
-                          np.transpose(dE_dZ) ).flatten() #transpose multiplication
-            #next iteration
-            a_next -= self.Layer_shape[i - 1]
-            w_next -= self.Layer_shape[i - 1] * self.Layer_shape[i - 2]
-        self.step += 1
+            self.__gE_layer[a_next - self.__Layer_shape[i - 1]: a_next] = \
+                np.matmul(self.__W_layer[w_next:w_next + w_shape].reshape(self.__Layer_shape[i - 1], self.__Layer_shape[i]),
+                          np.transpose(dE_dZ)).flatten()  # transpose multiplication
+            # next iteration
+            a_next -= self.__Layer_shape[i - 1]
+            w_next -= self.__Layer_shape[i - 1] * self.__Layer_shape[i - 2]
+        self.iteration += 1
 
-    # def cl_run(self):
-    #     """
-    #     It is calculating forward propagation and save each values in Z,A layers\n
-    #     The output should be saved in last layer's A layer\n
-    #     If interpreting is True then interpreting equation as user input at add layer function\n
-    #     It must take much longer than default function leakReLU\n
-    #     """
-    #     pass # latter too lazy to do it again
-    #
-    # def cl_back_propagation(self):
-    #     """
-    #     Back propagation, if the interpreting is False then the dA_dZ is based on the derivative of soft ReLU (default)\n
-    #     If not, it follows the derivative function by sympy (it makes the delay of calculating)
-    #     """
-    #     pass # too lazy to do it again
-
-    def csv_save(self, file_name):
+    def csv_save(self, file_name) -> None:
         """
-        It only exports the W_layer and B_layer for current neural network
+        It exports the __W_layer and __B_layer for current neural network
+            'file_name_W_layer.csv' 'file_name_B_layer.csv'
+        The file will be saved in the same document
 
-        :param file_name: it is file name for export the file should be written as "file_name_W.csv" and "file_name_B.csv"
+        Args:
+            file_name(str)
+
         """
-        np.savetxt(file_name + '_W.csv', self.W_layer, delimiter = ',')
-        np.savetxt(file_name + '_B.csv', self.B_layer, delimiter=',')
+        np.savetxt(file_name + '_W.csv', self.__W_layer, delimiter=',')
+        np.savetxt(file_name + '_B.csv', self.__B_layer, delimiter=',')
 
     def csv_load(self, file_name):
         """
-        It is overlapping the W and B layer of current neural network
+        It imports the __W_layer and __B_layer in current neural network
+            'file_name_W_layer.csv' and 'file_name_B_layer.csv'
+        The file will be loaded from the same document
 
-        The overlapped neural network's W and B layer should be generated and also have the same shape
+        Args:
+            file_name(str)
 
-        :param file_name: it is file name which is in the same directory with this python script
-        If file is not exists, it will not load the file
         """
-        if os.path.isfile(file_name + '_W.csv') and os.path.isfile(file_name + '_B.csv'):
-            self.W_layer = np.loadtxt(file_name + '_W.csv', delimiter = ',')
-            self.B_layer = np.loadtxt(file_name + '_B.csv', delimiter=',')
-        else:
-            print(Fore.LIGHTRED_EX + ' FILE IS NOT EXITS' + Fore.RESET)
+        assert os.path.isfile(file_name + '_W.csv') and os.path.isfile(file_name + '_B.csv')
+        self.__W_layer = np.loadtxt(file_name + '_W.csv', delimiter=',')
+        self.__B_layer = np.loadtxt(file_name + '_B.csv', delimiter=',')
 
-    def run_init(self, input_val, dropout_rate = 0.0):
+    def layer_copy(self, __W_layer, __B_layer) -> None:
         """
-        :param input_val: it is the input value which will be contained in the first Z_layer
-        :param dropout: it is the drop out rate between [0~1], recommend 0 when doing reinforcement learning and for just checking
+        Args:
+            __W_layer (list)
+            __B_layer (list)
         """
-        self.Z_layer[0:self.Layer_shape[0]] = np.array(input_val)[0:self.Layer_shape[0]] #input
-        self.drop_out = dropout_rate
+        assert len(self.__W_layer) == len(__W_layer) and len(self.__B_layer) == len(__B_layer)
+        self.__W_layer = np.copy(__W_layer)
+        self.__B_layer = np.copy(__B_layer)
 
-    def learning_reset(self):
-        self.VtW_layer = np.zeros(self.VtW_layer.size)
-        self.MtW_layer = np.zeros(self.MtW_layer.size)
-        self.VtB_layer = np.zeros(self.VtB_layer.size)
-        self.MtB_layer = np.zeros(self.MtB_layer.size)
-        self.step = 1
-
-    def learning_set(self, learning_rate  = 0.001, dropout_rate = 0.0, loss_fun = 'RMSE', adam_rmsp = True, Error_optimaization = 'NONE'):
+    def run(self, input_val, dropout_rate=0.0) -> None:
         """
-        :param learning_rate: learning rate
-        :param dropout_rate: droup out rate
-        :param loss_fun: Cost function types; DIRECT is just directly put the error, it will not do the forward for checking error
-        :param adam_rmsp: this is optimization for the back propagation
-        :param Error_optimaization: this is optimization for the Error
+        Args:
+            input_val(np.ndarray)
+            dropout_rate(float):drop out rate
         """
-        self.drop_out = dropout_rate
-        self.learning_rate = learning_rate
-        self.adamRMSP = adam_rmsp
-        self.Error_optimaization = Error_optimaization
-        self.loss_fun = loss_fun
+        assert len(input_val) == self.__Layer_shape[0]
+        self.__Z_layer[0:self.__Layer_shape[0]] = np.array(input_val)  # input
+        self.__drop_out = dropout_rate
+        self.__cpu_run()
 
-    def learn_start(self, input_val, target_val, show_result = False):
+    def opt_reset(self) -> None:
         """
-        1 learning_reset is required. if tou were not change the step(iteration), only once.
-
-        2 learning_set is required. if you were not change dropout rate, learning rate during the program, only once.
-
-        3 learning_start can be as much as you want (one learn_start do one cycle forward->Error->backpropagation).
-
-        The Nan, inf error don't affect to the weight update, it will be just ignored but taking process to measure it.
-
-        :param input_val: innput value should be as same as the number of input layer nodes
-        :param target_val: target value should be as same as the number of output layer nodes
-        :param show_result: If you want to see the infomaration of error and output value after the back propgation
+        Reset the optimization Layer values
         """
+        self.__VtW_layer = np.zeros(self.__VtW_layer.size)
+        self.__MtW_layer = np.zeros(self.__MtW_layer.size)
+        self.__VtB_layer = np.zeros(self.__VtB_layer.size)
+        self.__MtB_layer = np.zeros(self.__MtB_layer.size)
+        self.iteration = 1
+
+    def learning_set(self,
+                     learning_rate=0.001,
+                     dropout_rate=0.0,
+                     loss_fun=MSE,
+                     learn_optima='ADAMRMSP',
+                     processor='NONE') -> None:
+        """
+        Args:
+            learning_rate(float): learning rate
+            dropout_rate(float): droup out rate
+            loss_fun(function): Cost function types
+            learn_optima(str): ADAMRMSP
+            processor(str): Process type
+        """
+        self.__drop_out = dropout_rate
+        self.__learning_rate = learning_rate
+        self.__learn_optima = learn_optima
+        self.__processor = processor
+        self.__loss_fun = loss_fun
+
+    def learn_start(self, out_val, target_val) -> bool:
+        """
+        * learning_set is required.
+
+        The Nan, inf error don't affect to the weight update
+
+        Args:
+            out_val(np.ndarray): the result of network
+            target_val(np.ndarray): target value
+
+        Returns:
+            True is success for back propagation, False is Nan or Inf detected in update
+        """
+        assert len(out_val) == self.__Layer_shape[-1]
+        assert len(target_val) == self.__Layer_shape[-1]
         # learn start
-        copy_W_layer = np.copy(self.W_layer)
-        start = time.time()
-        self.step += 1 # it is used for the adamRMSP, if you need reset for adamRMSP, reset this before learning as 1
-        if self.loss_fun == 'DIRECT':
-            self.gE_layer[-self.Layer_shape[-1]:] = target_val[0:self.Layer_shape[-1]]
-        else:        
-            # initializing
-            self.Z_layer[0:self.Layer_shape[0]] = np.array(input_val)[0:self.Layer_shape[0]] #input
-            self.target_val = np.array(target_val)[0:self.Layer_shape[-1]] #target
-            self.cpu_run()
-            if self.loss_fun == 'RMSE':
-                self.RMSE()
-            elif self.loss_fun == 'MPE':
-                self.MPE()
-            elif self.loss_fun == 'CROSS':
-                self.CROSS_ENTROPY()
-            elif self.loss_fun == 'BINARY_CROSS':
-                self.BINARY_CROSS()
-            elif self.loss_fun == 'RELATIVE_ENTROPY':
-                self.RELATIVE_ENTROPY()
-            elif self.loss_fun == 'DIRECT':
-                self.RELATIVE_ENTROPY()
-            else:
-                self.MSE()
-        self.cpu_back_propagation()
-        end = time.time()
-        if show_result:
-            print(self.step, self.error, self.A_layer[-self.Layer_shape[-1]:])
-        if np.any(np.isnan(self.W_layer)) \
-                or np.any(np.isinf(self.W_layer)) \
-                or np.any(np.isnan(self.A_layer)) \
-                or np.any(np.isinf(self.A_layer)) \
-                or np.any(np.isnan(self.VtW_layer))\
-                or np.any(np.isinf(self.VtW_layer)):
-            self.W_layer = copy_W_layer
-            if show_result:
-                self.learn_show('Cyan', end - start)
+        copy_W_layer = np.copy(self.__W_layer)
+        self.iteration += 1  # it is used for the learn_optima, if you need reset for learn_optima, reset this before learning as 1
+        # initializing
+        self.__gE_layer[-self.__Layer_shape[-1]:], self.error = self.__loss_fun(self.output, target_val)
+        self.__cpu_back()
+        if np.any(np.isnan(self.__W_layer)) \
+                or np.any(np.isinf(self.__W_layer)) \
+                or np.any(np.isnan(self.__A_layer)) \
+                or np.any(np.isinf(self.__A_layer)) \
+                or np.any(np.isnan(self.__VtW_layer)) \
+                or np.any(np.isinf(self.__VtW_layer)):
+            self.__W_layer = copy_W_layer
+            return False
+        return True
 
-    def get_error(self, input_val, target_val):
+    def xavier_initialization(self) -> None:
         """
-        :param input_val:
-        :param target_val:
-        :return: error, if loss_fun is set as DIRECT, it will return jsut the target_val
+        It initializes the weight layers' value by Xavier uniform initialization
         """
-        self.Z_layer[0:self.Layer_shape[0]] = np.array(input_val)[0:self.Layer_shape[0]]  # input
-        self.target_val = np.array(target_val)[0:self.Layer_shape[-1]] #target
-        if self.loss_fun != 'DIRECT':
-            return self.target_val
-        else:
-            self.cpu_run()
-            if self.loss_fun == 'RMSE':
-                self.RMSE()
-            elif self.loss_fun == 'MPE':
-                self.MPE()
-            elif self.loss_fun == 'CROSS':
-                self.CROSS_ENTROPY()
-            elif self.loss_fun == 'BINARY_CROSS':
-                self.BINARY_CROSS()
-            elif self.loss_fun == 'RELATIVE_ENTROPY':
-                self.RELATIVE_ENTROPY()
-            else:
-                self.MSE()
-        return self.error
+        n_in = self.__Layer_shape[0]
+        n_out = self.__Layer_shape[-1]
+        copy_step = float(n_in + n_out)
+        self.__W_layer = np.random.uniform(-sqrt(6 / copy_step), sqrt(6 / copy_step), self.__W_layer.shape[0])
 
-    def learn_show(self, color, time):
-        np.set_printoptions(precision = 4)
-        if color == 'Green':
-            print(Fore.GREEN + f'[save] ',
-                    f'inp :{self.A_layer[0:self.Layer_shape[0]]}',
-                    f'tri :{self.step} '
-                    f'trg :{self.target_val}',
-                    f'out :{self.A_layer[-self.Layer_shape[-1]:]}',
-                    f'ech :{np.power(self.target_val - self.A_layer[-self.Layer_shape[-1]:], 2)} '
-                    f'err :{self.error:.4f}% '
-                    f'tim :{time :.2f}s'
-                    + Fore.RESET)
-        elif color == 'Red':
-            print(Fore.RED + f'[save] ',
-                    f'inp :{self.A_layer[0:self.Layer_shape[0]]}',
-                    f'tri :{self.step} '
-                    f'trg :{self.target_val}',
-                    f'out :{self.A_layer[-self.Layer_shape[-1]:]}',
-                    f'ech :{np.power(self.target_val - self.A_layer[-self.Layer_shape[-1]:], 2)} '
-                    f'err :{self.error:.4f}% '
-                    f'tim :{time :.2f}s'
-                    + Fore.RESET)
-        elif color == 'Cyan':
-            print(Fore.CYAN + f'[error] ',
-                    f'inp :{self.A_layer[0:self.Layer_shape[0]]}',
-                    f'tri :{self.step} '
-                    f'trg :{self.target_val}',
-                    f'out :{self.A_layer[-self.Layer_shape[-1]:]}',
-                    f'ech :{np.power(self.target_val - self.A_layer[-self.Layer_shape[-1]:], 2)} '
-                    f'err :{self.error:.4f}% '
-                    f'tim :{time :.2f}s'
-                    + Fore.RESET)
+    def he_initialization(self) -> None:
+        """
+        It initializes the weight layers' value by He uniform initialization
+        """
+        n_in = self.__Layer_shape[0]
+        self.__W_layer = np.random.uniform(-sqrt(6 / n_in), sqrt(6 / n_in), self.__W_layer.shape[0])
 
-    def xavier_initialization(self):
+    def generate_weight(self) -> None:
+        """This is generating weight layer by current layer shape.
         """
-        It initializes the weight layers' value by Xavier initialization
-        """
-        n_in = self.Layer_shape[0]
-        n_out = self.Layer_shape[-1]
-        N = float(n_in + n_out)
-        self.W_layer = np.random.uniform(-sqrt(6 / N), sqrt(6 / N), self.W_layer.shape[0])
+        self.__W_layer = np.empty(0)
+        self.__VtW_layer = np.empty(0)
+        self.__MtW_layer = np.empty(0)
+        for i in range(len(self.__Layer_shape) - 1):
+            W = np.ones(self.__Layer_shape[i] * self.__Layer_shape[i + 1])
+            VW = np.zeros(self.__Layer_shape[i] * self.__Layer_shape[i + 1])
+            self.__W_layer = np.append(self.__W_layer, W)
+            self.__VtW_layer = np.append(self.__VtW_layer, VW)
+            self.__MtW_layer = np.append(self.__MtW_layer, VW)
 
-    def generate_weight(self):
+    def add_layer(self, number, active_fn=ReLU, normal=linear_x):
         """
-        Generate Weight layers by the shape of current Layer\n
-        It is required after completing to construct the layer shapes\n
-        """
-        self.W_layer = np.empty(0)
-        self.VtW_layer = np.empty(0)
-        self.MtW_layer = np.empty(0)
-        for i in range(len(self.Layer_shape) - 1):
-            W = np.ones( self.Layer_shape[i] * self.Layer_shape[i + 1] )
-            VW = np.zeros( self.Layer_shape[i] * self.Layer_shape[i + 1] )
-            self.W_layer = np.append(self.W_layer, W)
-            self.VtW_layer = np.append(self.VtW_layer, VW)
-            self.MtW_layer = np.append(self.MtW_layer, VW)
+        This function add layer in neural network.
 
-    def add_layer(self, number, active_fn):
-        """
-        Add layer\n
-        :param number: The # of neuron in layer
-        :param active_fn: 'softmax', 'softmax_normal', 'max_min_limit', 'normal', 'znormal',
-        'sigmoid', 'tanh(x)', 'ReLU', 'leakReLU', 'parametricReLU' if not set then it works aas 'x'
-        """
-        self.Z_layer = np.append(self.Z_layer, np.zeros(number))
-        self.X_layer = np.append(self.X_layer, np.zeros(number))
-        self.B_layer = np.append(self.B_layer, np.random.uniform(0, 0.00001, number))
-        self.A_layer = np.append(self.A_layer, np.zeros(number))
-        self.VtB_layer = np.append(self.VtB_layer, np.zeros(number))
-        self.MtB_layer = np.append(self.MtB_layer, np.zeros(number))
-        self.gE_layer = np.append(self.gE_layer, np.zeros(number))
-        self.EQ_layer = np.append(self.EQ_layer, active_fn)
-        self.DE_layer = np.append(self.DE_layer, active_fn)
-        self.Layer_shape = np.append(self.Layer_shape, number)
+        * After :  generate_weight() function is required.
 
-    def sym_simplify_eq(self):
-        for i, val in enumerate(self.EQ_layer):
-            sym.Symbol('x')
-            self.EQ_layer[i] = sym.simplify(val)
-            self.DE_layer[i] = sym.simplify(diff(val))
-        self.interpreting = True
+        Args:
+            number(int):The # of neuron in layer
+            active_fn(function):The activation function
+            normal(function):The batch normalization function
 
-    #LOSS FUNCTIONS
-    def MPE(self):
         """
-        Mean Absolute Percentage Error
-        """
-        x = self.output
-        y = self.target_val
-        a = np.empty(0)
-        for i,j in zip(x,y):
-            if j != 0 and i != j:
-                a = np.append(a, (i - j) / (j * np.abs(i - j)))
-            else:
-                a = np.append(a, 0)
-        self.gE_layer[-self.Layer_shape[-1]:] = a
-        if y != 0:
-            self.error = 100 * np.mean( np.abs((y-x)/y) )
-        else:
-            print('MPE gonna 0 divide check the program')
-            exit()
+        self.__B_layer = np.append(self.__B_layer, np.random.uniform(0, 0.00001, number))
+        self.__Z_layer = np.append(self.__Z_layer, np.zeros(number))
+        self.__N_layer = np.append(self.__N_layer, normal)
+        self.__X_layer = np.append(self.__X_layer, np.zeros(number))
+        self.__A_layer = np.append(self.__A_layer, np.zeros(number))
+        self.__VtB_layer = np.append(self.__VtB_layer, np.zeros(number))
+        self.__MtB_layer = np.append(self.__MtB_layer, np.zeros(number))
+        self.__gE_layer = np.append(self.__gE_layer, np.zeros(number))
+        self.__EQ_layer = np.append(self.__EQ_layer, active_fn)
+        self.__DE_layer = np.append(self.__DE_layer, active_fn)
+        self.__Layer_shape = np.append(self.__Layer_shape, number)
 
-    def MSE(self):
+    def get_shape(self) ->np.ndarray:
         """
-        Mean Square Error
+        :return: Layer shape array
         """
-        # the constant value of power doesn't consider since the iteration will be convergence to the average value
-        # Therefore -> dE_dA = -(target - out)
-        self.gE_layer[-self.Layer_shape[-1]:] = -(self.target_val - self.output)
-        self.error = np.mean((self.target_val - self.output)** 2)
+        return self.__Layer_shape
 
-    def RMSE(self):
+    def get_layer(self)->np.ndarray:
         """
-        Root Mean Squared Error
+        :return: [W_layer, B_layer]
         """
-        self.gE_layer[-self.Layer_shape[-1]:] = -(self.target_val - self.output)
-        self.error = np.sqrt(np.mean((self.target_val - self.output)**2))
+        return np.array([self.__W_layer, self.__B_layer], dtype=object)
 
-    def CROSS_ENTROPY(self):
-        self.gE_layer[-self.Layer_shape[-1]:] = self.target_val/self.output
-        self.error = -np.sum(self.target_val*np.log(self.output))
-
-    def BINARY_CROSS(self):
+    def set_w_layer(self, layer):
         """
-        Binary Cross Entropy
+        Args:
+            layer(np.ndarray[np.double])
         """
-        self.gE_layer[-self.Layer_shape[-1]:]  = \
-            -(  #y * log(a)
-                self.target_val * np.log(self.output)
-                #+(1-y)
-                + (np.ones(self.Layer_shape[-1]) - self.target_val)
-                #*log(1-a)
-                * np.log(np.ones(self.Layer_shape[-1]) -self.output)
-              )
-        self.error = -sum(self.target_val * np.log(self.output))
+        assert len(self.__W_layer) == len(layer)
+        self.__W_layer = np.copy(layer)
 
-    def RELATIVE_ENTROPY(self):
+    def set_b_layer(self, layer):
         """
-        Relative Entropy Error
+        Args:
+            layer(np.ndarray[np.double])
         """
-        self.gE_layer[-self.Layer_shape[-1]:]  = \
-            -self.target_val/self.output
-        self.error = np.sum(self.target_val * np.log(self.target_val / self.output))
-
-    def show(self, detail = False):
-        print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-        print(f' == = == input == = == ')
-        print(f'{self.A_layer[0:self.Layer_shape[0]]}')
-        if detail is True:
-            j = 0
-            print('\n == = == W layer == = == ')
-            for k in range(len(self.Layer_shape) - 1):
-                print(f'layer{k}\n', self.W_layer[j: j + self.Layer_shape[k] * self.Layer_shape[k + 1]].reshape(self.Layer_shape[k], self.Layer_shape[k + 1]))
-                j += self.Layer_shape[k] * self.Layer_shape[k + 1]
-            j = 0
-            print('\n == = == B layer == = == ')
-            for k in self.Layer_shape:
-                print(f'layer{k}\n', self.B_layer[j: j + k])
-                j += k
-            j = 0
-            print('\n == = == Z layer == = == ')
-            for k in self.Layer_shape:
-                print(f'layer{k}\n', self.Z_layer[j: j + k])
-                j += k
-            j = 0
-            print('\n == = == A layer == = == ')
-            for k in self.Layer_shape:
-                print(f'layer{k}\n', self.A_layer[j: j + k])
-                j += k
-        print('\n == = == Layer Shape == = == ')
-        print(self.Layer_shape)
-        print(' == = == RESULT == = == ')
-        print(f' Target : {self.target_val}')
-        print(f' OutPut : {self.output}')
-        print(f' Each_error : {self.gE_layer[-self.Layer_shape[-1]:] * -1}')
-        print(f' Error : {self.error * 100:.20f} %')
-        print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-
+        assert len(self.__B_layer) == len(layer)
+        self.__B_layer = np.copy(layer)
