@@ -1,5 +1,5 @@
 # OpenNeural
-GNU license 2022(c) Useop Gim
+GNU AFFERO GPL (c) Useop Gim 2022
 
 v1.6.0\
 New option feature : normlization between each layer \
