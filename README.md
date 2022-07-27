@@ -8,6 +8,7 @@ New variable type : using function pointer\
 Remove functino : instead using run_int and cpu_run, merge it as run function\
 Change function : change the comments for function explanation\
 ETC : to avoid variable distortion, using private
+**Now just focus on off policy RL 
 
 v1.5.0\
 Change algorithm order for SGD and others\
