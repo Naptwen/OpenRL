@@ -9,6 +9,17 @@ import os
 # Please let reference 
 # If you intereseted in my work visit in https://sites.google.com/view/gesope/projects/a-i/neural-network-algorithm-explanation?authuser=0
 
+import random
+import time
+import sympy as sym
+from sympy import sqrt, diff
+import numpy as np
+import os
+
+# GNU AFFERO GPL (c) Useop Gim 2022 
+# Please let reference 
+# If you intereseted in my work visit in https://sites.google.com/view/gesope/projects/a-i/neural-network-algorithm-explanation?authuser=0
+
 def normalminmax(values):
     values = np.array(values)
     if np.min(values) != np.max(values):
