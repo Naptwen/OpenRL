@@ -163,12 +163,17 @@ class openNeural:
     __X_layer = np.empty(0, dtype=np.double)  # Z + B Layer
     __N_layer = np.empty(0, dtype=object)  # Batch normal Layer
     __A_layer = np.empty(0, dtype=np.double)  # Activation Layer
+    __RNN_W_layer = np.empty(0, dtype=np.double)  # RNN W Layer
+    __RNN_PA_layer = np.empty(0, dtype=np.double)  # RNN PAST Activation Layer
+    __RNN_A_layer = np.empty(0, dtype=np.double)  # RNN Activation Layer
     __EQ_layer = np.empty(0, dtype=object)  # Equation layer function pointer
     __Layer_shape = np.empty(0, dtype=np.int64)  # it contains Layer shapes information
     __VtW_layer = np.empty(0, dtype=np.double)  # Velocity layer by W for RMSP
     __MtW_layer = np.empty(0, dtype=np.double)  # Momentum layer by W for Adam
     __VtB_layer = np.empty(0, dtype=np.double)  # as same as above but by B
     __MtB_layer = np.empty(0, dtype=np.double)  # as same as above but by B
+    __RVtW_layer = np.empty(0, dtype=np.double)  # as same as above but by W(t-1) RNN
+    __RMtW_layer = np.empty(0, dtype=np.double)  # as same as above but by W(t-1) RNN
     __gE_layer = np.empty(0, dtype=np.double)  # It contains the error for each result and A layer
     __processor = str
     __drop_Out_rate = float  # drop out rate
@@ -184,7 +189,9 @@ class openNeural:
     target_val = np.empty(0, dtype=np.double)  # It is target value, same size of last value of the layer shape
     error = 1000  # loss function's error
 
-    def __init__(self):
+    def __init__(self, RNN = False):
+        assert str(type(RNN)) == "<class 'bool'>"
+        self.__RNN = RNN
         self.__beta_1 = 0.9
         self.__beta_2 = 0.9
         self.__epsilon = 0.00000001
@@ -197,16 +204,19 @@ class openNeural:
         w_next = 0
         for i in range(len(self.__Layer_shape)):
             a_shape = self.__Layer_shape[i]
-            # linearly sum
             self.__X_layer[a_next: a_next + a_shape] \
-                = self.__Z_layer[a_next: a_next + a_shape] + self.__B_layer[a_next: a_next + a_shape]
+                    = self.__Z_layer[a_next: a_next + a_shape] + self.__B_layer[a_next: a_next + a_shape]
             # normalization
             XN_array = self.__N_layer[i](self.__X_layer[a_next: a_next + a_shape])
             # activation function part
             self.__A_layer[a_next: a_next + a_shape] = self.__EQ_layer[i](XN_array)
+            # RNN update
+            if self.__RNN:  # slice is deep copy
+                self.__RNN_PA_layer[a_next: a_next + a_shape] = self.__RNN_A_layer[a_next: a_next + a_shape]
+                self.__RNN_A_layer[a_next: a_next + a_shape] = self.__A_layer[a_next: a_next + a_shape]
             # checking drop out
             if self.__drop_Out_rate != 0 and i < len(self.__Layer_shape) - 1:
-                self.__A_layer[a_next: a_next + a_shape] = self.drop_Out(self.__A_layer[a_next: a_next + a_shape],
+                self.__A_layer[a_next: a_next + a_shape] = drop_Out(self.__A_layer[a_next: a_next + a_shape],
                                                                          self.__drop_Out_rate)
             elif self.__drop_Out_rate == 1 and i < len(self.__Layer_shape) - 1:
                 self.__A_layer[a_next: a_next + a_shape] = np.zeors(self.__Layer_shape[i])
@@ -218,7 +228,7 @@ class openNeural:
                               self.__W_layer[w_next: w_next + w_shape].reshape(self.__Layer_shape[i],
                                                                                self.__Layer_shape[i + 1])).flatten()
                 w_next += w_shape
-            a_next += a_shape
+                a_next += a_shape
         self.output = self.__A_layer[-self.__Layer_shape[-1]:]
         return self.output
 
@@ -240,57 +250,42 @@ class openNeural:
             # dX_dZ = 1
             dE_dZ = dE_dA * dA_dX
             # converting dZ_dA for multiplication
-            repeat_dZ_dA = np.repeat([self.__A_layer[a_next - self.__Layer_shape[i - 1]: a_next]], repeats=a_shape,
-                                     axis=0)
+            repeat_dZ_dA = np.repeat([self.__A_layer[a_next - self.__Layer_shape[i - 1]: a_next]], repeats=a_shape,axis=0)
             dig_dE_dZ = np.diag(dE_dZ)
             # gradient dE_dW
             dE_dW = np.matmul(dig_dE_dZ, repeat_dZ_dA).transpose().flatten()  # (dig * repeat)^T is [a,b][2a 2b][3a 3b]
             if self.__learn_optima == 'ADAMRMSP':
-                if not self.__RNN or (self.__RNN and i % 2 == 1):  # if the past RNN
-                    # AdamRMSP Weight
-                    self.__MtW_layer[w_next:w_next + w_shape] = \
-                        self.__beta_1 * self.__MtW_layer[w_next:w_next + w_shape] + (1 - self.__beta_1) * dE_dW
-                    self.__VtW_layer[w_next:w_next + w_shape] = \
-                        self.__beta_2 * self.__VtW_layer[w_next:w_next + w_shape] + (1 - self.__beta_2) * dE_dW ** 2
-                    mdw_corr = self.__MtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_1 ** self.iteration)
-                    vdw_corr = self.__VtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_2 ** self.iteration)
-                    w_update = self.__learning_rate * (mdw_corr / (np.sqrt(vdw_corr) + self.__epsilon))
-                    # AdamRMSP Bias
-                    self.__MtB_layer[a_next: a_next + a_shape] = \
-                        self.__beta_1 * self.__MtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_1) * dE_dZ
-                    self.__VtB_layer[a_next: a_next + a_shape] = \
-                        self.__beta_2 * self.__VtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_2) * dE_dZ ** 2
-                    vdb_corr = self.__VtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_2 ** self.iteration)
-                    mdb_corr = self.__MtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_1 ** self.iteration)
-                    b_update = self.__learning_rate * (mdb_corr / (np.sqrt(vdb_corr) + self.__epsilon))
-                    # weight update
-                    self.__W_layer[w_next:w_next + w_shape] = \
-                        self.__W_layer[w_next:w_next + w_shape] - w_update
-                    # bias update
-                    self.__B_layer[a_next: a_next + a_shape] = \
-                        self.__B_layer[a_next: a_next + a_shape] - b_update
-                    if self.__RNN and i < len(self.__Layer_shape) - 2:
-                        # previous RNN bias reference as it
-                        self.__B_layer[a_next + a_shape: a_next + a_shape + a_shape] = self.__B_layer[a_next: a_next + a_shape]
+                # AdamRMSP Weight
+                self.__MtW_layer[w_next:w_next + w_shape] = \
+                    self.__beta_1 * self.__MtW_layer[w_next:w_next + w_shape] + (1 - self.__beta_1) * dE_dW
+                self.__VtW_layer[w_next:w_next + w_shape] = \
+                    self.__beta_2 * self.__VtW_layer[w_next:w_next + w_shape] + (1 - self.__beta_2) * dE_dW ** 2
+                mdw_corr = self.__MtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_1 ** self.iteration)
+                vdw_corr = self.__VtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_2 ** self.iteration)
+                w_update = self.__learning_rate * (mdw_corr / (np.sqrt(vdw_corr) + self.__epsilon))
+                # AdamRMSP Bias
+                self.__MtB_layer[a_next: a_next + a_shape] = \
+                    self.__beta_1 * self.__MtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_1) * dE_dZ
+                self.__VtB_layer[a_next: a_next + a_shape] = \
+                    self.__beta_2 * self.__VtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_2) * dE_dZ ** 2
+                mdb_corr = self.__MtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_1 ** self.iteration)
+                vdb_corr = self.__VtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_2 ** self.iteration)
+                b_update = self.__learning_rate * (mdb_corr / (np.sqrt(vdb_corr) + self.__epsilon))
             else:
-                if not self.__RNN or (self.__RNN and i % 2 == 1):  # if the past RNN
-                    w_update = self.__learning_rate * dE_dW
-                    b_update = self.__learning_rate * dE_dZ
-                    # weight update
-                    self.__W_layer[w_next:w_next + w_shape] = \
-                        self.__W_layer[w_next:w_next + w_shape] - w_update
-                    # bias update
-                    self.__B_layer[a_next: a_next + a_shape] = \
-                        self.__B_layer[a_next: a_next + a_shape] - b_update
+                w_update = self.__learning_rate * dE_dW
+                b_update = self.__learning_rate * dE_dZ
+            # weight update
+            self.__W_layer[w_next:w_next + w_shape] = \
+                self.__W_layer[w_next:w_next + w_shape] - w_update
+            # bias update
+            self.__B_layer[a_next: a_next + a_shape] = \
+                self.__B_layer[a_next: a_next + a_shape] - b_update
             # dE_dA PART
-            if self.__RNN and i % 2 == 0:
-                self.__gE_layer[a_next - self.__Layer_shape[i - 1]: a_next] = dE_dZ
-            else:
-                self.__gE_layer[a_next - self.__Layer_shape[i - 1]: a_next] = \
-                    np.matmul(
-                        self.__W_layer[w_next:w_next + w_shape].reshape(self.__Layer_shape[i - 1],
-                                                                        self.__Layer_shape[i]),
-                        np.transpose(dE_dZ)).flatten()  # transpose multiplication
+            self.__gE_layer[a_next - self.__Layer_shape[i - 1]: a_next] = \
+                np.matmul(
+                    self.__W_layer[w_next:w_next + w_shape].reshape(self.__Layer_shape[i - 1],
+                                                                    self.__Layer_shape[i]),
+                    np.transpose(dE_dZ)).flatten()  # transpose multiplication
             # next iteration
             a_next -= self.__Layer_shape[i - 1]
             w_next -= self.__Layer_shape[i - 1] * self.__Layer_shape[i - 2]
@@ -339,6 +334,7 @@ class openNeural:
             dropout_rate(float):drop out rate
         """
         assert len(input_val) == self.__Layer_shape[0]
+        assert 0 <= dropout_rate <= 1
         self.__Z_layer[0:self.__Layer_shape[0]] = np.array(input_val)  # input
         self.__drop_Out_rate = dropout_rate
         self.__cpu_run()
@@ -351,6 +347,8 @@ class openNeural:
         self.__MtW_layer = np.zeros(self.__MtW_layer.size)
         self.__VtB_layer = np.zeros(self.__VtB_layer.size)
         self.__MtB_layer = np.zeros(self.__MtB_layer.size)
+        self.__RMtW_layer = np.zeros(self.__RMtW_layer.size)
+        self.__RVtW_layer = np.zeros(self.__RVtW_layer.size)
         self.iteration = 1
 
     def learning_set(self,
@@ -435,30 +433,6 @@ class openNeural:
         n_in = self.__Layer_shape[0]
         self.__W_layer = np.random.uniform(-sqrt(6 / n_in), sqrt(6 / n_in), self.__W_layer.shape[0])
 
-    def generate_rnn_set(self):
-        """
-        The hidden layer should be the RNN structure
-
-        EXAMPLE:
-        _______
-            Layer shape is [350, 40, 40, 70, 70, 12]
-        """
-        assert (len(self.__Layer_shape) - 2) % 2 == 0
-        a_next = 0
-        w_next = 0
-        self.__RNN = True
-        for i in range(0, len(self.__Layer_shape) - 1):
-            a_shape = self.__Layer_shape[i]
-            w_shape = self.__Layer_shape[i] * self.__Layer_shape[i + 1]
-            if i % 2 == 1:
-                assert self.__Layer_shape[i] == self.__Layer_shape[i+1]
-                self.__EQ_layer[i] = linear_x
-                self.__W_layer[w_next:w_next + w_shape] = np.eye(self.__Layer_shape[i],
-                                                                 self.__Layer_shape[i + 1]).flatten()
-                self.__B_layer[a_next:a_next + a_shape] = self.__B_layer[a_next + a_shape:a_next + a_shape + self.__Layer_shape[i + 1]]
-            a_next += a_shape
-            w_next += w_shape
-
     def show_layer(self):
         w_next = 0
         print(Fore.LIGHTMAGENTA_EX, self.__Layer_shape)
@@ -501,6 +475,11 @@ class openNeural:
         self.__N_layer = np.append(self.__N_layer, normal)
         self.__X_layer = np.append(self.__X_layer, np.zeros(number))
         self.__A_layer = np.append(self.__A_layer, np.zeros(number))
+        self.__RNN_PA_layer = np.append(self.__RNN_PA_layer, np.zeros(number))
+        self.__RNN_A_layer = np.append(self.__RNN_A_layer, np.zeros(number))
+        self.__RNN_W_layer = np.append(self.__RNN_W_layer, np.random.uniform(0,1, number))
+        self.__RVtW_layer = np.append(self.__RVtW_layer, np.zeros(number))
+        self.__RMtW_layer = np.append(self.__RMtW_layer, np.zeros(number))
         self.__VtB_layer = np.append(self.__VtB_layer, np.zeros(number))
         self.__MtB_layer = np.append(self.__MtB_layer, np.zeros(number))
         self.__gE_layer = np.append(self.__gE_layer, np.zeros(number))
