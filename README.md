@@ -2,10 +2,10 @@
 GNU AFFERO GPL (c) Useop Gim 2022
 
 v1.6.2\
-Add bias update for RNN type
+~~Add bias update for RNN type 
 
 v1.6.1\
-New function :  generate_rnn_set
+~~New function :  generate_rnn_set
 
 v1.6.0\
 New option feature : normlization between each layer \
