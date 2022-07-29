@@ -58,11 +58,12 @@ if __name__ == '__main__':
 ```
 
 RNN version
-'''python
+
+```python
 import OpenNeural
     B = openNeural()
     B.add_layer(4)
-    B.add_layer(10, ReLU, linear_x) <- it automatically be the same as next layer but the shape should be the same below
+    B.add_layer(10, ReLU, linear_x) # it automatically be the same as next layer but the shape should be the same next layer
     B.add_layer(10, ReLU, znormal)
     B.add_layer(4)
     B.generate_weight()
@@ -79,4 +80,4 @@ import OpenNeural
             break
         print(B.error)
     print('Hello NEURAL : ', time.time() - start, B.output)
-'''
+```
