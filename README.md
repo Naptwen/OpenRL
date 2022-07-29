@@ -33,6 +33,7 @@ v1.3.0\
 If you intereseted in some of my work please visit below or send an email\
 https://sites.google.com/view/gesope/projects/a-i/reinforcement-neural-network-python?authuser=0
 
+DNN version
 ```python
 import OpenNeural
 if __name__ == '__main__':
@@ -55,11 +56,13 @@ if __name__ == '__main__':
         print(B.error)
     print('Hello DNN NEURAL : ', time.time() - start, B.output)
 ```
+
+RNN version
 '''python
 import OpenNeural
     B = openNeural()
     B.add_layer(4)
-    B.add_layer(10, ReLU, linear_x)
+    B.add_layer(10, ReLU, linear_x) <- it automatically be the same as next layer but the shape should be the same below
     B.add_layer(10, ReLU, znormal)
     B.add_layer(4)
     B.generate_weight()
