@@ -1,6 +1,9 @@
 # OpenNeural
 GNU AFFERO GPL (c) Useop Gim 2022
 
+v1.6.1\
+Add explanations for each function
+
 v1.6.0\
 New option feature : normlization between each layer \
 New function : he initialization\
