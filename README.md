@@ -54,3 +54,62 @@ if __name__ == '__main__':
     print('Hello DNN NEURAL : ', time.time() - start, B.output)
 ```
 
+How Apply it?
+Example for Basic strucutre of LSTM
+```python
+import OpenNeural
+class LSTM:
+   def __init__(self, input_sz, hidden_sz):
+        self.forget_gate = openNeural()
+        self.forget_gate.add_layer(input_sz)
+        self.forget_gate.add_layer(hidden_sz, ReLU, sigmoid)
+        self.forget_gate.add_layer(1)
+        self.forget_gate.generate_weight()
+        self.forget_gate.he_initialization()
+        self.forget_gate.opt_reset()
+        self.forget_gate.learning_set()
+
+        self.input_gate = openNeural()
+        self.input_gate.add_layer(input_sz)
+        self.input_gate.add_layer(hidden_sz, ReLU, sigmoid)
+        self.input_gate.add_layer(1)
+        self.input_gate.generate_weight()
+        self.input_gate.he_initialization()
+        self.input_gate.opt_reset()
+        self.input_gate.learning_set()
+
+        self.tanh_gate = openNeural()
+        self.tanh_gate.add_layer(input_sz)
+        self.tanh_gate.add_layer(hidden_sz, ReLU, arctan)
+        self.tanh_gate.add_layer(1)
+        self.tanh_gate.generate_weight()
+        self.tanh_gate.he_initialization()
+        self.tanh_gate.opt_reset()
+        self.tanh_gate.learning_set()
+
+        self.out_gate = openNeural()
+        self.out_gate.add_layer(input_sz)
+        self.out_gate.add_layer(hidden_sz, ReLU, sigmoid)
+        self.out_gate.add_layer(1)
+        self.out_gate.generate_weight()
+        self.out_gate.he_initialization()
+        self.out_gate.opt_reset()
+        self.out_gate.learning_set()
+
+
+    def run_gate(self, input_val, past_c, past_h):
+        assert len(input_val) + len(past_h) <= len(self.forget_gate.get_layer()[0])
+        if past_h is None:
+            input_list = np.zeros(self.forget_gate.get_layer()[0])
+            input_list[0:len(input_val)] = input_val
+        else:
+            input_list = np.apend(input_val, past_h)
+        self.forget_gate.run(input_list)
+        self.input_gate.run(input_list)
+        self.tanh_gate.run(input_list)
+        self.out_gate.run(input_list)
+        C = self.forget_gate.output * past_c.output \
+            + self.input_gate.output * self.tanh_gate.output
+        h = self.out_gate.output * arctan(arctan(C))
+        return C, h
+```
