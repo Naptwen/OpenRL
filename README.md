@@ -1,6 +1,9 @@
 # OpenNeural
 GNU AFFERO GPL (c) Useop Gim 2022
 
+v1.6.1\
+New function :  generate_rnn_set
+
 v1.6.0\
 New option feature : normlization between each layer \
 New function : he initialization\
