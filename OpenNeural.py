@@ -451,6 +451,7 @@ class openNeural:
             a_shape = self.__Layer_shape[i]
             w_shape = self.__Layer_shape[i] * self.__Layer_shape[i + 1]
             if i % 2 == 1:
+                assert self.__Layer_shape[i] == self.__Layer_shape[i+1]
                 self.__EQ_layer[i] = linear_x
                 self.__W_layer[w_next:w_next + w_shape] = np.eye(self.__Layer_shape[i],
                                                                  self.__Layer_shape[i + 1]).flatten()
