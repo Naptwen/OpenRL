@@ -32,7 +32,7 @@ https://sites.google.com/view/gesope/projects/a-i/reinforcement-neural-network-p
 
 DNN version
 ```python
-import OpenNeural
+from OpenNeural import *
 if __name__ == '__main__':
 # this is one iteration if you want to epoch do while and check the error for data
     B = openNeural()
@@ -56,8 +56,9 @@ if __name__ == '__main__':
 
 How Apply it?
 Example for Basic strucutre of LSTM
+
 ```python
-import OpenNeural
+from OpenNeural import *
 class LSTM:
    def __init__(self, input_sz, hidden_sz):
         self.forget_gate = openNeural()
