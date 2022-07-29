@@ -37,6 +37,7 @@ if __name__ == '__main__':
     B = openNeural()
     B.add_layer(4)
     B.add_layer(10, ReLU, znormal)
+    B.add_layer(4, parametricReLU, znormal)
     B.add_layer(4)
     B.generate_weight()
     B.xavier_initialization()
@@ -49,5 +50,27 @@ if __name__ == '__main__':
         if B.error <= 0.01:
             break
         print(B.error)
-    print('Hello NEURAL : ', time.time() - start, B.output)
+    print('Hello DNN NEURAL : ', time.time() - start, B.output)
 ```
+'''python
+import OpenNeural
+    B = openNeural()
+    B.add_layer(4)
+    B.add_layer(10, ReLU, linear_x) #<-- this will be the RNN
+    B.add_layer(10, ReLU, znormal)
+    B.add_layer(4)
+    B.generate_weight()
+    B.xavier_initialization()
+    B.generate_rnn_set() # rnn setting
+    B.opt_reset()
+    B.learning_set()
+    B.show_layer()
+    start = time.time()
+    for i in range(1000):
+        B.run(input_val = np.array([1,2,3,4]))
+        B.learn_start(out_val = B.output, target_val=np.array([4,3,2,1]))
+        if B.error <= 0.01:
+            break
+        print(B.error)
+    print('Hello RNN NEURAL : ', time.time() - start, B.output)
+'''
