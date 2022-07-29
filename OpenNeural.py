@@ -163,17 +163,12 @@ class openNeural:
     __X_layer = np.empty(0, dtype=np.double)  # Z + B Layer
     __N_layer = np.empty(0, dtype=object)  # Batch normal Layer
     __A_layer = np.empty(0, dtype=np.double)  # Activation Layer
-    __RNN_W_layer = np.empty(0, dtype=np.double)  # RNN W Layer
-    __RNN_PA_layer = np.empty(0, dtype=np.double)  # RNN PAST Activation Layer
-    __RNN_A_layer = np.empty(0, dtype=np.double)  # RNN Activation Layer
     __EQ_layer = np.empty(0, dtype=object)  # Equation layer function pointer
     __Layer_shape = np.empty(0, dtype=np.int64)  # it contains Layer shapes information
     __VtW_layer = np.empty(0, dtype=np.double)  # Velocity layer by W for RMSP
     __MtW_layer = np.empty(0, dtype=np.double)  # Momentum layer by W for Adam
     __VtB_layer = np.empty(0, dtype=np.double)  # as same as above but by B
     __MtB_layer = np.empty(0, dtype=np.double)  # as same as above but by B
-    __RVtW_layer = np.empty(0, dtype=np.double)  # as same as above but by W(t-1) RNN
-    __RMtW_layer = np.empty(0, dtype=np.double)  # as same as above but by W(t-1) RNN
     __gE_layer = np.empty(0, dtype=np.double)  # It contains the error for each result and A layer
     __processor = str
     __drop_Out_rate = float  # drop out rate
@@ -184,14 +179,11 @@ class openNeural:
     __beta_1 = float  # For using velocity rate
     __beta_2 = float  # For using momentum rate
     __epsilon = float  # For using velocity rate (to prevent dividing by 0)
-    __RNN = False
     output = np.empty(0)
     target_val = np.empty(0, dtype=np.double)  # It is target value, same size of last value of the layer shape
     error = 1000  # loss function's error
 
-    def __init__(self, RNN = False):
-        assert str(type(RNN)) == "<class 'bool'>"
-        self.__RNN = RNN
+    def __init__(self):
         self.__beta_1 = 0.9
         self.__beta_2 = 0.9
         self.__epsilon = 0.00000001
@@ -210,10 +202,6 @@ class openNeural:
             XN_array = self.__N_layer[i](self.__X_layer[a_next: a_next + a_shape])
             # activation function part
             self.__A_layer[a_next: a_next + a_shape] = self.__EQ_layer[i](XN_array)
-            # RNN update
-            if self.__RNN:  # slice is deep copy
-                self.__RNN_PA_layer[a_next: a_next + a_shape] = self.__RNN_A_layer[a_next: a_next + a_shape]
-                self.__RNN_A_layer[a_next: a_next + a_shape] = self.__A_layer[a_next: a_next + a_shape]
             # checking drop out
             if self.__drop_Out_rate != 0 and i < len(self.__Layer_shape) - 1:
                 self.__A_layer[a_next: a_next + a_shape] = drop_Out(self.__A_layer[a_next: a_next + a_shape],
@@ -347,8 +335,6 @@ class openNeural:
         self.__MtW_layer = np.zeros(self.__MtW_layer.size)
         self.__VtB_layer = np.zeros(self.__VtB_layer.size)
         self.__MtB_layer = np.zeros(self.__MtB_layer.size)
-        self.__RMtW_layer = np.zeros(self.__RMtW_layer.size)
-        self.__RVtW_layer = np.zeros(self.__RVtW_layer.size)
         self.iteration = 1
 
     def learning_set(self,
@@ -475,11 +461,6 @@ class openNeural:
         self.__N_layer = np.append(self.__N_layer, normal)
         self.__X_layer = np.append(self.__X_layer, np.zeros(number))
         self.__A_layer = np.append(self.__A_layer, np.zeros(number))
-        self.__RNN_PA_layer = np.append(self.__RNN_PA_layer, np.zeros(number))
-        self.__RNN_A_layer = np.append(self.__RNN_A_layer, np.zeros(number))
-        self.__RNN_W_layer = np.append(self.__RNN_W_layer, np.random.uniform(0,1, number))
-        self.__RVtW_layer = np.append(self.__RVtW_layer, np.zeros(number))
-        self.__RMtW_layer = np.append(self.__RMtW_layer, np.zeros(number))
         self.__VtB_layer = np.append(self.__VtB_layer, np.zeros(number))
         self.__MtB_layer = np.append(self.__MtB_layer, np.zeros(number))
         self.__gE_layer = np.append(self.__gE_layer, np.zeros(number))
