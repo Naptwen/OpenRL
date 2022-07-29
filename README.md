@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
 How Apply it?
 Example for Basic strucutre of LSTM
-
+The structure is refernced from https://en.wikipedia.org/wiki/Long_short-term_memory#:~:text=A%20common%20LSTM%20unit%20is%20composed%20of%20a,of%20information%20into%20and%20out%20of%20the%20cell.
 ```python
 from OpenNeural import *
 class LSTM:
