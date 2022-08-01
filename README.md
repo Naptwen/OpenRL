@@ -1,5 +1,10 @@
 # OpenNeural
 GNU AFFERO GPL (c) Useop Gim 2022
+v1.7.0\
+Change some normlization code (softmax and cross product)
+Return directly output value from run function for reducing writing the code length
+About RL : I coded algorithm for DQN, DDQN, D2QN, D3QN, and SAC and it works for those.
+Some find : For SAC, I increase the performance for the RL neural network by increasing difficulty of the level of game and it looks like work.
 
 v1.6.1\
 Add explanations for each function
