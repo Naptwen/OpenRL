@@ -1,5 +1,5 @@
 # OpenNeural
-GNU AFFERO GPL (c) Useop Gim 2022
+GNU AFFERO GPL (c) Useop Gim 2022\
 v1.7.0\
 Change some normlization code (softmax and cross product)\
 Return directly output value from run function for reducing writing the code length.\
