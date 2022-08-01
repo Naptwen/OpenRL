@@ -2,6 +2,10 @@
 GNU AFFERO GPL (c) Useop Gim 2022\
 v1.7.0\
 Change some normlization code (softmax and cross product)\
+New function : KLD JSD shannon_entropy\
+Edit function : leakReLU (0.3->0.03), all log base probabilty function change to log(x+1) to prevent inf nan error\
+Fix function : parametric function (a is user depend value), gradient for softmax and cross entropy function \
+Change function : the order of copy X layer by Normlizae, now overlapping X layer. So the back propagation order is changed also\
 Return directly output value from run function for reducing writing the code length.\
 About RL : I coded algorithm for DQN, DDQN, D2QN, D3QN, and SAC and it works for those.\
 Some find : For SAC, I increase the performance for the RL neural network by increasing difficulty of the level of game and it looks like work.
