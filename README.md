@@ -59,7 +59,7 @@ if __name__ == '__main__':
         if B.error <= 0.01:
             break
         print(B.error)
-    print('Hello DNN NEURAL : ', time.time() - start, B.output)
+    print('Hello DNN : ', time.time() - start, B.output)
 ```
 
 How Apply it?\
