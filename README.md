@@ -47,7 +47,7 @@ if __name__ == '__main__':
     B = openNeural()
     B.add_layer(4)
     B.add_layer(10, ReLU, znormal)
-    B.add_layer(4, parametricReLU, znormal)
+    B.add_layer(4, parametricReLU(a = 0.03), znormal)
     B.add_layer(4)
     B.generate_weight()
     B.xavier_initialization()
