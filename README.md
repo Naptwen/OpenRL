@@ -55,8 +55,7 @@ if __name__ == '__main__':
     B.learning_set()
     start = time.time()
     for i in range(1000):
-        B.run(input_val = np.array([1,2,3,4]))
-        B.learn_start(out_val = B.output, target_val=np.array([4,3,2,1]))
+        B.learn_start(out_val = B.run(input_val = np.array([1,2,3,4])), target_val=np.array([4,3,2,1]))
         if B.error <= 0.01:
             break
         print(B.error)
