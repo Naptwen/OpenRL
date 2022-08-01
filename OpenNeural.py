@@ -9,8 +9,13 @@ import os
 # Please let reference 
 # If you intereseted in my work visit in https://sites.google.com/view/gesope/projects/a-i/neural-network-algorithm-explanation?authuser=0
 
-def min_max_normal(values):
-    return (values - np.min(values)) / (np.max(values) - np.min(values) + 0.00000001)  # pretend the divide by 0
+def shannon_entropy(values):
+    """
+    Args:
+        values(np.ndarray): total 1 probability
+    :return: Entropy H(x)
+    """
+    return -np.sum(values * np.log1p(values))
 
 
 def user_fn(values, gradient=False):
@@ -26,22 +31,16 @@ def user_fn(values, gradient=False):
     return return_values
 
 
-def linear_x(values, gradient=False):
-    if gradient:
-        return np.ones(len(values))
-    return values
+def linear_x(values=np.ndarray, gradient=False):
+    if not gradient:
+        return values
+    return np.ones(len(values))
 
 
-def softmax(values, gradient=False):
-    if gradient:
-        return values - values ** 2
-    f = np.exp(values)
-    return f / np.sum(f)
-
-
-def softmax_normal(values):
-    f = np.exp(values - np.max(values))
-    return f / np.sum(f)
+def logp1_x(values=np.ndarray, gradient=False):
+    if not gradient:
+        return np.log1p(values)
+    return np.reciprocal(values + 1)
 
 
 def arctan(values, gradient=False):
@@ -62,29 +61,65 @@ def ReLU(values, gradient=False):
     return np.where(values > 0, values, 0)
 
 
-def parametricReLU(values, gradient=False):
+def parametricReLU(values, gradient=False, a = 0.01):
     if gradient:
-        return np.where(values > 0, 1, -0.3)
-    return np.where(values > -0.3 * values, values, -0.3 * values)
+        return np.where(values > 0, 1, a)
+    return np.where(values > a * values, values, a * values)
 
 
 def leakReLU(values, gradient=False):
     if gradient:
-        return np.where(values > 0, 1, 0.3)
-    return np.where(values > 0.3 * values, values, 0.3 * values)
+        return np.where(values > 0, 1, 0.03)
+    return np.where(values > 0.03 * values, values, 0.03 * values)
 
+
+# NORMALIZATION FUNCTIONS
 
 def znormal(values, gradient=False):
+    if not gradient:
+        if np.std(values) == 0:
+            return np.ones(len(values))
+        return (values - np.mean(values)) / (np.std(values))
+    return (np.std(values)) * values + np.mean(values)
+
+
+def min_max_normal(values, gradient=False):
+    m, n = max(values), min(values)
+    if not gradient:
+        if m == n:
+            return np.ones(len(values))
+        return (values - n) / (m - n)
+    if m == n:
+        return np.ones(len(values))
+    return np.full(len(values), 1 / (m - n))
+
+
+def bitsoftmax(values, gradient=False):
+    f = np.exp(values - np.max(values))
+    p = f / np.sum(f)
     if gradient:
-        return (values - np.mean(values)) / (np.std(values) + 0.00000001)  # pretend the divide by 0
-    else:
-        return (np.std(values) + 0.00000001) * values + np.mean(values)
+        p[np.argmax(f)] -= 1
+        return p * values
+    return p
 
 
-def max_min_limit(values):
-    values = np.where(values < -2, -2, values)
-    values = np.where(values > 2, 2, values)
-    return values
+def softmax(values, gradient=False):
+    f = np.exp(values - max(values))
+    p = f / np.sum(f)
+    if np.any(np.isnan(p)):
+        print(values, f, p)
+        exit()
+    if gradient:
+        return f * (1 - f)
+    return p
+
+
+# def logsoftmax(values, gradient=False):
+#     f = np.exp(values)
+#     p = np.log(f / np.sum(f))
+#     if gradient:
+#         return p * (1-p)
+#     return p
 
 
 def drop_Out(layer, drop_per):
@@ -94,6 +129,10 @@ def drop_Out(layer, drop_per):
 
 
 # LOSS FUNCTIONS
+
+def SIMPLE(x, y):
+    return x, y - x
+
 
 def MPE(x, y):
     """
@@ -116,6 +155,13 @@ def MSE(x, y):
     return 2 * (x - y), np.mean((y - x) ** 2)
 
 
+def MSE2(x, y):
+    """
+    Mean Square Error with power 2
+    """
+    return (x - y), np.sum((y - x) ** 2) / 2
+
+
 def RMSE(x, y):
     """
     Root Mean Squared Error
@@ -123,8 +169,51 @@ def RMSE(x, y):
     return -(y - x), np.sqrt(np.mean((y - x) ** 2))
 
 
-def CROSS_ENTROPY(x, y):
-    return y / x, -np.sum(y * np.log(x))
+def HUBER(x, y):
+    a = np.abs(y - x)  # delta is 1
+    h = 1
+    return np.where(a <= 1, y - x, h * np.sign(y - x)), np.sum(
+        np.where(a <= 1, 0.5 * (y - x) ** 2, np.abs(y - x) - 0.5))
+
+
+def CROSS_ENTROPY(x=np.ndarray, y=np.ndarray):
+    """
+    Args:
+        x(np.ndarray): probability out value
+        y(np.ndarray): percentage right(target) value
+    """
+    assert (y <= 1).all()
+    assert (y >= 0).all()
+    assert (x <= 1).all()
+    assert (x >= 0).all()
+    g = (y-x)
+    return g, np.sum(y * np.log1p(x))
+
+
+def JSD(x=np.ndarray, y=np.ndarray):
+    """
+    Args:
+        x(np.ndarray): probability out value
+        y(np.ndarray): percentage right(target) value
+    """
+    assert (y <= 1).all()
+    assert (y >= 0).all()
+    assert (x <= 1).all()
+    assert (x >= 0).all()
+    return shannon_entropy(0.5 * (x + y)) - 0.5 * (shannon_entropy(y) + shannon_entropy(x))
+
+
+def KLD(x=np.ndarray, y=np.ndarray):
+    """
+    Args:
+        x(np.ndarray): probability out value
+        y(np.ndarray): percentage right(target) value
+    """
+    assert (y <= 1).all()
+    assert (y >= 0).all()
+    assert (x <= 1).all()
+    assert (x >= 0).all()
+    return -np.sum(y * np.log1p(x / (y + 0.000000001)))
 
 
 def BINARY_CROSS(x, y):
@@ -132,19 +221,19 @@ def BINARY_CROSS(x, y):
     Binary Cross Entropy
     """
     return -(  # y * log(a)
-            y * np.log(x)
+            y * np.log1p(x)
             # +(1-y)
             + (np.ones(len(x)) - y)
             # *log(1-a)
-            * np.log(np.ones(len(x)) - x)
-    ), -sum(y * np.log(x))
+            * np.log1p(np.ones(len(x)) - x)
+    ), -sum(y * np.log1p(x))
 
 
 def RELATIVE_ENTROPY(x, y):
     """
     Relative Entropy Error
     """
-    return -y / x, np.sum(y * np.log(y / x))
+    return -y / x, np.sum(y * np.log1p(y / x))
 
 
 class openNeural:
@@ -171,11 +260,12 @@ class openNeural:
     __MtB_layer = np.empty(0, dtype=np.double)  # as same as above but by B
     __gE_layer = np.empty(0, dtype=np.double)  # It contains the error for each result and A layer
     __processor = str
+    __gradient_clipping_norm = float
     __drop_Out_rate = float  # drop out rate
     __learning_rate = float
     __learn_optima = 'ADAMRMSP'
     __loss_fun = object
-    __iteration = int  # For using the AdamRMSP iteration value
+    __iteration = 0  # For using the AdamRMSP iteration value
     __beta_1 = float  # For using velocity rate
     __beta_2 = float  # For using momentum rate
     __epsilon = float  # For using velocity rate (to prevent dividing by 0)
@@ -197,15 +287,15 @@ class openNeural:
         for i in range(len(self.__Layer_shape)):
             a_shape = self.__Layer_shape[i]
             self.__X_layer[a_next: a_next + a_shape] \
-                    = self.__Z_layer[a_next: a_next + a_shape] + self.__B_layer[a_next: a_next + a_shape]
+                = self.__Z_layer[a_next: a_next + a_shape] + self.__B_layer[a_next: a_next + a_shape]
             # normalization
-            XN_array = self.__N_layer[i](self.__X_layer[a_next: a_next + a_shape])
+            self.__X_layer[a_next: a_next + a_shape] = self.__N_layer[i](self.__X_layer[a_next: a_next + a_shape])
             # activation function part
-            self.__A_layer[a_next: a_next + a_shape] = self.__EQ_layer[i](XN_array)
+            self.__A_layer[a_next: a_next + a_shape] = self.__EQ_layer[i](self.__X_layer[a_next: a_next + a_shape])
             # checking drop out
             if self.__drop_Out_rate != 0 and i < len(self.__Layer_shape) - 1:
                 self.__A_layer[a_next: a_next + a_shape] = drop_Out(self.__A_layer[a_next: a_next + a_shape],
-                                                                         self.__drop_Out_rate)
+                                                                    self.__drop_Out_rate)
             elif self.__drop_Out_rate == 1 and i < len(self.__Layer_shape) - 1:
                 self.__A_layer[a_next: a_next + a_shape] = np.zeors(self.__Layer_shape[i])
             # obtained multiply weight
@@ -224,19 +314,22 @@ class openNeural:
         """
         This is cpu process back propagation
         """
-        self.iteration += 1
+        self.__iteration += 1
         a_next = len(self.__A_layer) - self.__Layer_shape[-1]
         w_next = len(self.__W_layer) - self.__Layer_shape[-1] * self.__Layer_shape[-2]
         for i in reversed(range(1, len(self.__Layer_shape))):
             a_shape = self.__Layer_shape[i]
             w_shape = self.__Layer_shape[i] * self.__Layer_shape[i - 1]
             dE_dA = self.__gE_layer[a_next: a_next + a_shape]
-            # batch normal recovery
-            XN = self.__N_layer[i](self.__X_layer[a_next: a_next + a_shape], True)
+            # gradient clipping
+            if self.__gradient_clipping_norm > 0:
+                dE_dA = self.gradient_clipping_norm(dE_dA, self.__gradient_clipping_norm)
             # calculate partial derivative of A
-            dA_dX = self.__EQ_layer[i](XN, True)
+            dA_dNX = self.__EQ_layer[i](self.__X_layer[a_next: a_next + a_shape], True)
+            # batch normal recovery
+            dNX_dX = self.__N_layer[i](self.__X_layer[a_next: a_next + a_shape], True)
             # dX_dZ = 1
-            dE_dZ = dE_dA * dA_dX
+            dE_dZ = dE_dA * dA_dNX * dNX_dX
             # converting dZ_dA for multiplication
             repeat_dZ_dA = np.repeat([self.__A_layer[a_next - self.__Layer_shape[i - 1]: a_next]], repeats=a_shape,axis=0)
             dig_dE_dZ = np.diag(dE_dZ)
@@ -248,16 +341,16 @@ class openNeural:
                     self.__beta_1 * self.__MtW_layer[w_next:w_next + w_shape] + (1 - self.__beta_1) * dE_dW
                 self.__VtW_layer[w_next:w_next + w_shape] = \
                     self.__beta_2 * self.__VtW_layer[w_next:w_next + w_shape] + (1 - self.__beta_2) * dE_dW ** 2
-                mdw_corr = self.__MtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_1 ** self.iteration)
-                vdw_corr = self.__VtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_2 ** self.iteration)
+                mdw_corr = self.__MtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_1 ** self.__iteration)
+                vdw_corr = self.__VtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_2 ** self.__iteration)
                 w_update = self.__learning_rate * (mdw_corr / (np.sqrt(vdw_corr) + self.__epsilon))
                 # AdamRMSP Bias
                 self.__MtB_layer[a_next: a_next + a_shape] = \
                     self.__beta_1 * self.__MtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_1) * dE_dZ
                 self.__VtB_layer[a_next: a_next + a_shape] = \
                     self.__beta_2 * self.__VtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_2) * dE_dZ ** 2
-                mdb_corr = self.__MtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_1 ** self.iteration)
-                vdb_corr = self.__VtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_2 ** self.iteration)
+                mdb_corr = self.__MtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_1 ** self.__iteration)
+                vdb_corr = self.__VtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_2 ** self.__iteration)
                 b_update = self.__learning_rate * (mdb_corr / (np.sqrt(vdb_corr) + self.__epsilon))
             else:
                 w_update = self.__learning_rate * dE_dW
@@ -315,7 +408,7 @@ class openNeural:
         self.__W_layer = np.copy(__W_layer)
         self.__B_layer = np.copy(__B_layer)
 
-    def run(self, input_val, dropout_rate=0.0) -> None:
+    def run(self, input_val, dropout_rate=0.0) -> ndarray:
         """
         Args:
             input_val(np.ndarray)
@@ -325,7 +418,7 @@ class openNeural:
         assert 0 <= dropout_rate <= 1
         self.__Z_layer[0:self.__Layer_shape[0]] = np.array(input_val)  # input
         self.__drop_Out_rate = dropout_rate
-        self.__cpu_run()
+        return self.__cpu_run()
 
     def opt_reset(self) -> None:
         """
@@ -335,22 +428,36 @@ class openNeural:
         self.__MtW_layer = np.zeros(self.__MtW_layer.size)
         self.__VtB_layer = np.zeros(self.__VtB_layer.size)
         self.__MtB_layer = np.zeros(self.__MtB_layer.size)
-        self.iteration = 1
+        self.__iteration = 1
+
+    def gradient_clipping_value(self, grad_list, max_threshold, min_threshold):
+        grad_list = np.where(np.linalg.norm(grad_list) > max_threshold, max_threshold)
+        grad_list = np.where(np.linalg.norm(grad_list) > min_threshold, min_threshold)
+        return grad_list
+
+    def gradient_clipping_norm(self, grad_list, threshold):
+        grad_list = np.where(np.linalg.norm(grad_list) > threshold,
+                             threshold * grad_list / (np.linalg.norm(grad_list) + 0.00000001), grad_list)
+        return grad_list
 
     def learning_set(self,
+                     gradient_clipping_norm=0.0,
                      learning_rate=0.001,
                      dropout_rate=0.0,
-                     loss_fun=MSE,
+                     loss_fun=MSE2,
                      learn_optima='ADAMRMSP',
                      processor='NONE') -> None:
         """
         Args:
+            gradient_clipping_norm(float): gradient cliiping for norm (0 is Not use)
             learning_rate(float): learning rate
             dropout_rate(float): droup out rate
             loss_fun(function): Cost function types
             learn_optima(str): ADAMRMSP
             processor(str): Process type
         """
+        assert 0 <= gradient_clipping_norm
+        self.__gradient_clipping_norm = gradient_clipping_norm
         self.__drop_Out_rate = dropout_rate
         self.__learning_rate = learning_rate
         self.__learn_optima = learn_optima
@@ -376,7 +483,7 @@ class openNeural:
         self.output = out_val
         self.target_val = target_val
         # learn start
-        copy_W_layer = np.copy(self.__W_layer)
+        copy_w_layer = deepcopy(self.__W_layer)
         # initializing
         self.__gE_layer[-self.__Layer_shape[-1]:], self.error = self.__loss_fun(out_val, target_val)
         self.__cpu_back()
@@ -386,7 +493,7 @@ class openNeural:
                 or np.any(np.isinf(self.__A_layer)) \
                 or np.any(np.isnan(self.__VtW_layer)) \
                 or np.any(np.isinf(self.__VtW_layer)):
-            self.__W_layer = copy_W_layer
+            self.__W_layer = copy_w_layer
             return False
         return True
 
@@ -496,3 +603,4 @@ class openNeural:
         """
         assert len(self.__B_layer) == len(layer)
         self.__B_layer = np.copy(layer)
+
