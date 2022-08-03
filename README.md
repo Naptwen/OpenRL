@@ -6,7 +6,7 @@ v1.7.1
 - Edit :  Load Save for all layer
 - New : Return Weight and Bias update record layer (for future parallel)
 - New : NADAM (Nestrov + Adam)
-- New : Pesudo Huber
+- New : Pseudo Huber
 
 v1.7.0\
 Change some normlization code (softmax and cross product)\
