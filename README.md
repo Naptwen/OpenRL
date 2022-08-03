@@ -6,7 +6,7 @@ v2.7.1
 Below is test code
 ```py
 from OpenRL import *
-import pygame as pg
+import pygame
 
 class DQN_TEST():
     def __init__(self, random_seed):
