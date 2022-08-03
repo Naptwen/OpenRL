@@ -6,6 +6,7 @@ v2.7.1
 Below is test
 ```py
 from openRL import *
+import pygame as py
 class DQN_TEST():
 
     def reward_policy(self, ss, g=None) -> [float, bool]:
