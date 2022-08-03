@@ -187,40 +187,6 @@ def D3QN(exp, gamma, qn, tqn) -> list:
     return [yt, q, 0.5 * (yt[a] - qn.run(s)[a])]
 
 
-# later works
-def SAC(exp, alpha_gamma, QN, TQN) -> object:
-    """
-        Args:
-            QN(list): [qn, qn_2, pn]
-            TQN(list): [tqn, tqn_2]
-            alpha_gamma(list): [alpha, gamma]
-        """
-    s, a, r, _s, t = exp
-    alpha, gamma = alpha_gamma
-    qn, qn_2, pn = QN[0], QN[1], QN[2]
-    tqn, tqn_2 = TQN[0], TQN[1]
-    q_list = np.array([qn.run(np.append(s, pn.run(s))),
-                       qn_2.run(np.append(s, pn.run(s)))])
-    tq_list = np.array([tqn.run(np.append(_s, pn.run(s))),
-                        tqn_2.run(np.append(_s, pn.run(s)))])
-    candidate = np.array([JSD(pn.run(s), softmax(q_list[0])), JSD(pn.run(s), softmax(q_list[1]))])
-    index = np.argmax(candidate)
-    # ---------------------- Update Q value ------------------------------------------------
-    Q_s_a = q_list[index]
-    # V_s_1 = Q'(s_1,a) - a*log(pi(s)) # Update for Critic Network
-    # Jq = Q(s,a) - (r + g * V_s_1)
-    V_s_1 = (tq_list[index] - alpha * np.log1p(pn.run(_s)))
-    T_s_1 = (r + gamma * V_s_1)
-    # ---------------------- Update policy -------------------------------------------------
-    # Jp = -Q(s,a) + a*log(p(s))
-    P_l = alpha * pn.run(s)
-    # Update alpha function
-    alpha = min(max(max(- pn.run(s) + 0.005), 0.0001), 2)
-    return Q_s_a, T_s_1, \
-           P_l, Q_s_a, \
-           index, shannon_entropy(P_l)
-
-
 class modelLearn(threading.Thread):
     neural = openNeural
     out = np.ndarray
@@ -479,7 +445,8 @@ class openRL:
             learning_rate(float):       The learning rate for learning
             loss_fun(function):         The loss(cost) function type for learning
             learn_optima(str):          The learning optimization function
-            t_update_interval(int):                 The C step (update target) frequency
+            w_update_interval(int):     The T step (update main) frequency
+            t_update_interval(int):     The C step (update target) frequency
             gamma(float):               The discount variable between greater than 0 and 1
             tau(float):                 The update percentage between greater than 0 and 1
         """
@@ -554,75 +521,3 @@ class openRL:
         self.tqn.numpy_load(file_name + "tqn")
         self.qn.numpy_load(file_name + "qn")
         print("LOAD FINISH")
-
-
-class RL_ON_POLICY(openRL):
-    alpha = 0.5
-    pn = openNeural
-    qn_2 = openNeural
-    tqn_2 = openNeural
-
-    def RL_LEARNING_SAC(self, neural_networks, replay_exp, gamma) -> object:
-        """
-        Args:
-            neural_networks(list): [qn_1, qn_2, pn, qn_1_target, qn_2_target]
-            replay_exp(np.ndarray):
-            gamma(float):
-        """
-        s, a, r, _s, t = replay_exp
-        tq, q, tp, p, index, e = self.__RL_MODEL(s, a, r, _s, t, gamma, neural_networks[0:3], neural_networks[3:5])
-        # ----------double Q learning----------
-        qn_1, qn_2, pn, qn_1_target, qn_2_target = neural_networks  # call by reference for the future c code
-        if index == 0:
-            qn_1.learn_start(out_val=q, target_val=tq)
-        else:
-            qn_2.learn_start(out_val=q, target_val=tq)
-        pn.learn_start(out_val=p, target_val=tp)
-        return qn_1, qn_1_target, qn_2, qn_2_target, pn
-
-    def RL_TRG_UPDATE(self, t_update_step, t_update_interval, t_update_rate, QN, TQN) -> object:
-        """
-        Args:
-            t_update_step(int): update iteration
-            t_update_interval(int): update interval
-            t_update_rate(float): soft update rate
-            qn(openNeural): main neural network
-            qn_target(openNeural): target neural network
-        """
-        assert 0 < t_update_rate < 1
-        qn_1, qn_2, pn = QN[0], QN[1], QN[2]
-        tqn_1, tqn_2, index = TQN[0], TQN[1], TQN[2]
-        if t_update_step % t_update_interval == 0:
-            if t_update_rate != 1:
-                if index == 0:
-                    tqn_1.set_w_layer(qn_1.get_layer()[0] * self.__tau \
-                                      + tqn_1.get_layer()[0] * (1.0 - self.__tau))
-                    tqn_1.set_b_layer(qn_1.get_layer()[1] * self.__tau \
-                                      + tqn_1.get_layer()[1] * (1.0 - self.__tau))
-                else:
-                    tqn_2.set_w_layer(qn_2.get_layer()[0] * self.__tau \
-                                      + tqn_2.get_layer()[0] * (1.0 - self.__tau))
-                    tqn_2.set_b_layer(qn_2.get_layer()[1] * self.__tau \
-                                      + tqn_2.get_layer()[1] * (1.0 - self.__tau))
-            else:
-                if index == 0:
-                    tqn_1.set_w_layer(qn_1.get_layer()[0])
-                    tqn_1.set_b_layer(qn_1.get_layer()[1])
-                else:
-                    tqn_2.set_w_layer(qn_2.get_layer()[0])
-                    tqn_2.set_b_layer(qn_2.get_layer()[1])
-        return tqn_1, tqn_2
-
-    def RL_SAVE(self, file_name) -> None:
-        self.tqn.csv_save(file_name + "tqn")
-        self.qn.csv_save(file_name + "qn")
-        self.tqn_2.csv_save(file_name + "tqn_2")
-        self.qn_2.csv_save(file_name + "qn_2")
-        self.pn.csv_save(file_name + "pn")
-
-    def RL_LOAD(self, file_name) -> None:
-        self.tqn.csv_load(file_name + "tqn")
-        self.qn.csv_load(file_name + "qn")
-        self.tqn_2.csv_load(file_name + "tqn_2")
-        self.qn_2.csv_load(file_name + "qn_2")
-        self.pn.csv_load(file_name + "pn")
