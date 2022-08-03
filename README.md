@@ -7,8 +7,13 @@ Below is test
 ```py
 from openRL import *
 import pygame as py
-class DQN_TEST():
 
+class DQN_TEST():
+    def __init__(self, random_seed):
+        self.neural = openRL(DDQN, random_seed)
+        self.neural.RL_LOAD('TEST__')
+        self.ball_game()
+        
     def reward_policy(self, ss, g=None) -> [float, bool]:
         """
         Args:
@@ -74,11 +79,6 @@ class DQN_TEST():
             #     s[2] = s[0] + 1
             ss[3] = 0
         return ss
-
-    def __init__(self, random_seed):
-        self.neural = openRL(DDQN, random_seed)
-        self.neural.RL_LOAD('TEST__')
-        self.ball_game()
 
     def ball_game(self):
         start = time.time()
@@ -166,19 +166,10 @@ class PY_GAME():
         ss[3] += 1
         if ss[2] == ss[0] and ss[3] > 4:
             ss[2] = random.randint(0, 3)
-            # if s[0] - 1 >= 0:
-            #     s[2] = s[0] - 1
-            # else:
-            #     s[2] = s[0] + 1
             ss[3] = 0
         elif ss[2] != ss[0] and ss[3] > 4:
             ss[0] = 0
             ss[2] = random.randint(0, 3)
-            # if s[0] - 1 >= 0:
-            #     s[2] = s[0] - 1
-            # else:
-            #     s[2] = s[0] + 1
-            ss[3] = 0
         return ss
 
     def drawing(self):
@@ -263,22 +254,7 @@ class PY_GAME():
 
 
 if __name__ == '__main__':
-    # Q_LIST = np.empty(0)
-    # pool = Pool(processes=mp.cpu_count())
-    # qn = pool.map(DQN_TEST, range(1))
-    # Q_LIST = np.append(Q_LIST, qn)
-    # pool.close()
-    # print(Q_LIST)
-    # W_list = np.zeros(len(Q_LIST[0].GET_LAYER()[0]))
-    # B_list = np.zeros(len(Q_LIST[0].GET_LAYER()[1]))
-    # for i in range(1):
-    #     W_list += Q_LIST[i].GET_LAYER()[0]
-    #     B_list += Q_LIST[i].GET_LAYER()[1]
-    # W_list = W_list / 8
-    # B_list = B_list / 8
     print('seed', int(time.time()))
-    # A = DQN_TEST(int(time.time()))
-    # A.neural.RL_SAVE('TEST__')
     B = PY_GAME(int(time.time()))
     print('FINISH')
 
