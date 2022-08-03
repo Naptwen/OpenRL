@@ -1,13 +1,12 @@
-import random
-import time
-import sympy as sym
-from sympy import sqrt, diff
 import numpy as np
+import sympy as sym
+from numpy import ndarray
+from sympy import sqrt, diff
+from colorama import Fore
+from opencl_algorithm import *
 import os
+from copy import deepcopy
 
-# GNU AFFERO GPL (c) Useop Gim 2022 
-# Please let reference 
-# If you intereseted in my work visit in https://sites.google.com/view/gesope/projects/a-i/neural-network-algorithm-explanation?authuser=0
 
 def shannon_entropy(values):
     """
@@ -61,7 +60,7 @@ def ReLU(values, gradient=False):
     return np.where(values > 0, values, 0)
 
 
-def parametricReLU(values, gradient=False, a = 0.01):
+def parametricReLU(values, gradient=False, a=0.01):
     if gradient:
         return np.where(values > 0, 1, a)
     return np.where(values > a * values, values, a * values)
@@ -170,10 +169,19 @@ def RMSE(x, y):
 
 
 def HUBER(x, y):
-    a = np.abs(y - x)  # delta is 1
     h = 1
-    return np.where(a <= 1, y - x, h * np.sign(y - x)), np.sum(
-        np.where(a <= 1, 0.5 * (y - x) ** 2, np.abs(y - x) - 0.5))
+    return        np.where(np.abs(y - x) <= 1, x - y, h * np.sign(x - y)), \
+           np.sum(np.where(np.abs(y - x) <= 1, 0.5 * (y - x) ** 2, h * np.abs(y - x) - 0.5 * h**2))
+
+
+def PSEUDO_HUBER(x, y):
+    a = np.abs(y-x) + 0.00000001
+    f = a * sqrt(1 + x**2/a**2)
+    return x/f, np.sum(f)
+
+# https://arxiv.org/pdf/2108.12627.pdf
+def STRIC_HUBER(x, y):
+    pass
 
 
 def CROSS_ENTROPY(x=np.ndarray, y=np.ndarray):
@@ -186,7 +194,7 @@ def CROSS_ENTROPY(x=np.ndarray, y=np.ndarray):
     assert (y >= 0).all()
     assert (x <= 1).all()
     assert (x >= 0).all()
-    g = (y-x)
+    g = (y - x)
     return g, np.sum(y * np.log1p(x))
 
 
@@ -246,37 +254,70 @@ class openNeural:
     * generate_weight() : generating the weight after adding layer
 
     """
-    __W_layer = np.empty(0, dtype=np.double)  # Weight Layer
-    __B_layer = np.empty(0, dtype=np.double)  # Bias Layer
-    __Z_layer = np.empty(0, dtype=np.double)  # Sum of weight times value Layer
-    __X_layer = np.empty(0, dtype=np.double)  # Z + B Layer
+    __W_layer = np.empty(0, dtype=np.float)  # Weight Layer
+    __B_layer = np.empty(0, dtype=np.float)  # Bias Layer
+    __Z_layer = np.empty(0, dtype=np.float)  # Sum of weight times value Layer
+    __X_layer = np.empty(0, dtype=np.float)  # Z + B Layer
     __N_layer = np.empty(0, dtype=object)  # Batch normal Layer
-    __A_layer = np.empty(0, dtype=np.double)  # Activation Layer
+    __A_layer = np.empty(0, dtype=np.float)  # Activation Layer
     __EQ_layer = np.empty(0, dtype=object)  # Equation layer function pointer
     __Layer_shape = np.empty(0, dtype=np.int64)  # it contains Layer shapes information
-    __VtW_layer = np.empty(0, dtype=np.double)  # Velocity layer by W for RMSP
-    __MtW_layer = np.empty(0, dtype=np.double)  # Momentum layer by W for Adam
-    __VtB_layer = np.empty(0, dtype=np.double)  # as same as above but by B
-    __MtB_layer = np.empty(0, dtype=np.double)  # as same as above but by B
-    __gE_layer = np.empty(0, dtype=np.double)  # It contains the error for each result and A layer
+    __VtW_layer = np.empty(0, dtype=np.float)  # Velocity layer by W for RMSP
+    __MtW_layer = np.empty(0, dtype=np.float)  # Momentum layer by W for Adam
+    __VtB_layer = np.empty(0, dtype=np.float)  # as same as above but by B
+    __MtB_layer = np.empty(0, dtype=np.float)  # as same as above but by B
+    __W_UPDATE_layer = np.empty(0, dtype=np.float)  # Weight update Layer
+    __B_UPDATE_layer = np.empty(0, dtype=np.float)  # Bias update Layer
+    __gE_layer = np.empty(0, dtype=np.float)  # It contains the error for each result and A layer
     __processor = str
     __gradient_clipping_norm = float
-    __drop_Out_rate = float  # drop out rate
+    __drop_Out_rate = 0  # drop out rate
     __learning_rate = float
-    __learn_optima = 'ADAMRMSP'
+    __learn_optima = 'ADAM'
     __loss_fun = object
     __iteration = 0  # For using the AdamRMSP iteration value
     __beta_1 = float  # For using velocity rate
     __beta_2 = float  # For using momentum rate
     __epsilon = float  # For using velocity rate (to prevent dividing by 0)
     output = np.empty(0)
-    target_val = np.empty(0, dtype=np.double)  # It is target value, same size of last value of the layer shape
+    target_val = np.empty(0, dtype=np.float)  # It is target value, same size of last value of the layer shape
     error = 1000  # loss function's error
 
     def __init__(self):
         self.__beta_1 = 0.9
-        self.__beta_2 = 0.9
+        self.__beta_2 = 0.999
         self.__epsilon = 0.00000001
+
+    def __lshift__(self, trg):
+        """
+        Args:
+            trg(openNeural):
+        """
+        self.__W_layer =                trg.__W_layer.copy()
+        self.__W_UPDATE_layer =         trg.__W_UPDATE_layer.copy()
+        self.__B_UPDATE_layer =         trg.__B_UPDATE_layer.copy()
+        self.__B_layer =                trg.__B_layer.copy()
+        self.__Z_layer =                trg.__Z_layer.copy()
+        self.__X_layer =                trg.__X_layer.copy()
+        self.__N_layer =                trg.__N_layer.copy()
+        self.__A_layer =                trg.__A_layer.copy()
+        self.__EQ_layer =               trg.__EQ_layer.copy()
+        self.__Layer_shape =            trg.__Layer_shape.copy()
+        self.__VtW_layer =              trg.__VtW_layer.copy()
+        self.__MtW_layer =              trg.__MtW_layer.copy()
+        self.__VtB_layer =              trg.__VtB_layer.copy()
+        self.__MtB_layer =              trg.__MtB_layer.copy()
+        self.__gE_layer =               trg.__gE_layer.copy()
+        self.__processor =              trg.__processor
+        self.__gradient_clipping_norm = trg.__gradient_clipping_norm
+        self.__drop_Out_rate =          trg.__drop_Out_rate
+        self.__learning_rate =          trg.__learning_rate
+        self.__learn_optima =           trg.__learn_optima
+        self.__loss_fun =               trg.__loss_fun
+        self.__iteration =              trg.__iteration
+        self.__beta_1 =                 trg.__beta_1
+        self.__beta_2 =                 trg.__beta_2
+        self.__epsilon =                trg.__epsilon
 
     def __cpu_run(self) -> np.ndarray:
         """
@@ -307,106 +348,105 @@ class openNeural:
                                                                                self.__Layer_shape[i + 1])).flatten()
                 w_next += w_shape
                 a_next += a_shape
-        self.output = self.__A_layer[-self.__Layer_shape[-1]:]
-        return self.output
+        self.output = self.__A_layer[-self.__Layer_shape[-1]:].copy()
+        return self.output.copy() # deepcopy value
 
     def __cpu_back(self) -> None:
         """
         This is cpu process back propagation
         """
+        # learn start
+        copy_w_layer = self.__W_layer.copy()
+        copy_b_layer = self.__B_layer.copy()
         self.__iteration += 1
         a_next = len(self.__A_layer) - self.__Layer_shape[-1]
         w_next = len(self.__W_layer) - self.__Layer_shape[-1] * self.__Layer_shape[-2]
         for i in reversed(range(1, len(self.__Layer_shape))):
-            a_shape = self.__Layer_shape[i]
-            w_shape = self.__Layer_shape[i] * self.__Layer_shape[i - 1]
-            dE_dA = self.__gE_layer[a_next: a_next + a_shape]
-            # gradient clipping
-            if self.__gradient_clipping_norm > 0:
-                dE_dA = self.gradient_clipping_norm(dE_dA, self.__gradient_clipping_norm)
-            # calculate partial derivative of A
-            dA_dNX = self.__EQ_layer[i](self.__X_layer[a_next: a_next + a_shape], True)
-            # batch normal recovery
-            dNX_dX = self.__N_layer[i](self.__X_layer[a_next: a_next + a_shape], True)
-            # dX_dZ = 1
-            dE_dZ = dE_dA * dA_dNX * dNX_dX
-            # converting dZ_dA for multiplication
-            repeat_dZ_dA = np.repeat([self.__A_layer[a_next - self.__Layer_shape[i - 1]: a_next]], repeats=a_shape,axis=0)
-            dig_dE_dZ = np.diag(dE_dZ)
-            # gradient dE_dW
-            dE_dW = np.matmul(dig_dE_dZ, repeat_dZ_dA).transpose().flatten()  # (dig * repeat)^T is [a,b][2a 2b][3a 3b]
-            if self.__learn_optima == 'ADAMRMSP':
-                # AdamRMSP Weight
-                self.__MtW_layer[w_next:w_next + w_shape] = \
-                    self.__beta_1 * self.__MtW_layer[w_next:w_next + w_shape] + (1 - self.__beta_1) * dE_dW
-                self.__VtW_layer[w_next:w_next + w_shape] = \
-                    self.__beta_2 * self.__VtW_layer[w_next:w_next + w_shape] + (1 - self.__beta_2) * dE_dW ** 2
-                mdw_corr = self.__MtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_1 ** self.__iteration)
-                vdw_corr = self.__VtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_2 ** self.__iteration)
-                w_update = self.__learning_rate * (mdw_corr / (np.sqrt(vdw_corr) + self.__epsilon))
-                # AdamRMSP Bias
-                self.__MtB_layer[a_next: a_next + a_shape] = \
-                    self.__beta_1 * self.__MtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_1) * dE_dZ
-                self.__VtB_layer[a_next: a_next + a_shape] = \
-                    self.__beta_2 * self.__VtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_2) * dE_dZ ** 2
-                mdb_corr = self.__MtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_1 ** self.__iteration)
-                vdb_corr = self.__VtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_2 ** self.__iteration)
-                b_update = self.__learning_rate * (mdb_corr / (np.sqrt(vdb_corr) + self.__epsilon))
-            else:
-                w_update = self.__learning_rate * dE_dW
-                b_update = self.__learning_rate * dE_dZ
-            # weight update
-            self.__W_layer[w_next:w_next + w_shape] = \
-                self.__W_layer[w_next:w_next + w_shape] - w_update
-            # bias update
-            self.__B_layer[a_next: a_next + a_shape] = \
-                self.__B_layer[a_next: a_next + a_shape] - b_update
-            # dE_dA PART
-            self.__gE_layer[a_next - self.__Layer_shape[i - 1]: a_next] = \
-                np.matmul(
-                    self.__W_layer[w_next:w_next + w_shape].reshape(self.__Layer_shape[i - 1],
-                                                                    self.__Layer_shape[i]),
-                    np.transpose(dE_dZ)).flatten()  # transpose multiplication
-            # next iteration
-            a_next -= self.__Layer_shape[i - 1]
-            w_next -= self.__Layer_shape[i - 1] * self.__Layer_shape[i - 2]
-
-    def csv_save(self, file_name) -> None:
-        """
-        It exports the __W_layer and __B_layer for current neural network
-            'file_name_W_layer.csv' 'file_name_B_layer.csv'
-        The file will be saved in the same document
-
-        Args:
-            file_name(str)
-
-        """
-        np.savetxt(file_name + '_W.csv', self.__W_layer, delimiter=',')
-        np.savetxt(file_name + '_B.csv', self.__B_layer, delimiter=',')
-
-    def csv_load(self, file_name):
-        """
-        It imports the __W_layer and __B_layer in current neural network
-            'file_name_W_layer.csv' and 'file_name_B_layer.csv'
-        The file will be loaded from the same document
-
-        Args:
-            file_name(str)
-
-        """
-        assert os.path.isfile(file_name + '_W.csv') and os.path.isfile(file_name + '_B.csv')
-        self.__W_layer = np.loadtxt(file_name + '_W.csv', delimiter=',')
-        self.__B_layer = np.loadtxt(file_name + '_B.csv', delimiter=',')
-
-    def layer_copy(self, __W_layer, __B_layer) -> None:
-        """
-        Args:
-            __W_layer (list)
-            __B_layer (list)
-        """
-        assert len(self.__W_layer) == len(__W_layer) and len(self.__B_layer) == len(__B_layer)
-        self.__W_layer = np.copy(__W_layer)
-        self.__B_layer = np.copy(__B_layer)
+            try:
+                a_shape = self.__Layer_shape[i]
+                w_shape = self.__Layer_shape[i] * self.__Layer_shape[i - 1]
+                dE_dA = self.__gE_layer[a_next: a_next + a_shape]
+                # gradient clipping
+                if self.__gradient_clipping_norm > 0:
+                    dE_dA = self.gradient_clipping_norm(dE_dA, self.__gradient_clipping_norm)
+                # calculate partial derivative of A
+                dA_dNX = self.__EQ_layer[i](self.__X_layer[a_next: a_next + a_shape], True)
+                # batch normal recovery
+                dNX_dX = self.__N_layer[i](self.__X_layer[a_next: a_next + a_shape], True)
+                # dX_dZ = 1
+                dE_dZ = dE_dA * dA_dNX * dNX_dX
+                # converting dZ_dA for multiplication
+                repeat_dZ_dA = np.repeat([self.__A_layer[a_next - self.__Layer_shape[i - 1]: a_next]], repeats=a_shape,
+                                         axis=0)
+                dig_dE_dZ = np.diag(dE_dZ)
+                # gradient dE_dW
+                dE_dW = np.matmul(dig_dE_dZ, repeat_dZ_dA).transpose().flatten()  # (dig * repeat)^T is [a,b][2a 2b][3a 3b]
+                if self.__learn_optima == 'ADAM':
+                    # AdamRMSP Weight
+                    self.__MtW_layer[w_next:w_next + w_shape] = \
+                        self.__beta_1 * self.__MtW_layer[w_next:w_next + w_shape] + (
+                                    1 - self.__beta_1) * dE_dW  # pm + (1-p)g
+                    self.__VtW_layer[w_next:w_next + w_shape] = \
+                        self.__beta_2 * self.__VtW_layer[w_next:w_next + w_shape] + (
+                                    1 - self.__beta_2) * dE_dW ** 2  # pv + (1-p)g
+                    mdw_corr = self.__MtW_layer[w_next:w_next + w_shape] / (
+                                1 - self.__beta_1 ** self.__iteration)  # m/(1-p)
+                    vdw_corr = self.__VtW_layer[w_next:w_next + w_shape] / (
+                                1 - self.__beta_2 ** self.__iteration)  # v/(1-p)
+                    w_update = self.__learning_rate * (mdw_corr / (np.sqrt(vdw_corr) + self.__epsilon))
+                    # AdamRMSP Bias
+                    self.__MtB_layer[a_next: a_next + a_shape] = \
+                        self.__beta_1 * self.__MtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_1) * dE_dZ
+                    self.__VtB_layer[a_next: a_next + a_shape] = \
+                        self.__beta_2 * self.__VtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_2) * dE_dZ ** 2
+                    mdb_corr = self.__MtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_1 ** self.__iteration)
+                    vdb_corr = self.__VtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_2 ** self.__iteration)
+                    b_update = self.__learning_rate * (mdb_corr / (np.sqrt(vdb_corr) + self.__epsilon))
+                elif self.__learn_optima == 'NADAM':
+                    # AdamRMSP Weight
+                    self.__MtW_layer[w_next:w_next + w_shape] = \
+                        self.__beta_1 * self.__MtW_layer[w_next:w_next + w_shape] + (1 - self.__beta_1) * dE_dW
+                    self.__VtW_layer[w_next:w_next + w_shape] = \
+                        self.__beta_2 * self.__VtW_layer[w_next:w_next + w_shape] + (1 - self.__beta_2) * dE_dW ** 2
+                    mdw_corr = self.__MtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_1 ** self.__iteration)
+                    vdw_corr = self.__VtW_layer[w_next:w_next + w_shape] / (1 - self.__beta_2 ** self.__iteration)
+                    # Nesterov
+                    mdw_corr = self.__beta_1 * mdw_corr + (1 - self.__beta_1) * dE_dW
+                    w_update = self.__learning_rate * (mdw_corr / (np.sqrt(vdw_corr) + self.__epsilon))
+                    # AdamRMSP Bias
+                    self.__MtB_layer[a_next: a_next + a_shape] = \
+                        self.__beta_1 * self.__MtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_1) * dE_dZ
+                    self.__VtB_layer[a_next: a_next + a_shape] = \
+                        self.__beta_2 * self.__VtB_layer[a_next: a_next + a_shape] + (1 - self.__beta_2) * dE_dZ ** 2
+                    mdb_corr = self.__MtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_1 ** self.__iteration)
+                    # Nesterov
+                    mdb_corr = self.__beta_1 * mdb_corr + (1 - self.__beta_1) * dE_dZ
+                    vdb_corr = self.__VtB_layer[a_next: a_next + a_shape] / (1 - self.__beta_2 ** self.__iteration)
+                    b_update = self.__learning_rate * (mdb_corr / (np.sqrt(vdb_corr) + self.__epsilon))
+                else:
+                    w_update = self.__learning_rate * dE_dW
+                    b_update = self.__learning_rate * dE_dZ
+                self.__W_UPDATE_layer[w_next:w_next + w_shape] = w_update
+                self.__B_UPDATE_layer[a_next: a_next + a_shape] = b_update
+                # weight update
+                self.__W_layer[w_next:w_next + w_shape] = \
+                    self.__W_layer[w_next:w_next + w_shape] - w_update
+                # bias update
+                self.__B_layer[a_next: a_next + a_shape] = \
+                    self.__B_layer[a_next: a_next + a_shape] - b_update
+                # dE_dA PART
+                self.__gE_layer[a_next - self.__Layer_shape[i - 1]: a_next] = \
+                    np.matmul(
+                        self.__W_layer[w_next:w_next + w_shape].reshape(self.__Layer_shape[i - 1],
+                                                                        self.__Layer_shape[i]),
+                        np.transpose(dE_dZ)).flatten()  # transpose multiplication
+                # next iteration
+                a_next -= self.__Layer_shape[i - 1]
+                w_next -= self.__Layer_shape[i - 1] * self.__Layer_shape[i - 2]
+            except (ZeroDivisionError, OverflowError) as e:
+                self.__W_layer = deepcopy(copy_w_layer)
+                self.__B_layer = deepcopy(copy_b_layer)
+                print(f"Layer {i} has error, learning dismissed: ", e)
 
     def run(self, input_val, dropout_rate=0.0) -> ndarray:
         """
@@ -445,7 +485,7 @@ class openNeural:
                      learning_rate=0.001,
                      dropout_rate=0.0,
                      loss_fun=MSE2,
-                     learn_optima='ADAMRMSP',
+                     learn_optima='ADAM',
                      processor='NONE') -> None:
         """
         Args:
@@ -453,7 +493,7 @@ class openNeural:
             learning_rate(float): learning rate
             dropout_rate(float): droup out rate
             loss_fun(function): Cost function types
-            learn_optima(str): ADAMRMSP
+            learn_optima(str): ADAM, NADAM, None
             processor(str): Process type
         """
         assert 0 <= gradient_clipping_norm
@@ -464,7 +504,7 @@ class openNeural:
         self.__processor = processor
         self.__loss_fun = loss_fun
 
-    def learn_start(self, out_val, target_val) -> bool:
+    def learn_start(self, out_val, target_val, direct_gradient=None) -> bool:
         """
         * learning_set is required.
 
@@ -482,19 +522,13 @@ class openNeural:
         # set value
         self.output = out_val
         self.target_val = target_val
-        # learn start
-        copy_w_layer = deepcopy(self.__W_layer)
+
         # initializing
-        self.__gE_layer[-self.__Layer_shape[-1]:], self.error = self.__loss_fun(out_val, target_val)
+        if direct_gradient is None:
+            self.__gE_layer[-self.__Layer_shape[-1]:], self.error = self.__loss_fun(out_val, target_val)
+        else:
+            self.__gE_layer[-self.__Layer_shape[-1]:] = direct_gradient
         self.__cpu_back()
-        if np.any(np.isnan(self.__W_layer)) \
-                or np.any(np.isinf(self.__W_layer)) \
-                or np.any(np.isnan(self.__A_layer)) \
-                or np.any(np.isinf(self.__A_layer)) \
-                or np.any(np.isnan(self.__VtW_layer)) \
-                or np.any(np.isinf(self.__VtW_layer)):
-            self.__W_layer = copy_w_layer
-            return False
         return True
 
     def generate_weight(self) -> None:
@@ -502,13 +536,14 @@ class openNeural:
         """
         self.__W_layer = np.empty(0)
         self.__VtW_layer = np.empty(0)
-        self.__MtW_layer = np.empty(0)
         for i in range(len(self.__Layer_shape) - 1):
             W = np.ones(self.__Layer_shape[i] * self.__Layer_shape[i + 1])
             VW = np.zeros(self.__Layer_shape[i] * self.__Layer_shape[i + 1])
             self.__W_layer = np.append(self.__W_layer, W)
             self.__VtW_layer = np.append(self.__VtW_layer, VW)
-            self.__MtW_layer = np.append(self.__MtW_layer, VW)
+        self.__MtW_layer = np.copy(self.__VtW_layer)
+        self.__W_UPDATE_layer = np.copy(self.__VtW_layer)
+        self.__B_UPDATE_layer = np.zeros(len(self.__A_layer))
 
     def xavier_initialization(self) -> None:
         """
@@ -588,19 +623,116 @@ class openNeural:
         """
         return np.array([self.__W_layer, self.__B_layer], dtype=object)
 
+    def get_update_layer(self) -> np.ndarray:
+        """
+        :return: [W_update_layer, B_ypdate_layer]
+        """
+        return np.array([self.__W_UPDATE_layer, self.__B_UPDATE_layer], dtype=object)
+
     def set_w_layer(self, layer):
         """
         Args:
-            layer(np.ndarray[np.double])
+            layer(np.ndarray[np.float])
         """
         assert len(self.__W_layer) == len(layer)
-        self.__W_layer = np.copy(layer)
+        self.__W_layer = layer.copy()
 
     def set_b_layer(self, layer):
         """
         Args:
-            layer(np.ndarray[np.double])
+            layer(np.ndarray[np.float])
         """
         assert len(self.__B_layer) == len(layer)
-        self.__B_layer = np.copy(layer)
+        self.__B_layer = layer.copy()
 
+    def numpy_save(self, file_name) -> None:
+        """
+        It exports the __W_layer and __B_layer for current neural network
+            'file_name_W_layer.csv' 'file_name_B_layer.csv'
+        The file will be saved in the same document
+
+        Args:
+            file_name(str)
+
+        """
+        np.savetxt(file_name + '_W.csv', self.__W_layer)
+        np.savetxt(file_name + '_B.csv', self.__B_layer)
+        np.savetxt(file_name + '_Z.csv', self.__Z_layer)
+        np.savetxt(file_name + '_X.csv', self.__X_layer)
+        np.savetxt(file_name + '_A.csv', self.__A_layer)
+        np.savetxt(file_name + '_L.csv', self.__Layer_shape, fmt="%d")
+        np.savetxt(file_name + '_Vw.csv', self.__VtW_layer)
+        np.savetxt(file_name + '_Mw.csv', self.__MtW_layer)
+        np.savetxt(file_name + '_Vb.csv', self.__VtB_layer)
+        np.savetxt(file_name + '_Mb.csv', self.__MtB_layer)
+        np.savetxt(file_name + '_Wu.csv', self.__W_UPDATE_layer)
+        np.savetxt(file_name + '_Bu.csv', self.__B_UPDATE_layer)
+        np.savetxt(file_name + '_E.csv', self.__gE_layer)
+        eq_list = np.empty(0)
+        for T in self.__EQ_layer:
+            eq_list = np.append(eq_list, T.__name__)
+        n_list = np.empty(0)
+        for N in self.__N_layer:
+            n_list = np.append(n_list, N.__name__)
+        np.save(file_name + '_Q', eq_list) # function
+        np.save(file_name + '_N', n_list) # function
+
+
+    def numpy_load(self, file_name):
+        """
+        It imports the __W_layer and __B_layer in current neural network
+            'file_name_W_layer.csv' and 'file_name_B_layer.csv'
+        The file will be loaded from the same document
+
+        Args:
+            file_name(str)
+
+        """
+        self.__W_layer=np.loadtxt(file_name + '_W.csv')
+        self.__B_layer=np.loadtxt(file_name + '_B.csv')
+        self.__Z_layer=np.loadtxt(file_name + '_Z.csv')
+        self.__X_layer=np.loadtxt(file_name + '_X.csv')
+        self.__A_layer=np.loadtxt(file_name + '_A.csv')
+        self.__Layer_shape=np.loadtxt(file_name + '_L.csv', dtype=int)
+        self.__VtW_layer=np.loadtxt(file_name + '_Vw.csv')
+        self.__MtW_layer=np.loadtxt(file_name + '_Mw.csv')
+        self.__VtB_layer=np.loadtxt(file_name + '_Vb.csv')
+        self.__MtB_layer=np.loadtxt(file_name + '_Mb.csv')
+        self.__W_UPDATE_layer=np.loadtxt(file_name + '_Wu.csv')
+        self.__B_UPDATE_layer=np.loadtxt(file_name + '_Bu.csv')
+        self.__gE_layer=np.loadtxt(file_name + '_E.csv')
+
+        eq_list = np.load(file_name + '_Q.npy')
+        n_list = np.load(file_name + '_N.npy')
+        self.__EQ_layer = np.empty(0)
+
+        for eq_str in eq_list:
+            if eq_str == linear_x.__name__ :
+                self.__EQ_layer = np.append(self.__EQ_layer, linear_x)
+            elif eq_str == leakReLU.__name__ :
+                self.__EQ_layer = np.append(self.__EQ_layer, leakReLU)
+            elif eq_str == ReLU.__name__ :
+                self.__EQ_layer = np.append(self.__EQ_layer, ReLU)
+            elif eq_str == logp1_x.__name__ :
+                self.__EQ_layer = np.append(self.__EQ_layer, logp1_x)
+
+        self.__N_layer = np.empty(0)
+        for n_str in n_list:
+            if n_str == linear_x.__name__ :
+                self.__N_layer = np.append(self.__N_layer, linear_x)
+            elif n_str == znormal.__name__ :
+                self.__N_layer = np.append(self.__N_layer, znormal)
+            elif n_str == min_max_normal.__name__ :
+                self.__N_layer = np.append(self.__N_layer, parametricReLU)
+            elif n_str == softmax.__name__ :
+                self.__N_layer = np.append(self.__N_layer, softmax)
+
+    def layer_copy(self, __W_layer, __B_layer) -> None:
+        """
+        Args:
+            __W_layer (list)
+            __B_layer (list)
+        """
+        assert len(self.__W_layer) == len(__W_layer) and len(self.__B_layer) == len(__B_layer)
+        self.__W_layer = np.copy(__W_layer)
+        self.__B_layer = np.copy(__B_layer)
