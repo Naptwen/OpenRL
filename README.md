@@ -1,7 +1,7 @@
 # OpenNeural
 GNU AFFERO GPL (c) Useop Gim 2022\
 
-v1.7.1\
+v1.7.1
 - Fix : Huber loss functino
 - Edit :  Load Save for all layer
 - New : Return Weight and Bias update record layer (for future parallel)
