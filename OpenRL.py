@@ -434,7 +434,7 @@ class openRL:
         """
         Args:
             enviro_fn(function):        The function input (s,a) then return [s']
-            reward_fn(function):        The function input (s') then return [r,t]
+            reward_fn(function):        The function input (s) then return [r,t]
             max_iter(int):              The # of maximum iteration(step) for one epoch
             max_epoch(int):             The # of maximum epoch for terminating RL
             buffer_maximum_sz(int):     The maximum # of experience buffer
