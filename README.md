@@ -5,7 +5,7 @@ v2.7.1
 - New : Finally add some success off policy RL algorithm and others\
 Below is test code
 ```py
-from openRL import *
+from OpenRL import *
 import pygame as py
 
 class DQN_TEST():
