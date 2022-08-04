@@ -2,9 +2,9 @@
 GNU AFFERO GPL (c) Useop Gim 2022
 
 OpenRL
-v1.2.0
+v1.2.1
 - new function and variable for input action and status together for Q value reinforcecment learning
-
+- fix some save load algorithm
 
 OpenRL
 v1.1.0 and OpenNeural v1.7.2
