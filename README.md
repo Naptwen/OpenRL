@@ -76,7 +76,7 @@ def enviro(s, a) -> np.ndarray:
 class DQN_TEST():
     def start_Q_learning(self):
         random_seed = int(time.time())
-        self.neural = openRL(model=DDQN, random_seed=random_seed)
+        self.neural = openRL(model=DDQN, action_size=3, random_seed=random_seed)
         self.neural.RL_LEARN_SETTING(
             enviro_fn=enviro, reward_fn=reward_policy, max_iter=60, max_epoch=1000,
             buffer_maximum_sz=32, buffer_replay_sz=1, buffer_replay_trial=1,
