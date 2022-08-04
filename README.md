@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import pygame
 
-from openRL import *
+from OpenRL import *
 import random
 
 def reward_policy(s, g=None) -> [float, bool]:
