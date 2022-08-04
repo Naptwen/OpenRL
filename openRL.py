@@ -253,7 +253,7 @@ def RL_ACTION(s, epsilon, rl_data_dict) -> int:
     if rl_data_dict["merge"]:
         if 0 < epsilon and random.uniform(0, 1) < epsilon:
             return rl_data_dict["act_list"][random.randint(0, rl_data_dict["act_sz"] - 1)]
-        return int(np.argmax(MAX_Q(s, rl_data_dict["qn"], rl_data_dict)))
+        return int(ARG_MAXQ(s, rl_data_dict["qn"], rl_data_dict))
     else:
         if 0 < epsilon and random.uniform(0, 1) < epsilon:
             return random.randint(0, rl_data_dict["act_sz"] - 1)
@@ -368,6 +368,7 @@ class openRL:
         self.RL_DATA["rl_model"] = model
         self.RL_DATA["replay_opt"] = replay_opt
         self.RL_DATA["act_sz"] = action_size
+        self.RL_DATA["merge"] = False
         self.RL_DATA["act_list"] = act_list
 
     def RL_RUN(self, initial_state, terminate_reward_condition=None, ep_decay_rate=0.9, show=True):
@@ -540,9 +541,16 @@ class openRL:
     def RL_SAVE(self, file_name) -> None:
         self.RL_DATA["qn"].numpy_save(file_name + "qn")
         self.RL_DATA["tqn"].numpy_save(file_name + "tqn")
+        np.savetxt(file_name + "_act_list", self.RL_DATA["act_list"], fmt="%d")
+        np.savetxt(file_name + "_act_sz", np.array([self.RL_DATA["act_sz"]]), fmt="%d")
         print("SAVE FINISH")
 
     def RL_LOAD(self, file_name) -> None:
         self.RL_DATA["tqn"].numpy_load(file_name + "tqn")
         self.RL_DATA["qn"].numpy_load(file_name + "qn")
+        self.RL_DATA["act_list"] = np.loadtxt(file_name + "_act_list")
+        self.RL_DATA["act_sz"] = np.loadtxt(file_name + "_act_sz", dtype = int)
+        self.RL_DATA["agent"] = self.RL_DATA["qn"]
+        if self.RL_DATA["qn"].get_shape()[-1] == 1:
+            self.RL_DATA["merge"] = True
         print("LOAD FINISH")
