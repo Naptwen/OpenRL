@@ -1,7 +1,8 @@
 # OpenNeural and OpenRL
 GNU AFFERO GPL (c) Useop Gim 2022\
 
-v2.7.1
+OpenRL
+v1.0.1
 - New : Finally add some success off policy RL algorithm and others\
 Below is test code
 ```py
