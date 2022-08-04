@@ -1,5 +1,5 @@
 # OpenNeural and OpenRL
-GNU AFFERO GPL (c) Useop Gim 2022\
+GNU AFFERO GPL (c) Useop Gim 2022
 
 OpenRL
 v1.0.1
