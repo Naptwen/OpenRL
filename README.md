@@ -5,87 +5,93 @@ v2.7.1
 - New : Finally add some success off policy RL algorithm and others\
 Below is test code
 ```py
-from OpenRL import *
+import time
+from matplotlib import pyplot as plt
+
+import numpy as np
 import pygame
 
-class DQN_TEST():
-    def __init__(self, random_seed):
-        self.neural = openRL(DDQN, random_seed)
-        self.neural.RL_LOAD('TEST__')
-        self.ball_game()
-        
-    def reward_policy(self, ss, g=None) -> [float, bool]:
-        """
-        Args:
-            ss(np.ndarray): status
-            g(np.ndarray): goal for get reward
+from openRL import *
+import random
 
-        Return:
-             Reward, Termination
-        """
-        # -------------REWARD----------------------
-        if g is None:
-            g = [ss[0], ss[1]]
-            if ss[2] == g[0] and ss[3] == 4:
-                r = 1
-                t = False
-            elif ss[2] != g[0] and ss[3] == 4:
-                r = -1
-                t = True
-            else:
-                r = 0
-                t = False
-            return r, t
+def reward_policy(s, g=None) -> [float, bool]:
+    """
+    Args:
+        s(np.ndarray): current status
+        g(np.ndarray): goal for get reward
+
+    Return:
+         Reward, Termination
+    """
+    # -------------REWARD----------------------
+    if g is None:
+        g = [s[0], s[1]]
+        if s[2] == g[0] and s[3] == 4:
+            r = 1
+            t = False
+        elif s[2] != g[0] and s[3] == 4:
+            r = -1
+            t = True
         else:
-            if (ss[2] == g[0] and ss[3] == g[1]) or (ss[2] == ss[0] and ss[3] == ss[1]):
-                r = 1
-                t = False
-            elif ss[2] != g[0] and ss[3] == g[1]:
-                r = -1
-                t = True
-            else:
-                r = 0
-                t = False
-            return r, t
+            r = 0
+            t = False
+        return r, t
+    else:
+        if (s[2] == g[0] and s[3] == g[1]) or (s[2] == s[0] and s[3] == s[1]):
+            r = 1
+            t = False
+        elif s[2] != g[0] and s[3] == g[1]:
+            r = -1
+            t = True
+        else:
+            r = 0
+            t = False
+        return r, t
 
-    def enviro(self, s, a) -> np.ndarray:
-        assert 0 <= a <= 3
-        ss = s.copy()
-        if a == 0:
-            ss[0] -= 1
-        elif a == 1:
-            ss[0] += 0
-        elif a == 2:
-            ss[0] += 1
-        if ss[0] < 0:
-            ss[0] = 0
-        elif ss[0] > 3:
-            ss[0] = 3
-        # ------------NEW STATE--------------------
-        ss[3] += 1
-        if ss[2] == ss[0] and ss[3] > 4:
-            ss[2] = random.randint(0, 3)
-            # if s[0] - 1 >= 0:
-            #     s[2] = s[0] - 1
-            # else:
-            #     s[2] = s[0] + 1
-            ss[3] = 0
-        elif ss[2] != ss[0] and ss[3] > 4:
-            ss[0] = 0
-            ss[2] = random.randint(0, 3)
-            # if s[0] - 1 >= 0:
-            #     s[2] = s[0] - 1
-            # else:
-            #     s[2] = s[0] + 1
-            ss[3] = 0
-        return ss
+def enviro(s, a) -> np.ndarray:
+    assert 0 <= a <= 3
+    ss = s.copy()
+    if a == 0:
+        ss[0] -= 1
+    elif a == 1:
+        ss[0] += 0
+    elif a == 2:
+        ss[0] += 1
+    if ss[0] < 0:
+        ss[0] = 0
+    elif ss[0] > 3:
+        ss[0] = 3
+    # ------------NEW STATE--------------------
+    ss[3] += 1
+    if ss[2] == ss[0] and ss[3] > 4:
+        ss[2] = random.randint(0, 3)
+        ss[3] = 0
+    elif ss[2] != ss[0] and ss[3] > 4:
+        ss[0] = 0
+        ss[2] = random.randint(0, 3)
+        ss[3] = 0
+    return ss
 
-    def ball_game(self):
-        start = time.time()
-        self.neural.RL_LEARN_SETTING(enviro_fn=self.enviro, reward_fn=self.reward_policy)
-        self.neural.RL_SETTING()
-        self.neural.RL_PROCESS_MERGE(initial_state=np.array([0, 4, random.randint(0, 3), 0]))
-        print(time.time() - start)
+
+class DQN_TEST():
+    def start_Q_learning(self):
+        random_seed = int(time.time())
+        self.neural = openRL(model=DDQN, random_seed=random_seed)
+        self.neural.RL_LEARN_SETTING(
+            enviro_fn=enviro, reward_fn=reward_policy, max_iter=60, max_epoch=1000,
+            buffer_maximum_sz=32, buffer_replay_sz=1, buffer_replay_trial=1,
+            dropout_rate=0.0,
+            learning_rate=0.005, learn_optima='NADAM', loss_fun=HUBER,
+            w_update_interval=5, t_update_interval=10, gamma=0.99, tau=0.01
+        )
+        self.neural.RL_SETTING(q_layer=[4, 8, 12, 4],
+                               q_activation_fn=[linear_x, leakReLU, leakReLU, linear_x],
+                               q_normalization=[linear_x, znormal, znormal, linear_x])
+        self.neural.RL_LOAD(file_name='TEST__')
+        self.neural.RL_PROCESS_MERGE(initial_state=np.array([0, 4, random.randint(0, 3), 0]), show=True)
+        self.static_function()
+
+    def static_function(self):
         xx = np.arange(len(self.neural.reward_time_stamp))
         yy = self.neural.reward_time_stamp
         plt.plot(xx, yy, 'k+', alpha=0.3)
@@ -94,15 +100,9 @@ class DQN_TEST():
         plt.ylabel('Reward')
         plt.show()
         print(Fore.LIGHTCYAN_EX, 'FINISH')
-        return self.neural.GET_NEURON()
-
-    def GET_SHAPE(self):
-        return self.neural.qn.get_shape()
-
-    def GET_LAYER(self):
-        return self.neural.qn.get_layer()
 
 
+# 실제 게임을 보여줄 함수
 class PY_GAME():
     cell = np.zeros([4, 5])
     cell_w = 50
@@ -114,63 +114,6 @@ class PY_GAME():
         self.neural.RL_SETTING()
         self.neural.RL_LOAD('TEST__')
         self.test_play()
-
-    def reward_policy(self, ss, g=None) -> [float, bool]:
-        """
-        Args:
-            ss(np.ndarray): status
-            g(np.ndarray): goal for get reward
-
-        Return:
-             Reward, Termination
-        """
-        # -------------REWARD----------------------
-        if g is None:
-            g = [ss[0], ss[1]]
-            if ss[2] == g[0] and ss[3] == 4:
-                r = 1
-                t = False
-            elif ss[2] != g[0] and ss[3] == 4:
-                r = -1
-                t = True
-            else:
-                r = 0
-                t = False
-            return r, t
-        else:
-            if (ss[2] == g[0] and ss[3] == g[1]) or (ss[2] == ss[0] and ss[3] == ss[1]):
-                r = 1
-                t = False
-            elif ss[2] != g[0] and ss[3] == g[1]:
-                r = -1
-                t = True
-            else:
-                r = 0
-                t = False
-            return r, t
-
-    def enviro(self, s, a) -> np.ndarray:
-        assert 0 <= a <= 3
-        ss = s.copy()
-        if a == 0:
-            ss[0] -= 1
-        elif a == 1:
-            ss[0] += 0
-        elif a == 2:
-            ss[0] += 1
-        if ss[0] < 0:
-            ss[0] = 0
-        elif ss[0] > 3:
-            ss[0] = 3
-        # ------------NEW STATE--------------------
-        ss[3] += 1
-        if ss[2] == ss[0] and ss[3] > 4:
-            ss[2] = random.randint(0, 3)
-            ss[3] = 0
-        elif ss[2] != ss[0] and ss[3] > 4:
-            ss[0] = 0
-            ss[2] = random.randint(0, 3)
-        return ss
 
     def drawing(self):
         self.screen.fill([0, 0, 0])
@@ -224,9 +167,9 @@ class PY_GAME():
             self.screen.blit(text, textRect)
             pygame.display.flip()
             # -------------REWARD----------------------
-            reward, t = self.reward_policy(np.array([self.cx, self.cy, self.ball_x, self.ball_y]))
+            reward, t = reward_policy(np.array([self.cx, self.cy, self.ball_x, self.ball_y]))
             # ------------ACTION-----------------------
-            act = np.argmax(self.neural.qn.run(np.array([self.cx, self.cy, self.ball_x, self.ball_y]))[:3])
+            act = RL_ACTION(s=np.array([self.cx, self.cy, self.ball_x, self.ball_y]), agent=self.neural.qn, act_sz=3, epsilon=0.0)
             print(
                 Fore.LIGHTRED_EX,
                 f'Ac : {act}',
@@ -239,7 +182,7 @@ class PY_GAME():
                 Fore.LIGHTBLUE_EX,
                 total_reward,
                 Fore.RESET)
-            self.cx, self.cy, self.ball_x, self.ball_y = self.enviro([self.cx, self.cy, self.ball_x, self.ball_y], act)
+            self.cx, self.cy, self.ball_x, self.ball_y = enviro([self.cx, self.cy, self.ball_x, self.ball_y], act)
             total_reward += reward
             if reward < 0:
                 total_reward = 0
@@ -254,11 +197,12 @@ class PY_GAME():
 
 
 if __name__ == '__main__':
-    A = DQN_TEST(1829272)
-    print('seed', int(time.time()))
-    B = PY_GAME(int(time.time()))
-    print('FINISH')
-
+    A = DQN_TEST()  
+    start = time.time() 
+    A.start_Q_learning()  
+    print('take time', time.time() - start) 
+    A.neural.RL_SAVE('TEST__')
+    B = PY_GAME(int(time.time())) 
 ```
 v1.7.1
 - Fix : Huber loss function
