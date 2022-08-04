@@ -3,6 +3,8 @@ GNU AFFERO GPL (c) Useop Gim 2022
 
 OpenRL
 v1.2.1
+- Since there are two type of calculating Q value; "[s,ai]->Q(s,ai) for i in Z" and "[s]->Q(s,a1,a2,a3....)"
+- Thus edited algorithm for working in both way by set the variable of using act_sz and act_list
 - New : new function and variable for input action and status together for Q value reinforcecment learning
 - Fix : fix some save load algorithm
 
