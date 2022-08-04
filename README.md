@@ -2,7 +2,12 @@
 GNU AFFERO GPL (c) Useop Gim 2022
 
 OpenRL
-v1.1.0 and OpenNeural v1.7.2\
+v1.2.0
+- new function and variable for input action and status together for Q value reinforcecment learning
+
+
+OpenRL
+v1.1.0 and OpenNeural v1.7.2
 - Had edit the variable and reorder the algorithm for a more user friendly
 
 OpenRL
@@ -19,14 +24,14 @@ v1.7.1
 - New : Pseudo Huber
 
 OpenNeural
-v1.7.0\
-Change some normlization code (softmax and cross product)\
-- New function : KLD JSD shannon_entropy\
-- Edit function : leakReLU (0.3->0.03), all log base probabilty function change to log(x+1) to prevent inf nan error\
-- Fix function : parametric function (a is user depend value), gradient for softmax and cross entropy function \
+v1.7.0
+-Change some normlization code (softmax and cross product)
+- New function : KLD JSD shannon_entropy
+- Edit function : leakReLU (0.3->0.03), all log base probabilty function change to log(x+1) to prevent inf nan error
+- Fix function : parametric function (a is user depend value), gradient for softmax and cross entropy function 
 - Change function : the order of copy X layer by Normlizae, now overlapping X layer. So the back propagation order is changed also\
-                    Return directly output value from run function for reducing writing the code length.\
-- About RL : I coded algorithm for DQN, DDQN, D2QN, D3QN, and SAC and it works for those.\
+                    Return directly output value from run function for reducing writing the code length.
+- About RL : I coded algorithm for DQN, DDQN, D2QN, D3QN, and SAC and it works for those.
 ~~Some find : For SAC, I increase the performance for the RL neural network by increasing difficulty of the level of game and it looks like work~~
 
 OpenNeural
@@ -35,32 +40,32 @@ v1.6.1\
 
 OpenNeural
 v1.6.0\
-- New option feature : normlization between each layer \
-- New function : he initialization\
-- New variable type : using function pointer\
-- Remove function : instead using run_int and cpu_run, merge it as run function\
-- Change function : change the comments for function explanation\
+- New option feature : normlization between each layer 
+- New function : he initialization
+- New variable type : using function pointer
+- Remove function : instead using run_int and cpu_run, merge it as run function
+- Change function : change the comments for function explanation
 - ETC : to avoid variable distortion, using private
 **Now just focus on off policy RL 
 
 OpenNeural
 v1.5.0\
-- Change algorithm order for SGD and others\
-- This version I tested for DDQN and DQN and it success! \
-- I am so happy that I finally make it for RL!\
-*The RL version will be publish as soon as possible after some additional work for optimization \
+- Change algorithm order for SGD and others
+- This version I tested for DDQN and DQN and it success! 
+- I am so happy that I finally make it for RL!
+*The RL version will be publish as soon as possible after some additional work for optimization 
 **paraller and GPGPU will be publised as soon as after add some function for mutiple network parallel algorith
 
 OpenNeural
 v1.4.0\
-- Change the variable name of algorithm\
+- Change the variable name of algorithm
 - Fix forget Load and Save csv for Bias layer
 
 OpenNeural
 v1.3.0\
-- Change the matrix form of the neural network algorithm\
-- Remove OpenCL algorithm for future work\
-- If you intereseted in some of my work please visit below or send an email\
+- Change the matrix form of the neural network algorithm
+- Remove OpenCL algorithm for future work
+- If you intereseted in some of my work please visit below or send an email
 - https://sites.google.com/view/gesope/projects/a-i/reinforcement-neural-network-python?authuser=0
 
 DNN version
