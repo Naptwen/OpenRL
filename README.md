@@ -254,6 +254,7 @@ class PY_GAME():
 
 
 if __name__ == '__main__':
+    A = DN_TEST(1829272)
     print('seed', int(time.time()))
     B = PY_GAME(int(time.time()))
     print('FINISH')
