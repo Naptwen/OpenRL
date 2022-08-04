@@ -102,7 +102,6 @@ class DQN_TEST():
         print(Fore.LIGHTCYAN_EX, 'FINISH')
 
 
-# 실제 게임을 보여줄 함수
 class PY_GAME():
     cell = np.zeros([4, 5])
     cell_w = 50
@@ -110,7 +109,7 @@ class PY_GAME():
     ball_x, ball_y, cx, cy = random.randint(0, 3), 0, 0, 4
 
     def __init__(self, random_seed):
-        self.neural = openRL(D3QN, random_seed)
+        self.neural = openRL(D3QN, 3, random_seed)
         self.neural.RL_SETTING()
         self.neural.RL_LOAD('TEST__')
         self.test_play()
