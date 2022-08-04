@@ -10,6 +10,7 @@ v1.0.1
 - New : Finally add some success off policy RL algorithm and others\
 Below is test code
 
+OpenNeural
 v1.7.1
 - Fix : Huber loss function
 - Edit :  Load Save for all layer
@@ -17,6 +18,7 @@ v1.7.1
 - New : NADAM (Nestrov + Adam)
 - New : Pseudo Huber
 
+OpenNeural
 v1.7.0\
 Change some normlization code (softmax and cross product)\
 - New function : KLD JSD shannon_entropy\
@@ -27,9 +29,11 @@ Change some normlization code (softmax and cross product)\
 - About RL : I coded algorithm for DQN, DDQN, D2QN, D3QN, and SAC and it works for those.\
 ~~Some find : For SAC, I increase the performance for the RL neural network by increasing difficulty of the level of game and it looks like work~~
 
+OpenNeural
 v1.6.1\
 Add explanations for each function
 
+OpenNeural
 v1.6.0\
 New option feature : normlization between each layer \
 New function : he initialization\
@@ -39,6 +43,7 @@ Change function : change the comments for function explanation\
 ETC : to avoid variable distortion, using private
 **Now just focus on off policy RL 
 
+OpenNeural
 v1.5.0\
 Change algorithm order for SGD and others\
 This version I tested for DDQN and DQN and it success! \
@@ -46,10 +51,12 @@ I am so happy that I finally make it for RL!\
 *The RL version will be publish as soon as possible after some additional work for optimization \
 **paraller and GPGPU will be publised as soon as after add some function for mutiple network parallel algorith
 
+OpenNeural
 v1.4.0\
 Change the variable name of algorithm\
 Fix forget Load and Save csv for Bias layer
 
+OpenNeural
 v1.3.0\
 -Change the matrix form of the neural network algorithm\
 -Remove OpenCL algorithm for future work\
