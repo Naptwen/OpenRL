@@ -275,16 +275,12 @@ class openRL:
             aQ, aY = RL_MINI_ACCUMU_GRAD(self.__RL_MODEL, [self.qn, self.tqn], mini_batch, self.__replay_trial)
             self.qn.learn_start(aQ, aY)
 
-    def RL_PROCESS_MERGE(self, initial_state, show=True) -> bool:
+   def RL_PROCESS_MERGE(self, initial_state, terminate_reward_condition=None, show=True):
         """
         Args:
             initial_state(np.ndarray) : initial state
+            terminate_reward_condition(float) : terminate_reward_condition if None the program do until max epoch
             show(bool): show each reward
-        Require:
-            Initialized and set Neural networks
-            __RL_MODEL
-        Return:
-            False : playing terminated, True :playing continue
         """
         self.__update = 0
         # ----------playing episode----------
@@ -305,7 +301,7 @@ class openRL:
                 self.__up_step += 1
                 # ----------Get exp from action----------
                 r, t = self.__reward_system(s)  # get [r, t] (reward and terminated state)
-                a = RL_ACTION(s=s, agent=self.qn, act_sz=self.__action_size, epsilon=action_probability)  # get a (action)
+                a = RL_ACTION(s=s, agent=self.qn, act_sz= self.__action_sz, epsilon=action_probability)  # get a (action)
                 ss = self.__environment(s, a)  # get ss (new state)
                 exp = np.array([s, a, r, ss, t], dtype=object)
                 # ----------Add experience buffer----------
@@ -354,9 +350,8 @@ class openRL:
                 if t: break
                 else: s = ss.copy()  # update new state
             self.reward_time_stamp = np.append(self.reward_time_stamp, total_reward)
-            if total_reward >= 12:
+            if terminate_reward_condition is not None and total_reward >= terminate_reward_condition:
                 break
-        return False
 
     def __hindsight_replay(self, replay_buffer) -> np.ndarray:
         """
