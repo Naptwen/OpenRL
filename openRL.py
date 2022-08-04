@@ -300,8 +300,12 @@ def RL_MINI_BATCH_LEARN(replay_buffer, rl_data_dict):
         if len(mini_batch) >= rl_data_dict["replay_sz"]:
             for exp in mini_batch:
                 loss_data = rl_data_dict["rl_model"](exp=exp, rl_data_dict=rl_data_dict)
-                Y[exp[1]] += loss_data["Y"]
-                Q[exp[1]] += loss_data["Q"]
+                if rl_data_dict["merge"]:
+                    Y += loss_data["Y"]
+                    Q += loss_data["Q"]
+                else:
+                    Y[exp[1]] += loss_data["Y"]
+                    Q[exp[1]] += loss_data["Q"]
             rl_data_dict["qn"].learn_start(Q, Y)
         else:
             break
