@@ -2,11 +2,11 @@
 GNU AFFERO GPL (c) Useop Gim 2022
 
 OpenRL
-v1.1.0
+v1.1.0 and OpenNeural v1.7.2\
 Had edit the variable and reorder the algorithm for a more user friendly
 
 OpenRL
-v1.0.1
+v1.0.1\
 - New : Finally add some success off policy RL algorithm and others\
 Below is test code
 
