@@ -1,7 +1,7 @@
 import numpy as np
 
 from openNeural import *
-
+import math
 
 # GNU AFFERO GPL (c) Useop Gim 2022
 # Please let reference
@@ -84,10 +84,10 @@ def RL_TRG_UPDATE(t_update_step, rl_data_dict):
             if rl_data_dict["t_update_rate"] != 1:
                 rl_data_dict["tqn"].set_w_layer(rl_data_dict["qn"].get_layer()[0] * rl_data_dict["t_update_rate"] \
                                                 + rl_data_dict["tqn"].get_layer()[0] * (
-                                                            1.0 - rl_data_dict["t_update_rate"]))
+                                                        1.0 - rl_data_dict["t_update_rate"]))
                 rl_data_dict["tqn"].set_b_layer(rl_data_dict["qn"].get_layer()[1] * rl_data_dict["t_update_rate"] \
                                                 + rl_data_dict["tqn"].get_layer()[1] * (
-                                                            1.0 - rl_data_dict["t_update_rate"]))
+                                                        1.0 - rl_data_dict["t_update_rate"]))
             else:
                 rl_data_dict["tqn"].set_w_layer(rl_data_dict["qn"].get_layer()[0])
                 rl_data_dict["tqn"].set_b_layer(rl_data_dict["qn"].get_layer()[1])
@@ -95,89 +95,112 @@ def RL_TRG_UPDATE(t_update_step, rl_data_dict):
             if rl_data_dict["t_update_rate"] != 1:
                 rl_data_dict["tqn_2"].set_w_layer(rl_data_dict["qn_2"].get_layer()[0] * rl_data_dict["t_update_rate"] \
                                                   + rl_data_dict["tqn_2"].get_layer()[0] * (
-                                                              1.0 - rl_data_dict["t_update_rate"]))
+                                                          1.0 - rl_data_dict["t_update_rate"]))
                 rl_data_dict["tqn_2"].set_b_layer(rl_data_dict["qn_2"].get_layer()[1] * rl_data_dict["t_update_rate"] \
                                                   + rl_data_dict["tqn_2"].get_layer()[1] * (
-                                                              1.0 - rl_data_dict["t_update_rate"]))
+                                                          1.0 - rl_data_dict["t_update_rate"]))
             else:
                 rl_data_dict["tqn_2"].set_w_layer(rl_data_dict["qn_2"].get_layer()[0])
                 rl_data_dict["tqn_2"].set_b_layer(rl_data_dict["qn_2"].get_layer()[1])
 
 
+def ARG_MAXQ(status, neural, rl_data_dict):
+    argmax_list = np.empty(rl_data_dict["act_sz"])
+    for i, act in enumerate(rl_data_dict["act_list"]):
+        argmax_list[i] = neural.run(np.append(status, act))
+    return np.argmax(argmax_list)
+
+
+def ARG_MINQ(status, neural, rl_data_dict):
+    argmin_list = np.empty(rl_data_dict["act_sz"])
+    for i, act in enumerate(rl_data_dict["act_list"]):
+        argmin_list[i] = neural.run(np.append(status, act))
+    return np.argmin(argmin_list)
+
+
+def MAX_Q(status, neural, rl_data_dict):
+    max_list = np.empty(rl_data_dict["act_sz"])
+    for i, act in enumerate(rl_data_dict["act_list"]):
+        max_list[i] = neural.run(np.append(status, act))
+    return np.max(max_list)
+
+
+def MEAN_Q(status, neural, rl_data_dict):
+    mean_list = np.empty(rl_data_dict["act_sz"])
+    for i, act in enumerate(rl_data_dict["act_list"]):
+        mean_list[i] = neural.run(np.append(status, act))
+    return np.max(mean_list)
+
+
+def VA_Q(status, neural, rl_data_dict) -> float:
+    max_list = np.empty(rl_data_dict["act_sz"])
+    for i, act in enumerate(rl_data_dict["act_list"]):
+        neural.run(np.append(status, act))
+        max_list[i] = neural.output[1] + neural.output[0]
+    return np.max(max_list)
+
+
 def DQN(exp, rl_data_dict) -> dict:
-    """
-    "Y" - r + gamma * max(Q'(s'))\n
-    "Q" - Q(s)\n
-    "E" - 1/2(Y-Q)\n
-
-    Args:
-        exp(np.ndarray): the single array [s,a,r,s',t]
-        rl_data_dict(dict): dictionary for reinforcement learning data
-
-    Return:
-        dictionary "Y, "Q", "E"
-    """
     gamma = rl_data_dict["gamma"]
     s, a, r, _s, t = exp
-    yt = rl_data_dict["qn"].run(s)  # deep copy
-    if not t:
-        yt[a] = r + gamma * max(rl_data_dict["tqn"].run(_s))
+    if rl_data_dict["merge"]:
+        if not t:
+            yt = r + gamma * MAX_Q(_s, rl_data_dict["tqn"], rl_data_dict)
+        else:
+            yt = r
+        q = rl_data_dict["qn"].run(np.append(s, a))
     else:
-        yt[a] = r
-    return {"Y": yt, "Q": rl_data_dict["qn"].run(s), "E": 0.5 * (yt[a] - rl_data_dict["qn"].output[a])}
+        if not t:
+            yt = r + gamma * max(rl_data_dict["tqn"].run(_s))
+        else:
+            yt = r
+        q = rl_data_dict["qn"].run(s)[a]
+    return {"Y": yt, "Q": q, "E": 0.5 * (yt - q)}
 
 
 def DDQN(exp, rl_data_dict) -> dict:
-    """
-    "Y" - r + gamma * Q'(s')[argmax(Q(_s))]\n
-    "Q" - Q(s)\n
-    "E" - 1/2(Y-Q)\n
-
-    Args:
-        exp(np.ndarray): the single array [s,a,r,s',t]
-        rl_data_dict(dict): dictionary for reinforcement learning data
-
-    Return:
-        dictionary "Y, "Q", "E"
-    """
     gamma = rl_data_dict["gamma"]
     s, a, r, _s, t = exp
-    yt = rl_data_dict["qn"].run(s)
-    if not t:
-        yt[a] = r + gamma * rl_data_dict["tqn"].run(_s)[np.argmax(rl_data_dict["qn"].run(_s))]
+    if rl_data_dict["merge"]:
+        assert rl_data_dict["qn"].get_shape()[-1] == 1
+        if not t:
+            yt = r + gamma * MAX_Q(_s, rl_data_dict["qn"], rl_data_dict)
+        else:
+            yt = r
+        q = rl_data_dict["qn"].run(np.append(s, a))
     else:
-        yt[a] = r
-    return {"Y": yt, "Q": rl_data_dict["qn"].run(s), "E": 0.5 * (yt[a] - rl_data_dict["qn"].output[a])}
+        if not t:
+            yt = r + gamma * rl_data_dict["tqn"].run(_s)[np.argmax(rl_data_dict["qn"].run(_s))]
+        else:
+            yt = r
+        q = rl_data_dict["qn"].run(s)[a]
+    return {"Y": yt, "Q": q, "E": 0.5 * (yt - q)}
 
 
 def D2QN(exp, rl_data_dict) -> dict:
-    """
-     "Y" - r + gamma * ((V:Q'(s)) + max(A:Q'(s)) + μ(A:Q'(s)))\n
-     "Q" - ((V:Q(s)) + (A:Q(s))[a] + μ(A:Q(s)))\n
-     "E" - 1/2(Y-Q)\n
-
-     Args:
-         exp(np.ndarray): the single array [s,a,r,s',t]
-         rl_data_dict(dict): dictionary for reinforcement learning data
-
-     Return:
-         dictionary "Y, "Q", "E"
-     """
     gamma = rl_data_dict["gamma"]
     s, a, r, _s, t = exp
-    rl_data_dict["qn"].run(s)
-    q = (rl_data_dict["qn"].output[-1]  # V
-         + rl_data_dict["qn"].output  # A
-         - np.mean(rl_data_dict["qn"].output[:-1]))  # mean A
-    yt = q.copy()
-    if not t:
-        rl_data_dict["tqn"].run(_s)
-        yt[a] = r + gamma * (rl_data_dict["tqn"].output[-1]  # V
-                             + np.max(rl_data_dict["tqn"].output[:-1])  # A
-                             - np.mean(rl_data_dict["tqn"].output[:-1]))  # mean A
+    if rl_data_dict["merge"]:
+        assert rl_data_dict["qn"].get_shape()[-1] == 1
+        if not t:
+            yt = r + gamma * (VA_Q(_s, rl_data_dict["tqn"], rl_data_dict) - MEAN_Q(_s, rl_data_dict["tqn"], rl_data_dict))
+        else:
+            yt = r
+        VA = np.sum(rl_data_dict["qn"].run(np.append(s, a)))
+        q = VA - MEAN_Q(s, rl_data_dict["qn"], rl_data_dict)
     else:
-        yt[a] = r
-    return {"Y": yt, "Q": rl_data_dict["qn"].run(s), "E": 0.5 * (yt[a] - rl_data_dict["qn"].output[a])}
+        if not t:
+            rl_data_dict["tqn"].run(_s)
+            yt = r + gamma * (rl_data_dict["tqn"].output[-1]  # V
+                 + np.max(rl_data_dict["tqn"].output[:-1])  # A
+                 - np.mean(rl_data_dict["tqn"].output[:-1]))  # mean A
+        else:
+            yt = r
+        rl_data_dict["qn"].run(s)
+        q = (rl_data_dict["qn"].output[-1]  # V
+             + rl_data_dict["qn"].output[a]  # A
+             - np.mean(rl_data_dict["qn"].output[:-1]))  # mean A
+    return {"Y": yt, "Q": q, "E": 0.5 * (yt - q)}
 
 
 def D3QN(exp, rl_data_dict) -> dict:
@@ -193,21 +216,29 @@ def D3QN(exp, rl_data_dict) -> dict:
      Return:
          dictionary "Y, "Q", "E"
      """
+    gamma = rl_data_dict["gamma"]
     s, a, r, _s, t = exp
-    rl_data_dict["qn"].run(s)
-    q = (rl_data_dict["qn"].output[-1]  # V
-         + rl_data_dict["qn"].output  # A
-         - np.mean(rl_data_dict["qn"].output[:-1]))  # mean A
-    _a = np.argmax(rl_data_dict["qn"].run(_s)[:-1])
-    yt = q.copy()
-    if not t:
-        rl_data_dict["tqn"].run(_s)
-        yt[a] = r + rl_data_dict["gamma"] * (rl_data_dict["tqn"].output[-1]  # V
-                                             + rl_data_dict["tqn"].output[:-1][_a]  # A
-                                             - np.mean(rl_data_dict["tqn"].output[:-1]))  # mean A
+    if rl_data_dict["merge"]:
+        assert rl_data_dict["qn"].get_shape()[-1] == 1
+        if not t:
+            yt = r + gamma * (VA_Q(_s, rl_data_dict["tqn"], rl_data_dict) - MEAN_Q(_s, rl_data_dict["tqn"], rl_data_dict))
+        else:
+            yt = r
+        VA = np.sum(rl_data_dict["qn"].run(np.append(s, a)))
+        q = VA - MEAN_Q(s, rl_data_dict["qn"], rl_data_dict)
     else:
-        yt[a] = r
-    return {"Y": yt, "Q": rl_data_dict["qn"].run(s), "E": 0.5 * (yt[a] - rl_data_dict["qn"].output[a])}
+        if not t:
+            rl_data_dict["tqn"].run(_s)
+            yt = r + gamma * (rl_data_dict["tqn"].output[-1]  # V
+                 + rl_data_dict["tqn"].output[:-1][np.argmax(rl_data_dict["qn"].run(_s))]  # A
+                 - np.mean(rl_data_dict["tqn"].output[:-1]))  # mean A
+        else:
+            yt = r
+        rl_data_dict["qn"].run(s)
+        q = (rl_data_dict["qn"].output[-1]  # V
+             + rl_data_dict["qn"].output[a]  # A
+             - np.mean(rl_data_dict["qn"].output[:-1]))  # mean A
+    return {"Y": yt, "Q": q, "E": 0.5 * (yt - q)}
 
 
 def RL_ACTION(s, epsilon, rl_data_dict) -> int:
@@ -219,9 +250,14 @@ def RL_ACTION(s, epsilon, rl_data_dict) -> int:
     Return:
         action(int): action from fn(s)
     """
-    if 0 < epsilon and random.uniform(0, 1) < epsilon:
-        return random.randint(0, rl_data_dict["act_sz"] - 1)
-    return int(np.argmax(rl_data_dict["agent"].run(s)[:rl_data_dict["act_sz"]]))
+    if rl_data_dict["merge"]:
+        if 0 < epsilon and random.uniform(0, 1) < epsilon:
+            return rl_data_dict["act_list"][random.randint(0, rl_data_dict["act_sz"] - 1)]
+        return int(np.argmax(MAX_Q(s, rl_data_dict["qn"], rl_data_dict)))
+    else:
+        if 0 < epsilon and random.uniform(0, 1) < epsilon:
+            return random.randint(0, rl_data_dict["act_sz"] - 1)
+        return int(np.argmax(rl_data_dict["agent"].run(s)[:rl_data_dict["act_sz"]]))
 
 
 def RL_ADD_EXP(exp, replay_buffer, rl_data_dict) -> np.ndarray:
@@ -238,6 +274,37 @@ def RL_ADD_EXP(exp, replay_buffer, rl_data_dict) -> np.ndarray:
                                np.array([s, a, r, _s, t], dtype=object)))
     return replay_buffer
 
+
+def RL_REPLAY_SAC_LEARN(replay_buffer, rl_data_dict):
+    assert rl_data_dict["replay_sz"] == 1
+    for trial in range(rl_data_dict["replay_trial"]):
+        # ---------SGD-----------SS
+        for exp in replay_buffer:
+            loss_data = rl_data_dict["rl_model"](exp=exp, rl_data_dict=rl_data_dict)
+            Q = loss_data["Q"]
+            Y = loss_data["Y"]
+            P = loss_data["P"]
+            PY = loss_data["PY"]
+        rl_data_dict["qn"].learn_start(Q, Y)
+        rl_data_dict["pn"].learn_start(P, PY)
+
+def RL_MINI_BATCH_LEARN(replay_buffer, rl_data_dict):
+    for trial in range(rl_data_dict["replay_trial"]):
+        # ---------mini batch split-----------
+        mini_batch = \
+            replay_buffer[rl_data_dict["replay_sz"] * trial: rl_data_dict["replay_sz"] * (trial + 1)]
+        # ---------mini batch replay----------
+        Y = np.zeros(rl_data_dict["qn"].get_shape()[-1])
+        Q = np.zeros(rl_data_dict["qn"].get_shape()[-1])
+        # ---------accumulate gradient---------
+        if len(mini_batch) >= rl_data_dict["replay_sz"]:
+            for exp in mini_batch:
+                loss_data = rl_data_dict["rl_model"](exp=exp, rl_data_dict=rl_data_dict)
+                Y += loss_data["Y"]
+                Q += loss_data["Q"]
+            rl_data_dict["qn"].learn_start(Q, Y)
+        else:
+            break
 
 def RL_REPLAY(replay_buffer, update_step, rl_data_dict):
     """
@@ -257,25 +324,11 @@ def RL_REPLAY(replay_buffer, update_step, rl_data_dict):
         "w_update_interval"] == 0:
         # ----------ordering replay----------
         replay_index_list = rl_data_dict["replay_opt"](replay_buffer, rl_data_dict)
-        re_ordered_replay = replay_buffer[replay_index_list]
-        # ---------mini batch replay---------
-        mini_batch = np.array_split(re_ordered_replay, rl_data_dict["mini_size"])
-        Y = np.zeros(rl_data_dict["qn"].get_shape()[-1])
-        Q = np.zeros(rl_data_dict["qn"].get_shape()[-1])
-        if "pn" in rl_data_dict:
-            P = np.zeros(rl_data_dict["pn"].get_shape()[-1])
-            PY = np.zeros(rl_data_dict["pn"].get_shape()[-1])
-        for exp in mini_batch[rl_data_dict["replay_trial"]]:
-            if len(exp) == 5:
-                loss_data = rl_data_dict["rl_model"](exp=exp, rl_data_dict=rl_data_dict)
-                Y += loss_data["Y"]
-                Q += loss_data["Q"]
-                if "pn" in rl_data_dict:
-                    P += loss_data["P"]
-                    PY += loss_data["pY"]
-            else:
-                break
-        rl_data_dict["qn"].learn_start(Q, Y)
+        re_ordered_replay = replay_buffer[replay_index_list] # deepcopy array
+        if rl_data_dict["rl_model"] == SAC:
+            RL_REPLAY_SAC_LEARN(re_ordered_replay, rl_data_dict)
+        else:
+            RL_MINI_BATCH_LEARN(re_ordered_replay, rl_data_dict)
 
 
 class openRL:
@@ -297,7 +350,7 @@ class openRL:
 
     RL_DATA = {}
 
-    def __init__(self, model, action_size, random_seed, replay_opt=REPLAY_PRIORITIZATION):
+    def __init__(self, model, action_size, random_seed, act_list = None, replay_opt=REPLAY_PRIORITIZATION):
         """
         It initializes tje target and main neural network
         Args:
@@ -315,12 +368,14 @@ class openRL:
         self.RL_DATA["rl_model"] = model
         self.RL_DATA["replay_opt"] = replay_opt
         self.RL_DATA["act_sz"] = action_size
+        self.RL_DATA["act_list"] = act_list
 
     def RL_RUN(self, initial_state, terminate_reward_condition=None, ep_decay_rate=0.9, show=True):
         """
         Args:
             initial_state(np.ndarray) : initial state
             terminate_reward_condition(float) : terminate_reward_condition if None the program do until max epoch
+            ep_decay_rate(float) : epsilon decay rate
             show(bool): show each reward
         """
         __update = 0
@@ -361,7 +416,7 @@ class openRL:
                     action_probability = max(action_probability, 0.01)
                     print(__ep, __it, total_reward, action_probability)
                 # ---------Termination check -----------------
-                if t : break
+                if t: break
                 s = ss.copy()  # update new state
             self.reward_time_stamp = np.append(self.reward_time_stamp, total_reward)
             if terminate_reward_condition is not None and total_reward >= terminate_reward_condition:
@@ -422,8 +477,6 @@ class openRL:
         self.RL_DATA["w_update_interval"] = w_update_interval
         self.RL_DATA["t_update_rate"] = t_update_rate
         self.RL_DATA["t_update_interval"] = t_update_interval
-        self.RL_DATA["mini_size"] = round(self.RL_DATA["replay_buffer_max_sz"] / self.RL_DATA["replay_sz"])
-
         self.RL_DATA["qn"].opt_reset()
         self.RL_DATA["qn"].learning_set(
             gradient_clipping_norm=0,
@@ -440,19 +493,49 @@ class openRL:
                    q_normalization=
                    np.array([linear_x, znormal, znormal, linear_x], dtype=object)
                    ) -> None:
-        if (self.RL_DATA["rl_model"] == D2QN or self.RL_DATA["rl_model"] == D3QN) \
-                and q_layer[-1] != self.RL_DATA["act_sz"] + 1:
-            raise Exception("D2QN D3QN output size must act size + 1")
-        elif (self.RL_DATA["rl_model"] == DQN or self.RL_DATA["rl_model"] == DDQN) \
-                and q_layer[-1] != self.RL_DATA["act_sz"]:
-            raise Exception("DQN DDQN output size must as same as act size")
+        # checking exception
+        if q_layer[-1] == 1:
+            self.RL_DATA["merge"] = True
+            if len(self.RL_DATA["act_list"]) != self.RL_DATA["act_sz"]:
+                raise Exception("act_size output and act_list size doesn't match")
+            print("Merge input neural network is set")
+        elif self.RL_DATA["rl_model"] == D2QN or self.RL_DATA["rl_model"] == D3QN:
+            if not self.RL_DATA["merge"] and q_layer[-1] != self.RL_DATA["act_sz"] + 1:
+                raise Exception("D2QN D3QN output size must act size + 1")
+        elif self.RL_DATA["rl_model"] == DQN or self.RL_DATA["rl_model"] == DDQN:
+            if not self.RL_DATA["merge"] and q_layer[-1] != self.RL_DATA["act_sz"]:
+                raise Exception("DQN DDQN output size must as same as act size")
+
+
+        self.RL_DATA["merging"] = 1
+        # layer setting
         for i, L in enumerate(q_layer):
             self.RL_DATA["qn"].add_layer(L, q_activation_fn[i], normal=q_normalization[i])
         self.RL_DATA["qn"].generate_weight()
         self.RL_DATA["qn"].he_initialization()
         print('Q NEURAL : ', self.RL_DATA["qn"].get_shape())
         self.RL_DATA["tqn"] << self.RL_DATA["qn"]
-        print('TARGET NEURAL : ', self.RL_DATA["tqn"].get_shape())
+        print('Q TARGET NEURAL : ', self.RL_DATA["tqn"].get_shape())
+
+    def RL_POLICY_SETTING(self,
+                          p_layer=np.array([4, 8, 12, 3]),
+                          p_activation_fn=
+                          np.array([linear_x, leakReLU, leakReLU, linear_x], dtype=object),
+                          p_normalization=
+                          np.array([linear_x, znormal, znormal, linear_x], dtype=object)
+                          ):
+        if self.RL_DATA["rl_model"] != SAC:
+            raise Exception("rl_model type must be Policy type")
+        for i, L in enumerate(p_layer):
+            self.RL_DATA["pn"].add_layer(L, p_activation_fn[i], normal=p_normalization[i])
+        self.RL_DATA["pn"].generate_weight()
+        self.RL_DATA["pn"].he_initialization()
+        print('P NEURAL : ', self.RL_DATA["pn"].get_shape())
+        self.RL_DATA["qn_2"] << self.RL_DATA["qn"]
+        self.RL_DATA["qn_2"].he_initialization()
+        self.RL_DATA["tqn_2"] << self.RL_DATA["qn_2"]
+        print('Q_2 NEURAL : ', self.RL_DATA["qn_2"].get_shape())
+        print('Q_2 TARGET NEURAL : ', self.RL_DATA["qn_2"].get_shape())
 
     def RL_SAVE(self, file_name) -> None:
         self.RL_DATA["qn"].numpy_save(file_name + "qn")
