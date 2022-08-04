@@ -2,208 +2,14 @@
 GNU AFFERO GPL (c) Useop Gim 2022
 
 OpenRL
+v1.1.0
+Had edit the variable and reorder the algorithm for a more user friendly
+
+OpenRL
 v1.0.1
 - New : Finally add some success off policy RL algorithm and others\
 Below is test code
-```py
-import time
-from matplotlib import pyplot as plt
 
-import numpy as np
-import pygame
-
-from OpenRL import *
-import random
-
-def reward_policy(s, g=None) -> [float, bool]:
-    """
-    Args:
-        s(np.ndarray): current status
-        g(np.ndarray): goal for get reward
-
-    Return:
-         Reward, Termination
-    """
-    # -------------REWARD----------------------
-    if g is None:
-        g = [s[0], s[1]]
-        if s[2] == g[0] and s[3] == 4:
-            r = 1
-            t = False
-        elif s[2] != g[0] and s[3] == 4:
-            r = -1
-            t = True
-        else:
-            r = 0
-            t = False
-        return r, t
-    else:
-        if (s[2] == g[0] and s[3] == g[1]) or (s[2] == s[0] and s[3] == s[1]):
-            r = 1
-            t = False
-        elif s[2] != g[0] and s[3] == g[1]:
-            r = -1
-            t = True
-        else:
-            r = 0
-            t = False
-        return r, t
-
-def enviro(s, a) -> np.ndarray:
-    assert 0 <= a <= 3
-    ss = s.copy()
-    if a == 0:
-        ss[0] -= 1
-    elif a == 1:
-        ss[0] += 0
-    elif a == 2:
-        ss[0] += 1
-    if ss[0] < 0:
-        ss[0] = 0
-    elif ss[0] > 3:
-        ss[0] = 3
-    # ------------NEW STATE--------------------
-    ss[3] += 1
-    if ss[2] == ss[0] and ss[3] > 4:
-        ss[2] = random.randint(0, 3)
-        ss[3] = 0
-    elif ss[2] != ss[0] and ss[3] > 4:
-        ss[0] = 0
-        ss[2] = random.randint(0, 3)
-        ss[3] = 0
-    return ss
-
-
-class DQN_TEST():
-    def start_Q_learning(self):
-        random_seed = int(time.time())
-        self.neural = openRL(model=DDQN, action_size=3, random_seed=random_seed)
-        self.neural.RL_LEARN_SETTING(
-            enviro_fn=enviro, reward_fn=reward_policy, max_iter=60, max_epoch=1000,
-            buffer_maximum_sz=32, buffer_replay_sz=1, buffer_replay_trial=1,
-            dropout_rate=0.0,
-            learning_rate=0.005, learn_optima='NADAM', loss_fun=HUBER,
-            w_update_interval=5, t_update_interval=10, gamma=0.99, tau=0.01
-        )
-        self.neural.RL_SETTING(q_layer=[4, 8, 12, 4],
-                               q_activation_fn=[linear_x, leakReLU, leakReLU, linear_x],
-                               q_normalization=[linear_x, znormal, znormal, linear_x])
-        self.neural.RL_LOAD(file_name='TEST__')
-        self.neural.RL_PROCESS_MERGE(initial_state=np.array([0, 4, random.randint(0, 3), 0]), show=True)
-        self.static_function()
-
-    def static_function(self):
-        xx = np.arange(len(self.neural.reward_time_stamp))
-        yy = self.neural.reward_time_stamp
-        plt.plot(xx, yy, 'k+', alpha=0.3)
-        plt.title('Test graph')
-        plt.xlabel('Time step')
-        plt.ylabel('Reward')
-        plt.show()
-        print(Fore.LIGHTCYAN_EX, 'FINISH')
-
-
-class PY_GAME():
-    cell = np.zeros([4, 5])
-    cell_w = 50
-    neural = object
-    ball_x, ball_y, cx, cy = random.randint(0, 3), 0, 0, 4
-
-    def __init__(self, random_seed):
-        self.neural = openRL(D3QN, 3, random_seed)
-        self.neural.RL_SETTING()
-        self.neural.RL_LOAD('TEST__')
-        self.test_play()
-
-    def drawing(self):
-        self.screen.fill([0, 0, 0])
-        for i in range(self.cell.shape[0]):
-            pygame.draw.line(self.screen, [255, 255, 255], [i * self.cell_w, 0],
-                             [i * self.cell_w, self.cell.shape[1] * self.cell_w])
-        for j in range(self.cell.shape[1]):
-            pygame.draw.line(self.screen, [255, 255, 255], [0, self.cell_w * j],
-                             [self.cell.shape[0] * self.cell_w, self.cell_w * j])
-        for j in range(self.cell.shape[1]):
-            for i in range(self.cell.shape[0]):
-                if self.cell[i, j] == 1:
-                    pygame.draw.rect(self.screen, [0, 0, 255],
-                                     [i * self.cell_w, j * self.cell_w, self.cell_w, self.cell_w])
-                elif self.cell[i, j] == 2:
-                    pygame.draw.rect(self.screen, [255, 0, 0],
-                                     [i * self.cell_w, j * self.cell_w, self.cell_w, self.cell_w])
-
-    def test_play(self):
-        # -------------PY GAME SETTING-------------
-        pygame.init()
-        pygame.font.init()
-        clock = pygame.time.Clock()
-        my_font = pygame.font.SysFont('Comic Sans MS', 30)  # if you want to use this module.
-        self.screen = pygame.display.set_mode([self.cell.shape[0] * self.cell_w, self.cell.shape[1] * self.cell_w])
-        pygame.display.set_caption("MY DQN GAME")
-        # -------------REINFORCEMENT SETTING-------------
-        self.neural.__epsilon = 0
-        # -------------GAME SETTING-------------
-        self.ball_x = random.randint(0, 3)
-        self.ball_y = 0
-        self.cx = 0
-        self.cy = 4
-        total_reward = 0
-        FPS = 10
-        running = True
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-            # ------------NEW STATE--------------------
-            self.cell = np.zeros(self.cell.shape)
-            self.cell[self.ball_x, self.ball_y] = 1
-            self.cell[self.cx, self.cy] = 2
-            # ------------DRAWING STATE--------------------
-            clock.tick(FPS)
-            self.drawing()
-            text = my_font.render(str(int(total_reward)), True, (0, 255, 0), (0, 0, 128))
-            textRect = text.get_rect()
-            textRect.center = (self.cell.shape[0] * self.cell_w / 2, self.cell.shape[1] * self.cell_w / 2)
-            self.screen.blit(text, textRect)
-            pygame.display.flip()
-            # -------------REWARD----------------------
-            reward, t = reward_policy(np.array([self.cx, self.cy, self.ball_x, self.ball_y]))
-            # ------------ACTION-----------------------
-            act = RL_ACTION(s=np.array([self.cx, self.cy, self.ball_x, self.ball_y]), agent=self.neural.qn, act_sz=3, epsilon=0.0)
-            print(
-                Fore.LIGHTRED_EX,
-                f'Ac : {act}',
-                Fore.LIGHTBLACK_EX,
-                [self.cx, self.cy, self.ball_x, self.ball_y],
-                Fore.LIGHTBLUE_EX,
-                f'{self.neural.qn.run(np.array([self.cx, self.cy, self.ball_x, self.ball_y]))}',
-                Fore.LIGHTYELLOW_EX,
-                f'qn : {np.where(self.neural.qn.output[0:3] == np.max(self.neural.qn.output[0:3]), 1, 0)}',
-                Fore.LIGHTBLUE_EX,
-                total_reward,
-                Fore.RESET)
-            self.cx, self.cy, self.ball_x, self.ball_y = enviro([self.cx, self.cy, self.ball_x, self.ball_y], act)
-            total_reward += reward
-            if reward < 0:
-                total_reward = 0
-            # -------------DRAWING---------------------
-            clock.tick(FPS)
-            self.drawing()
-            text = my_font.render(str(int(total_reward)), True, (0, 255, 0), (0, 0, 128))
-            textRect = text.get_rect()
-            textRect.center = (self.cell.shape[0] * self.cell_w / 2, self.cell.shape[1] * self.cell_w / 2)
-            self.screen.blit(text, textRect)
-            pygame.display.flip()
-
-
-if __name__ == '__main__':
-    A = DQN_TEST()  
-    start = time.time() 
-    A.start_Q_learning()  
-    print('take time', time.time() - start) 
-    A.neural.RL_SAVE('TEST__')
-    B = PY_GAME(int(time.time())) 
-```
 v1.7.1
 - Fix : Huber loss function
 - Edit :  Load Save for all layer
@@ -332,4 +138,205 @@ class LSTM:
             + self.input_gate.output * self.tanh_gate.output
         h = self.out_gate.output * arctan(arctan(C))
         return C, h
+```
+ReinForcement Exmaple
+```py
+import time
+from matplotlib import pyplot as plt
+
+import numpy as np
+import pygame
+
+from openRL import *
+import random
+
+def reward_policy(s, g=None) -> [float, bool]:
+    """
+    Args:
+        s(np.ndarray): current status
+        g(np.ndarray): goal for get reward
+
+    Return:
+         Reward, Termination
+    """
+    # -------------REWARD----------------------
+    if g is None:
+        g = [s[0], s[1]]
+        if s[2] == g[0] and s[3] == 4:
+            r = 1
+            t = False
+        elif s[2] != g[0] and s[3] == 4:
+            r = -1
+            t = True
+        else:
+            r = 0
+            t = False
+        return r, t
+    else:
+        if (s[2] == g[0] and s[3] == g[1]) or (s[2] == s[0] and s[3] == s[1]):
+            r = 1
+            t = False
+        elif s[2] != g[0] and s[3] == g[1]:
+            r = -1
+            t = True
+        else:
+            r = 0
+            t = False
+        return r, t
+
+def enviro(s, a) -> np.ndarray:
+    assert 0 <= a <= 3
+    ss = s.copy()
+    if a == 0:
+        ss[0] -= 1
+    elif a == 1:
+        ss[0] += 0
+    elif a == 2:
+        ss[0] += 1
+    if ss[0] < 0:
+        ss[0] = 0
+    elif ss[0] > 3:
+        ss[0] = 3
+    # ------------NEW STATE--------------------
+    ss[3] += 1
+    if ss[2] == ss[0] and ss[3] > 4:
+        ss[2] = random.randint(0, 3)
+        ss[3] = 0
+    elif ss[2] != ss[0] and ss[3] > 4:
+        ss[0] = 0
+        ss[2] = random.randint(0, 3)
+        ss[3] = 0
+    return ss
+
+
+class DQN_TEST():
+    def start_Q_learning(self):
+        random_seed = int(time.time())
+        self.neural = openRL(model=DDQN, action_size=3, random_seed=random_seed)
+        self.neural.RL_LEARN_SETTING(
+            enviro_fn=enviro, reward_fn=reward_policy, max_iter=120, max_epoch=800,
+            buffer_maximum_sz=32, buffer_replay_sz=1, buffer_replay_trial=1,
+            dropout_rate=0.0,
+            learning_rate=0.005, learn_optima='NADAM', loss_fun=HUBER,
+            w_update_interval=5, t_update_interval=10, gamma=0.99, t_update_rate=0.01
+        )
+
+        self.neural.RL_SETTING(q_layer=[4, 8, 12, 3],
+                               q_activation_fn=[linear_x, leakReLU, leakReLU, linear_x],
+                               q_normalization=[linear_x, znormal, znormal, linear_x])
+        self.neural.RL_LOAD(file_name='TEST__')
+
+        self.static_function()
+
+    def static_function(self):
+        xx = np.arange(len(self.neural.reward_time_stamp))
+        yy = self.neural.reward_time_stamp
+        plt.plot(xx, yy, 'k+', alpha=0.3)
+        plt.title('Test graph')
+        plt.xlabel('Time step')
+        plt.ylabel('Reward')
+        plt.show()
+        print(Fore.LIGHTCYAN_EX, 'FINISH')
+
+
+class PY_GAME():
+    cell = np.zeros([4, 5])
+    cell_w = 50
+    neural = object
+    ball_x, ball_y, cx, cy = random.randint(0, 3), 0, 0, 4
+
+    def __init__(self, random_seed):
+        self.neural = openRL(D3QN, 3, random_seed)
+        self.neural.RL_LOAD('TEST__')
+        self.test_play()
+
+    def drawing(self):
+        self.screen.fill([0, 0, 0])
+        for i in range(self.cell.shape[0]):
+            pygame.draw.line(self.screen, [255, 255, 255], [i * self.cell_w, 0],
+                             [i * self.cell_w, self.cell.shape[1] * self.cell_w])
+        for j in range(self.cell.shape[1]):
+            pygame.draw.line(self.screen, [255, 255, 255], [0, self.cell_w * j],
+                             [self.cell.shape[0] * self.cell_w, self.cell_w * j])
+        for j in range(self.cell.shape[1]):
+            for i in range(self.cell.shape[0]):
+                if self.cell[i, j] == 1:
+                    pygame.draw.rect(self.screen, [0, 0, 255],
+                                     [i * self.cell_w, j * self.cell_w, self.cell_w, self.cell_w])
+                elif self.cell[i, j] == 2:
+                    pygame.draw.rect(self.screen, [255, 0, 0],
+                                     [i * self.cell_w, j * self.cell_w, self.cell_w, self.cell_w])
+
+    def test_play(self):
+        # -------------PY GAME SETTING-------------
+        pygame.init()
+        pygame.font.init()
+        clock = pygame.time.Clock()
+        my_font = pygame.font.SysFont('Comic Sans MS', 30)  # if you want to use this module.
+        self.screen = pygame.display.set_mode([self.cell.shape[0] * self.cell_w, self.cell.shape[1] * self.cell_w])
+        pygame.display.set_caption("MY DQN GAME")
+        # -------------REINFORCEMENT SETTING-------------
+        self.neural.__epsilon = 0
+        # -------------GAME SETTING-------------
+        self.ball_x = random.randint(0, 3)
+        self.ball_y = 0
+        self.cx = 0
+        self.cy = 4
+        total_reward = 0
+        FPS = 10
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+            # ------------NEW STATE--------------------
+            self.cell = np.zeros(self.cell.shape)
+            self.cell[self.ball_x, self.ball_y] = 1
+            self.cell[self.cx, self.cy] = 2
+            # ------------DRAWING STATE--------------------
+            clock.tick(FPS)
+            self.drawing()
+            text = my_font.render(str(int(total_reward)), True, (0, 255, 0), (0, 0, 128))
+            textRect = text.get_rect()
+            textRect.center = (self.cell.shape[0] * self.cell_w / 2, self.cell.shape[1] * self.cell_w / 2)
+            self.screen.blit(text, textRect)
+            pygame.display.flip()
+            # -------------REWARD----------------------
+            reward, t = reward_policy(np.array([self.cx, self.cy, self.ball_x, self.ball_y]))
+            # ------------ACTION-----------------------
+            act = RL_ACTION(s=np.array([self.cx, self.cy, self.ball_x, self.ball_y]), epsilon=0.0, rl_data_dict=self.neural.RL_DATA)
+            print(
+                Fore.LIGHTRED_EX,
+                f'Ac : {act}',
+                Fore.LIGHTBLACK_EX,
+                [self.cx, self.cy, self.ball_x, self.ball_y],
+                Fore.LIGHTBLUE_EX,
+                f'{self.neural.RL_DATA["qn"].run(np.array([self.cx, self.cy, self.ball_x, self.ball_y]))}',
+                Fore.LIGHTYELLOW_EX,
+                f'qn : {np.where(self.neural.RL_DATA["qn"].output[0:3] == np.max(self.neural.RL_DATA["qn"].output[0:3]), 1, 0)}',
+                Fore.LIGHTBLUE_EX,
+                total_reward,
+                Fore.RESET)
+            self.cx, self.cy, self.ball_x, self.ball_y = enviro([self.cx, self.cy, self.ball_x, self.ball_y], act)
+            total_reward += reward
+            if reward < 0:
+                total_reward = 0
+            # -------------DRAWING---------------------
+            clock.tick(FPS)
+            self.drawing()
+            text = my_font.render(str(int(total_reward)), True, (0, 255, 0), (0, 0, 128))
+            textRect = text.get_rect()
+            textRect.center = (self.cell.shape[0] * self.cell_w / 2, self.cell.shape[1] * self.cell_w / 2)
+            self.screen.blit(text, textRect)
+            pygame.display.flip()
+
+
+if __name__ == '__main__':
+    A = DQN_TEST()  
+    start = time.time()  
+    A.start_Q_learning()  
+    print('take time', time.time() - start) 
+    A.neural.RL_SAVE('TEST__')  
+    B = PY_GAME(int(time.time()))  
+
 ```
