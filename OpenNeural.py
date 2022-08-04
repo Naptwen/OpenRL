@@ -6,6 +6,7 @@ from colorama import Fore
 from opencl_algorithm import *
 import os
 from copy import deepcopy
+import random
 
 
 def shannon_entropy(values):
@@ -496,6 +497,7 @@ class openNeural:
             learn_optima(str): ADAM, NADAM, None
             processor(str): Process type
         """
+        assert 0 < learning_rate
         assert 0 <= gradient_clipping_norm
         self.__gradient_clipping_norm = gradient_clipping_norm
         self.__drop_Out_rate = dropout_rate
@@ -513,7 +515,7 @@ class openNeural:
         Args:
             out_val(np.ndarray): the result of network
             target_val(np.ndarray): target value
-
+            direct_gradient(np.ndarray): direct put the gradient
         Returns:
             True is success for back propagation, False is Nan or Inf detected in update
         """
@@ -534,6 +536,7 @@ class openNeural:
     def generate_weight(self) -> None:
         """This is generating weight layer by current layer shape.
         """
+        assert len(self.__Layer_shape) >= 2
         self.__W_layer = np.empty(0)
         self.__VtW_layer = np.empty(0)
         for i in range(len(self.__Layer_shape) - 1):
@@ -677,7 +680,6 @@ class openNeural:
         np.save(file_name + '_Q', eq_list) # function
         np.save(file_name + '_N', n_list) # function
 
-
     def numpy_load(self, file_name):
         """
         It imports the __W_layer and __B_layer in current neural network
@@ -688,44 +690,48 @@ class openNeural:
             file_name(str)
 
         """
-        self.__W_layer=np.loadtxt(file_name + '_W.csv')
-        self.__B_layer=np.loadtxt(file_name + '_B.csv')
-        self.__Z_layer=np.loadtxt(file_name + '_Z.csv')
-        self.__X_layer=np.loadtxt(file_name + '_X.csv')
-        self.__A_layer=np.loadtxt(file_name + '_A.csv')
-        self.__Layer_shape=np.loadtxt(file_name + '_L.csv', dtype=int)
-        self.__VtW_layer=np.loadtxt(file_name + '_Vw.csv')
-        self.__MtW_layer=np.loadtxt(file_name + '_Mw.csv')
-        self.__VtB_layer=np.loadtxt(file_name + '_Vb.csv')
-        self.__MtB_layer=np.loadtxt(file_name + '_Mb.csv')
-        self.__W_UPDATE_layer=np.loadtxt(file_name + '_Wu.csv')
-        self.__B_UPDATE_layer=np.loadtxt(file_name + '_Bu.csv')
-        self.__gE_layer=np.loadtxt(file_name + '_E.csv')
+        try:
+            self.__W_layer=np.loadtxt(file_name + '_W.csv')
+            self.__B_layer=np.loadtxt(file_name + '_B.csv')
+            self.__Z_layer=np.loadtxt(file_name + '_Z.csv')
+            self.__X_layer=np.loadtxt(file_name + '_X.csv')
+            self.__A_layer=np.loadtxt(file_name + '_A.csv')
+            self.__Layer_shape=np.loadtxt(file_name + '_L.csv', dtype=int)
+            self.__VtW_layer=np.loadtxt(file_name + '_Vw.csv')
+            self.__MtW_layer=np.loadtxt(file_name + '_Mw.csv')
+            self.__VtB_layer=np.loadtxt(file_name + '_Vb.csv')
+            self.__MtB_layer=np.loadtxt(file_name + '_Mb.csv')
+            self.__W_UPDATE_layer=np.loadtxt(file_name + '_Wu.csv')
+            self.__B_UPDATE_layer=np.loadtxt(file_name + '_Bu.csv')
+            self.__gE_layer=np.loadtxt(file_name + '_E.csv')
 
-        eq_list = np.load(file_name + '_Q.npy')
-        n_list = np.load(file_name + '_N.npy')
-        self.__EQ_layer = np.empty(0)
+            eq_list = np.load(file_name + '_Q.npy')
+            n_list = np.load(file_name + '_N.npy')
 
-        for eq_str in eq_list:
-            if eq_str == linear_x.__name__ :
-                self.__EQ_layer = np.append(self.__EQ_layer, linear_x)
-            elif eq_str == leakReLU.__name__ :
-                self.__EQ_layer = np.append(self.__EQ_layer, leakReLU)
-            elif eq_str == ReLU.__name__ :
-                self.__EQ_layer = np.append(self.__EQ_layer, ReLU)
-            elif eq_str == logp1_x.__name__ :
-                self.__EQ_layer = np.append(self.__EQ_layer, logp1_x)
+            self.__EQ_layer = np.empty(0)
+            for eq_str in eq_list:
+                if eq_str == linear_x.__name__ :
+                    self.__EQ_layer = np.append(self.__EQ_layer, linear_x)
+                elif eq_str == leakReLU.__name__ :
+                    self.__EQ_layer = np.append(self.__EQ_layer, leakReLU)
+                elif eq_str == ReLU.__name__ :
+                    self.__EQ_layer = np.append(self.__EQ_layer, ReLU)
+                elif eq_str == logp1_x.__name__ :
+                    self.__EQ_layer = np.append(self.__EQ_layer, logp1_x)
 
-        self.__N_layer = np.empty(0)
-        for n_str in n_list:
-            if n_str == linear_x.__name__ :
-                self.__N_layer = np.append(self.__N_layer, linear_x)
-            elif n_str == znormal.__name__ :
-                self.__N_layer = np.append(self.__N_layer, znormal)
-            elif n_str == min_max_normal.__name__ :
-                self.__N_layer = np.append(self.__N_layer, parametricReLU)
-            elif n_str == softmax.__name__ :
-                self.__N_layer = np.append(self.__N_layer, softmax)
+            self.__N_layer = np.empty(0)
+            for n_str in n_list:
+                if n_str == linear_x.__name__ :
+                    self.__N_layer = np.append(self.__N_layer, linear_x)
+                elif n_str == znormal.__name__ :
+                    self.__N_layer = np.append(self.__N_layer, znormal)
+                elif n_str == min_max_normal.__name__ :
+                    self.__N_layer = np.append(self.__N_layer, parametricReLU)
+                elif n_str == softmax.__name__ :
+                    self.__N_layer = np.append(self.__N_layer, softmax)
+        except FileNotFoundError as e:
+            print('File is not exist')
+            pass
 
     def layer_copy(self, __W_layer, __B_layer) -> None:
         """
