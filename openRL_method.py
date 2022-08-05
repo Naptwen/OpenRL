@@ -330,7 +330,7 @@ def RL_TRG_UPDATE(t_update_step, rl_data_dict):
 
 # ------------------PROCESS--------------------------
 
-def RL_ACTION(s, epsilon, agent, act_list, SA_merge=False) -> int:
+def RL_ACTION(s, epsilon, rl_data_dict) -> int:
     """
     Args:
         s(np.ndarray) : current state
@@ -341,12 +341,16 @@ def RL_ACTION(s, epsilon, agent, act_list, SA_merge=False) -> int:
     Return:
         action(int): action from fn(s)
     """
+    agent = rl_data_dict["agent"]
+    act_list = rl_data_dict["act_list"]
+    if rl_data_dict["rl_model"] is SAC:
+        return int(np.argmax(rl_data_dict["pn"].run(s)))
     if 0 < epsilon and random.uniform(0, 1) < epsilon:
         return np.random.choice(act_list)
-    if SA_merge:
-        if agent.get_shape()[-1] == 2:
-            return int(ARGMAX_VA_Q(s, agent, act_list))
-        elif agent.get_shape()[-1] == 1:
+    else:
+        if rl_data_dict["SA_merge"]:
+            if rl_data_dict["rl_model"] is D2QN or D3QN:
+                return int(ARGMAX_VA_Q(s, agent, act_list))
             return int(ARG_MAXQ(s, agent, act_list))
     return int(np.argmax(agent.run(s)))
 
