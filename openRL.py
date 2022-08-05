@@ -168,7 +168,6 @@ class openRL:
             self.reward_time_stamp = np.append(self.reward_time_stamp, self.RL_DATA["total_reward"])
             if terminate_reward_condition is not None and self.RL_DATA["total_reward"] >= terminate_reward_condition:
                 break
-        print(self.RL_DATA)
 
     def RL_SAVE(self, file_name) -> None:
         os.makedirs("save", exist_ok=True)

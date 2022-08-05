@@ -111,8 +111,8 @@ def DQN(exp, rl_data_dict) -> dict:
     for i, qn in enumerate(rl_data_dict["qn"]):
         Q[i] = np.zeros(qn.get_shape()[-1])
     Y = Q.copy()
-    Q[a] = q
-    Y[a] = yt
+    Q[0][a] = q
+    Y[0][a] = yt
     return {"Q": Q, "Y": Y,  "E": 0.5 * (yt - q)}
 
 
@@ -142,8 +142,8 @@ def DDQN(exp, rl_data_dict) -> dict:
     for i, qn in enumerate(rl_data_dict["qn"]):
         Q[i] = np.zeros(qn.get_shape()[-1])
     Y = Q.copy()
-    Q[a] = q
-    Y[a] = yt
+    Q[0][a] = q
+    Y[0][a] = yt
     return {"Q": Q, "Y": Y, "E": 0.5 * (yt - q)}
 
 
@@ -158,8 +158,8 @@ def D2QN(exp, rl_data_dict) -> dict:
         assert rl_data_dict["qn"][0].get_shape()[-1] == 2
         if not t:
             yt = r + gamma * (
-                    MAX_VA_Q(_s, rl_data_dict["tqn"][0], rl_data_dict) - MEAN_Q(_s, rl_data_dict["tqn"][0],
-                                                                            rl_data_dict["act_list"]))
+                    MAX_VA_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"])
+                    - MEAN_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"]))
         else:
             yt = r
         VA = np.sum(rl_data_dict["qn"][0].run(np.append(s, a)))
@@ -182,8 +182,8 @@ def D2QN(exp, rl_data_dict) -> dict:
     for i, qn in enumerate(rl_data_dict["qn"]):
         Q[i] = np.zeros(qn.get_shape()[-1])
     Y = Q.copy()
-    Q[a] = q
-    Y[a] = yt
+    Q[0][a] = q
+    Y[0][a] = yt
     return {"Q": Q, "Y": Y, "E": 0.5 * (yt - q)}
 
 
@@ -221,7 +221,7 @@ def D3QN(exp, rl_data_dict) -> dict:
         if not t:
             rl_data_dict["tqn"][0].run(_s)
             yt = r + gamma * (rl_data_dict["tqn"][0].output[-1]  # V
-                              + rl_data_dict["tqn"][0].output[:-1][np.argmax(rl_data_dict["qn"][0].run(_s))]  # A
+                              + rl_data_dict["tqn"][0].output[:-1][np.argmax(rl_data_dict["qn"][0].run(_s)[:-1])]  # A
                               - np.mean(rl_data_dict["tqn"][0].output[:-1]))  # mean A
         else:
             yt = r
@@ -234,8 +234,8 @@ def D3QN(exp, rl_data_dict) -> dict:
     for i, qn in enumerate(rl_data_dict["qn"]):
         Q[i] = np.zeros(qn.get_shape()[-1])
     Y = Q.copy()
-    Q[a] = q
-    Y[a] = yt
+    Q[0][a] = q
+    Y[0][a] = yt
     return {"Q": Q, "Y": Y, "E": 0.5 * (yt - q)}
 
 
@@ -288,10 +288,10 @@ def SAC(exp, rl_data_dict) -> dict:
     for i, qn in enumerate(rl_data_dict["qn"]):
         Q[i] = np.zeros(qn.get_shape()[-1])
     Y = Q.copy()
-    Q[I] = q
-    Y[I] = y_ss
-    Q[2] = p_l
-    Q[2] = q_s_rp
+    Q[I+1] = q
+    Y[I+1] = y_ss
+    Q[0][a] = p_l
+    Y[0][a] = q_s_rp
     return {"Q": Q, "Y": Y, "E": shannon_entropy(p_l)}
 
 
@@ -402,7 +402,7 @@ def RL_E_G_ACTION(s, rl_data_dict) -> int:
         return np.random.choice(act_list)
     else:
         if rl_data_dict["SA_merge"]:
-            if rl_data_dict["rl_model"] is D2QN or D3QN:
+            if rl_data_dict["rl_model"] is D2QN or rl_data_dict["rl_model"] is D3QN:
                 return ARGMAX_VA_Q(s, agent, act_list)
             return ARG_MAXQ(s, agent, act_list)
     return int(np.argmax(agent.run(s)))
