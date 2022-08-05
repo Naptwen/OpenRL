@@ -1,6 +1,8 @@
 # OpenNeural and OpenRL
-GNU AFFERO GPL (c) Useop Gim 2022
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FNaptwen%2FOpen_pyAI&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
+GNU AFFERO GPL (c) Useop Gim 2022\
+
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FNaptwen%2FOpen_pyAI&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)\
+
 OpenRL
 v2.0.0
  - Edit : Seperate class and functions for reinforcement learning, setting functions, load and save functions
