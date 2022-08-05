@@ -35,7 +35,16 @@ def MEAN_Q(status, neural, act_list) -> float:
 
 
 # base on the all actions, finding the Value and Advantage
-def VA_Q(status, neural, act_list) -> float:
+def ARGMAX_VA_Q(status, neural, act_list) -> float:
+    max_list = np.empty(len(act_list))
+    for i, act in enumerate(act_list):
+        neural.run(np.append(status, act))
+        max_list[i] = neural.output[1] + neural.output[0]
+    return np.max(max_list)
+
+
+# base on the all actions, finding the Value and Advantage
+def MAX_VA_Q(status, neural, act_list) -> float:
     max_list = np.empty(len(act_list))
     for i, act in enumerate(act_list):
         neural.run(np.append(status, act))
@@ -110,7 +119,7 @@ def D2QN(exp, rl_data_dict) -> dict:
         assert rl_data_dict["qn"][0].get_shape()[-1] == 2
         if not t:
             yt = r + gamma * (
-                    VA_Q(_s, rl_data_dict["tqn"][0], rl_data_dict) - MEAN_Q(_s, rl_data_dict["tqn"][0],
+                    MAX_VA_Q(_s, rl_data_dict["tqn"][0], rl_data_dict) - MEAN_Q(_s, rl_data_dict["tqn"][0],
                                                                             rl_data_dict["act_list"]))
         else:
             yt = r
@@ -154,7 +163,7 @@ def D3QN(exp, rl_data_dict) -> dict:
         assert rl_data_dict["qn"][0].get_shape()[-1] == 2
         if not t:
             yt = r + gamma * (
-                    VA_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"])
+                    MAX_VA_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"])
                     - MEAN_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"]))
         else:
             yt = r
@@ -191,7 +200,7 @@ def SAC(exp, rl_data_dict) -> dict:
     assert rl_data_dict["SA_merge"] is True
     s, a, r, ss, t = exp
     alpha, gamma = rl_data_dict["alpha"], rl_data_dict["gamma"]
-    qn_1, qn_2, pn = rl_data_dict["qn"][0], rl_data_dict["qn"][1], rl_data_dict["pn"][0]
+    qn_1, qn_2, pn = rl_data_dict["qn"][0], rl_data_dict["qn"][1], rl_data_dict["pn"]
     tqn_1, tqn_2 = rl_data_dict["tqn"][0], rl_data_dict["tqn"][1]
     # -------------------------- State ----------------------------------------------------
     # --------------------- Select Index --------------------------------------------------
@@ -332,17 +341,14 @@ def RL_ACTION(s, epsilon, agent, act_list, SA_merge=False) -> int:
     Return:
         action(int): action from fn(s)
     """
+    if 0 < epsilon and random.uniform(0, 1) < epsilon:
+        return np.random.choice(act_list)
     if SA_merge:
-        if 0 < epsilon and random.uniform(0, 1) < epsilon:
-            return np.random.choice(act_list)
-        if agent.get_shape()[-1] == 2: # D2QN D3QN
+        if agent.get_shape()[-1] == 2:
+            return int(ARGMAX_VA_Q(s, agent, act_list))
+        elif agent.get_shape()[-1] == 1:
             return int(ARG_MAXQ(s, agent, act_list))
-        else: # SAC, DQN, DDQN
-            return int(ARG_MAXQ(s, agent, act_list))
-    else:
-        if 0 < epsilon and random.uniform(0, 1) < epsilon:
-            return np.random.choice(act_list)
-        return int(np.argmax(agent.run(s)))
+    return int(np.argmax(agent.run(s)))
 
 
 def RL_ADD_EXP(exp, replay_buffer, replay_buffer_max_sz) -> np.ndarray:
