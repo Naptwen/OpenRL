@@ -1,12 +1,21 @@
 import random
-
 import numpy as np
+from numpy import ndarray
 
 from openNeural import *
 
 
 # base on the all actions, finding the argmax Q
 def ARG_MAXQ(status, neural, act_list) -> int:
+    """
+
+    :param status:
+    :type status:np.ndarray or list
+    :param neural:
+    :type neural:openNeural
+    :param act_list:
+    :type act_list:np.ndarray or list
+    """
     argmax_list = np.empty(len(act_list))
     for i, act in enumerate(act_list):
         argmax_list[i] = neural.run(np.append(status, act))[0]
@@ -15,6 +24,15 @@ def ARG_MAXQ(status, neural, act_list) -> int:
 
 # base on the all actions, finding the argmin Q
 def ARG_MINQ(status, neural, act_list) -> int:
+    """
+
+    :param status:
+    :type status:np.ndarray or list
+    :param neural:
+    :type neural:openNeural
+    :param act_list:
+    :type act_list:np.ndarray or list
+    """
     argmin_list = np.empty(len(act_list))
     for i, act in enumerate(act_list):
         argmin_list[i] = neural.run(np.append(status, act))[0]
@@ -23,6 +41,15 @@ def ARG_MINQ(status, neural, act_list) -> int:
 
 # base on the all actions, finding the max Q
 def MAX_Q(status, neural, act_list) -> float:
+    """
+
+    :param status:
+    :type status:np.ndarray or list
+    :param neural:
+    :type neural:openNeural
+    :param act_list:
+    :type act_list:np.ndarray or list
+    """
     max_list = np.empty(len(act_list))
     for i, act in enumerate(act_list):
         max_list[i] = neural.run(np.append(status, act))[0]
@@ -31,6 +58,15 @@ def MAX_Q(status, neural, act_list) -> float:
 
 # base on the all actions, finding the mean Q
 def MEAN_Q(status, neural, act_list) -> float:
+    """
+
+    :param status:
+    :type status:np.ndarray or list
+    :param neural:
+    :type neural:openNeural
+    :param act_list:
+    :type act_list:np.ndarray or list
+    """
     mean_list = np.empty(len(act_list))
     for i, act in enumerate(act_list):
         mean_list[i] = neural.run(np.append(status, act))[0]
@@ -39,6 +75,15 @@ def MEAN_Q(status, neural, act_list) -> float:
 
 # base on the all actions, finding the Value and Advantage
 def ARGMAX_VA_Q(status, neural, act_list) -> int:
+    """
+
+    :param status:
+    :type status:np.ndarray or list
+    :param neural:
+    :type neural:openNeural
+    :param act_list:
+    :type act_list:np.ndarray or list
+    """
     max_list = np.empty(len(act_list))
     for i, act in enumerate(act_list):
         neural.run(np.append(status, act))
@@ -48,6 +93,15 @@ def ARGMAX_VA_Q(status, neural, act_list) -> int:
 
 # base on the all actions, finding the Value and Advantage
 def MAX_VA_Q(status, neural, act_list) -> float:
+    """
+
+    :param status:
+    :type status:np.ndarray or list
+    :param neural:
+    :type neural:openNeural
+    :param act_list:
+    :type act_list:np.ndarray or list
+    """
     max_list = np.empty(len(act_list))
     for i, act in enumerate(act_list):
         neural.run(np.append(status, act))
@@ -56,7 +110,16 @@ def MAX_VA_Q(status, neural, act_list) -> float:
 
 
 # base on the all actions, finding all Q
-def ALL_Q(status, neural, act_list) -> np.ndarray:
+def ALL_Q(status, neural, act_list) -> np.ndarray or list:
+    """
+
+    :param status:
+    :type status:np.ndarray or list
+    :param neural:
+    :type neural:openNeural
+    :param act_list:
+    :type act_list:np.ndarray or list
+    """
     action_candidates = np.empty(len(act_list))
     for i, act in enumerate(act_list):
         neural.run(np.append(status, act))
@@ -64,10 +127,15 @@ def ALL_Q(status, neural, act_list) -> np.ndarray:
     return action_candidates
 
 
-# ------------------MODEL--------------------------
+# ------------ epsion greedy --------------------
 
-# call by object reference
-def E_G_DECAY_BY_REWARD(rl_data_dict):
+
+def E_G_DECAY_BY_REWARD(rl_data_dict) -> None:
+    """
+
+    :param rl_data_dict:
+    :type rl_data_dict: dict
+    """
     assert "total_reward" in rl_data_dict
     assert "epsilon" in rl_data_dict
     assert "epsilon_decay_rate" in rl_data_dict
@@ -80,13 +148,27 @@ def E_G_DECAY_BY_REWARD(rl_data_dict):
         rl_data_dict["epsilon"] = max(rl_data_dict["epsilon"], rl_data_dict["epsilon_min"])
 
 
-def E_G_DECAY_BY_EPISODE(rl_data_dict):
+def E_G_DECAY_BY_EPISODE(rl_data_dict) -> None:
+    """
+
+    :param rl_data_dict:
+    :type rl_data_dict: dict
+    """
     assert "max_epoch" in rl_data_dict
     assert "epsilon" in rl_data_dict
-    rl_data_dict["epsilon"] = 1 - rl_data_dict["epoch"]/rl_data_dict["max_epoch"]
+    rl_data_dict["epsilon"] = 1 - rl_data_dict["epoch"] / rl_data_dict["max_epoch"]
 
+
+# --------------- rl_model ------------------------------------------
 
 def DQN(exp, rl_data_dict) -> dict:
+    """
+
+    :param exp:
+    :type exp: np.ndarray
+    :param rl_data_dict:
+    :type rl_data_dict: dict
+    """
     assert "gamma" in rl_data_dict
     assert "tqn" in rl_data_dict
     assert "qn" in rl_data_dict
@@ -117,10 +199,17 @@ def DQN(exp, rl_data_dict) -> dict:
     Y = Q.copy()
     Q[0][a] = q
     Y[0][a] = yt
-    return {"Q": Q, "Y": Y,  "E": 0.5 * (yt - q)}
+    return {"Q": Q, "Y": Y, "E": 0.5 * (yt - q)}
 
 
 def DDQN(exp, rl_data_dict) -> dict:
+    """
+
+    :param exp:
+    :type exp: np.ndarray
+    :param rl_data_dict:
+    :type rl_data_dict: dict
+    """
     assert "gamma" in rl_data_dict
     assert "tqn" in rl_data_dict
     assert "qn" in rl_data_dict
@@ -155,6 +244,13 @@ def DDQN(exp, rl_data_dict) -> dict:
 
 
 def D2QN(exp, rl_data_dict) -> dict:
+    """
+
+    :param exp:
+    :type exp: np.ndarray
+    :param rl_data_dict:
+    :type rl_data_dict: dict
+    """
     assert "gamma" in rl_data_dict
     assert "tqn" in rl_data_dict
     assert "qn" in rl_data_dict
@@ -200,17 +296,12 @@ def D2QN(exp, rl_data_dict) -> dict:
 
 def D3QN(exp, rl_data_dict) -> dict:
     """
-     "Y" - r + gamma * ((V:Q'(s)) + (A:Q'(s))[argmax(Q(s')] + μ(A:Q'(s)))\n
-     "Q" - ((V:Q(s)) + (A:Q(s))[a] + μ(A:Q(s)))\n
-     "E" - 1/2(Y-Q)\n
 
-     Args:
-         exp(np.ndarray): the single array [s,a,r,s',t]
-         rl_data_dict(dict): dictionary for reinforcement learning data
-
-     Return:
-         dictionary "Y, "Q", "E"
-     """
+    :param exp:
+    :type exp: np.ndarray
+    :param rl_data_dict:
+    :type rl_data_dict: dict
+    """
     assert "gamma" in rl_data_dict
     assert "tqn" in rl_data_dict
     assert "qn" in rl_data_dict
@@ -257,11 +348,12 @@ def D3QN(exp, rl_data_dict) -> dict:
 
 def SAC(exp, rl_data_dict) -> dict:
     """
-        Args:
-            QN(list): [qn, qn_2, pn]
-            TQN(list): [tqn, tqn_2]
-            alpha_gamma(list): [alpha, gamma]
-        """
+
+    :param exp:
+    :type exp: np.ndarray
+    :param rl_data_dict:
+    :type rl_data_dict:dict
+    """
     assert "gamma" in rl_data_dict
     assert "alpha" in rl_data_dict
     assert "tqn" in rl_data_dict
@@ -304,8 +396,8 @@ def SAC(exp, rl_data_dict) -> dict:
     for i, qn in enumerate(rl_data_dict["qn"]):
         Q[i] = np.zeros(qn.get_shape()[-1])
     Y = Q.copy()
-    Q[I+1] = q
-    Y[I+1] = y_ss
+    Q[I + 1] = q
+    Y[I + 1] = y_ss
     Q[0][a] = p_l
     Y[0][a] = q_s_rp
     return {"Q": Q, "Y": Y, "E": shannon_entropy(p_l)}
@@ -315,18 +407,25 @@ def SAC(exp, rl_data_dict) -> dict:
 
 
 # ordering
-def REPLAY_DIRECT(replay_buffer, rl_data_dict):
-    return np.arange(len(replay_buffer))
+def REPLAY_DIRECT(replay_buffer, rl_data_dict) -> int:
+    """
+
+    :param replay_buffer:
+    :type replay_buffer: np.ndarray
+    :param rl_data_dict:
+    :type rl_data_dict: dict
+    """
+    return int(np.arange(len(replay_buffer)))
 
 
 # basic shuffle random
-def REPLAY_SHUFFLE(replay_buffer, rl_data_dict):
+def REPLAY_SHUFFLE(replay_buffer, rl_data_dict) -> np.ndarray:
     """
-    It substitutes "index_list" of rl_data_dict
 
-    Args:
-        replay_buffer(np.ndarray): replay buffer array
-        rl_data_dict(dict): dictionary for reinforcement learning data
+    :param replay_buffer:
+    :type replay_buffer: np.ndarray
+    :param rl_data_dict:
+    :type rl_data_dict: dict
     """
     assert len(replay_buffer) > 0, "Buffer size must be greater than 0"
     index_list = np.arange(len(replay_buffer))
@@ -337,14 +436,11 @@ def REPLAY_SHUFFLE(replay_buffer, rl_data_dict):
 # prioritization
 def REPLAY_PRIORITIZATION(replay_buffer, rl_data_dict) -> np.ndarray:
     """
-    This is reordering the replay buffer index through
-    the values with the largest difference are listed with the highest probability with annealing bias
-    Args:
-        replay_buffer(np.ndarray): replay buffer array
-        rl_data_dict(dict): dictionary for reinforcement learning data
 
-    Return:
-        re-ordered index array
+    :param replay_buffer:
+    :type replay_buffer: np.ndarray
+    :param rl_data_dict:
+    :type rl_data_dict: dict
     """
     assert len(replay_buffer) > 0, "Buffer size must be greater than 0"
     assert "rl_model" in rl_data_dict, "Reinforcement Model is required"
@@ -361,42 +457,38 @@ def REPLAY_PRIORITIZATION(replay_buffer, rl_data_dict) -> np.ndarray:
 
 
 # hindsight_replay
-def REPLAY_HINDSIGHT(replay_buffer, rl_data_dict):
+def REPLAY_HINDSIGHT(replay_buffer, rl_data_dict) -> None:
     """
-    This function set the new goal by the last replay buffer
-    After that re-calculating following trajectory again base on reward policy
-    Then add those all trajectory into the replay buffer
-    (if the size is over the oldest memory is deleted)
 
-    Args:
-        replay_buffer(np.ndarray): replay buffer array (object reference)
-        rl_data_dict(dict): dictionary for reinforcement learning data
+    :param replay_buffer:
+    :type replay_buffer: np.ndarray
+    :param rl_data_dict:
+    :type rl_data_dict: dict
     """
     __last = replay_buffer[-1]  # get last
     __goal = __last[3]  # set new goal
     for trajectory in replay_buffer:
         __s, __a, __r, __ss, __t = trajectory  # the replay buffer
         __r, __t = rl_data_dict["reward_fn"](__s, __goal)  # change reward
-        replay_buffer = RL_ADD_EXP(exp=np.array([__s, __a, __r, __ss, __t], dtype=object),
+        replay_buffer = RL_ADD_EXP(exp=np.ndarray([__s, __a, __r, __ss, __t]),
                                    replay_buffer=replay_buffer,
                                    replay_buffer_max_sz=rl_data_dict["replay_buffer_max_sz"])
 
 
 # slice the replay buffer by replay size [return call by object reference]
-def RL_TRG_UPDATE(t_update_step, rl_data_dict):
+def RL_TRG_UPDATE(t_update_step, rl_data_dict) -> None:
     """
-    Update the target networks in rl_data_dict by rl_data_dict["t_update_interval"]
 
-    Args:
-        t_update_step(int): iteration for target Q value update
-        rl_data_dict(dict): dictionary for reinforcement learning data
+    :param t_update_step:
+    :type t_update_step:int
+    :param rl_data_dict:
+    :type rl_data_dict: dict
     """
     assert "tqn" in rl_data_dict
     assert "qn" in rl_data_dict
     assert "t_update_rate" in rl_data_dict
     assert "t_update_interval" in rl_data_dict
     assert len(rl_data_dict["tqn"]) == len(rl_data_dict["qn"])
-
     if t_update_step % rl_data_dict["t_update_interval"] == 0:
         for qn, tqn in zip(rl_data_dict["qn"], rl_data_dict["tqn"]):
             if rl_data_dict["t_update_rate"] != 1:
@@ -411,8 +503,16 @@ def RL_TRG_UPDATE(t_update_step, rl_data_dict):
 
 # ------------------PROCESS--------------------------
 
-def RL_E_G_ACTION(s, rl_data_dict) -> int:
-    assert rl_data_dict["rl_model"] != SAC, "Epsilon greed is not working for on pollicy"
+def RL_ACTION(s, rl_data_dict) -> int:
+    """
+
+    :param s:
+    :type s: np.ndarray or list
+    :param rl_data_dict:
+    :type rl_data_dict: dict
+    """
+    assert "agent" in rl_data_dict, "agent is required"
+    assert "act_list" in rl_data_dict, "act_list is required"
     agent = rl_data_dict["agent"]
     act_list = rl_data_dict["act_list"]
     if 0 < rl_data_dict["epsilon"] and random.uniform(0, 1) < rl_data_dict["epsilon"]:
@@ -420,7 +520,7 @@ def RL_E_G_ACTION(s, rl_data_dict) -> int:
     else:
         if rl_data_dict["SA_merge"]:
             assert rl_data_dict["agent"].get_shape()[0] == len(s) + 1, "Q(s,a) input size must |s| + 1"
-            if rl_data_dict["rl_model"] is D2QN or rl_data_dict["rl_model"] is D3QN:
+            if rl_data_dict["rl_model"] is D2QN or D3QN:
                 assert rl_data_dict["agent"].get_shape()[-1] == 2, "Value-Advantage output size must 2 "
                 return ARGMAX_VA_Q(s, agent, act_list)
             return ARG_MAXQ(s, agent, act_list)
@@ -428,25 +528,15 @@ def RL_E_G_ACTION(s, rl_data_dict) -> int:
     return int(np.argmax(agent.run(s)))
 
 
-def RL_DIRECT_ACTION(s, rl_data_dict) -> int:
-    agent = rl_data_dict["agent"]
-    act_list = rl_data_dict["act_list"]
-    if rl_data_dict["SA_merge"]:
-        assert rl_data_dict["agent"].get_shape()[0] == len(s) + 1, "Q(s,a) input size must |s| + 1"
-        if rl_data_dict["rl_model"] is D2QN or D3QN:
-            assert rl_data_dict["agent"].get_shape()[-1] == 2, "Value-Advantage output size must 2 "
-            return ARGMAX_VA_Q(s, agent, act_list)
-        return ARG_MAXQ(s, agent, act_list)
-    assert rl_data_dict["agent"].get_shape()[0] == len(s), "Q(s) input size must |s|"
-    return int(np.argmax(agent.run(s)))
-
-
 def RL_ADD_EXP(exp, replay_buffer, replay_buffer_max_sz) -> np.ndarray:
     """
-    Args:
-        exp(np.ndarray(5, dtype = object)): ['state', 'action', 'reward', 'future state', 'termination']
-        replay_buffer(np.ndarray) : replay_buffer
-        replay_buffer_max_sz(int) : replay_buffer maximum size
+
+    :param exp:
+    :type exp: np.ndarray or list
+    :param replay_buffer:
+    :type replay_buffer: np.ndarray or List[list]
+    :param replay_buffer_max_sz:
+    :type replay_buffer_max_sz: int
     """
     if len(replay_buffer) + 1 > replay_buffer_max_sz:
         replay_buffer = np.delete(replay_buffer, 0, axis=0)
@@ -456,13 +546,20 @@ def RL_ADD_EXP(exp, replay_buffer, replay_buffer_max_sz) -> np.ndarray:
     return replay_buffer
 
 
-def RL_LEARN(replay_buffer, rl_data_dict):
+def RL_LEARN(replay_buffer, rl_data_dict) -> None:
+    """
+
+    :param replay_buffer:
+    :type replay_buffer: np.ndarray or List[list]
+    :param rl_data_dict:
+    :type rl_data_dict: dict
+    """
     for trial in range(rl_data_dict["replay_trial"]):
         # ---------mini batch split-----------
         mini_batch = \
             replay_buffer[rl_data_dict["replay_sz"] * trial: rl_data_dict["replay_sz"] * (trial + 1)]
         # ---------mini batch replay----------
-        Q = np.empty(len(rl_data_dict["qn"]), dtype = list)
+        Q = np.empty(len(rl_data_dict["qn"]), dtype=list)
         for i, qn in enumerate(rl_data_dict["qn"]):
             Q[i] = np.zeros(qn.get_shape()[-1])
         Y = Q.copy()
@@ -478,12 +575,15 @@ def RL_LEARN(replay_buffer, rl_data_dict):
             break
 
 
-def RL_REPLAY(replay_buffer, update_step, rl_data_dict):
+def RL_REPLAY(replay_buffer, update_step, rl_data_dict) -> None:
     """
-    Args:
-        replay_buffer(np.ndarray): replay buffer
-        update_step(int): update step
-        rl_data_dict(dict): infomration dictionary
+
+    :param replay_buffer:
+    :type replay_buffer: np.ndarray or list
+    :param update_step:
+    :type update_step: int
+    :param rl_data_dict:
+    :type rl_data_dict: dict
     """
     assert "replay_buffer_max_sz" in rl_data_dict
     assert "replay_sz" in rl_data_dict

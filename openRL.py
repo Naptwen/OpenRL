@@ -1,5 +1,3 @@
-import numpy as np
-
 from openRL_method import *
 import os
 
@@ -10,12 +8,6 @@ import os
 # https://sites.google.com/view/gesope/projects/a-i/neural-network-algorithm-explanation?authuser=0
 
 class openRL:
-    """
-    This is DQN class.
-    After declare, following below process\n
-    RL_DQN_SETTING : Make the neural network
-    """
-
     reward_time_stamp = np.array(0)
     RL_DATA = {'action_fn': object,
                'rl_model': object,
@@ -50,14 +42,49 @@ class openRL:
         pass
 
     def RL_SETTING(self,
-
                    rl_model, enviro_fn, reward_fn, act_list,
                    max_epoch, max_iter,
                    replay_buffer_max_sz, replay_sz, replay_trial, replay_opt,
                    gamma, alpha, agent_update_interval, t_update_interval, t_update_rate,
-                   SA_merge, epsilon_decay_fn = None, action_fn = RL_DIRECT_ACTION):
+                   sa_merge, epsilon_decay_fn=None) -> None:
+        """
+
+        :param rl_model:
+        :type rl_model: function
+        :param enviro_fn:
+        :type enviro_fn: function
+        :param reward_fn:
+        :type reward_fn: function
+        :param act_list:
+        :type act_list: list
+        :param max_epoch:
+        :type max_epoch: int
+        :param max_iter:
+        :type max_iter: int
+        :param replay_buffer_max_sz:
+        :type replay_buffer_max_sz: int
+        :param replay_sz:
+        :type replay_sz: int
+        :param replay_trial:
+        :type replay_trial: int
+        :param replay_opt:
+        :type replay_opt: function
+        :param gamma:
+        :type gamma: float
+        :param alpha:
+        :type alpha: float
+        :param agent_update_interval:
+        :type agent_update_interval: int
+        :param t_update_interval:
+        :type t_update_interval: int
+        :param t_update_rate:
+        :type t_update_rate: float
+        :param sa_merge:
+        :type sa_merge: bool
+        :param epsilon_decay_fn:
+        :type epsilon_decay_fn: function
+        """
         # -------RL setting-----------
-        self.RL_DATA["action_fn"] = action_fn
         self.RL_DATA["rl_model"] = rl_model
         self.RL_DATA["enviro_fn"] = enviro_fn
         self.RL_DATA["reward_fn"] = reward_fn
@@ -79,16 +106,32 @@ class openRL:
         self.RL_DATA["tqn"] = np.empty(0)
         self.RL_DATA["epsilon"] = 0
         self.RL_DATA["epsilon_decay_fn"] = epsilon_decay_fn
-        self.RL_DATA["SA_merge"] = SA_merge
+        self.RL_DATA["SA_merge"] = sa_merge
 
     def CREATE_Q(self,
                  learning_rate, dropout_rate, loss_fun, learn_optima,
                  q_layer=np.array([4, 8, 12, 3]),
-                 q_activation_fn=
-                 np.array([linear_x, leakReLU, leakReLU, linear_x], dtype=object),
-                 q_normalization=
-                 np.array([linear_x, znormal, znormal, linear_x], dtype=object),
-                 ):
+                 q_activation_fn=np.array([linear_x, leakReLU, leakReLU, linear_x], dtype=object),
+                 q_normalization=np.array([linear_x, znormal, znormal, linear_x], dtype=object),
+                 ) -> None:
+        """
+
+        :param learning_rate:
+        :type learning_rate: float
+        :param dropout_rate:
+        :type dropout_rate: float
+        :param loss_fun:
+        :type loss_fun: function
+        :param learn_optima:
+        :type learn_optima: str
+        :param q_layer:
+        :type q_layer: list or np.ndarray
+        :param q_activation_fn:
+        :type q_activation_fn: list or np.ndarray
+        :param q_normalization: list or np.ndarray
+        :type q_normalization: list or np.ndarray
+        """
+
         # layer setting
         q_network = openNeural()
         for i, L in enumerate(q_layer):
@@ -113,6 +156,21 @@ class openRL:
                           decay_threshold_rate=0.8,
                           decay_minimum=0.1,
                           decay_fn=E_G_DECAY_BY_REWARD):
+        """
+
+        :param initial_epsilon:
+        :type initial_epsilon: float
+        :param epsilon_decay_rate:
+        :type epsilon_decay_rate: float
+        :param decay_threshold:
+        :type decay_threshold: float
+        :param decay_threshold_rate:
+        :type decay_threshold_rate: float
+        :param decay_minimum:
+        :type decay_minimum: float
+        :param decay_fn:
+        :type decay_fn: function
+        """
         self.RL_DATA["epsilon"] = initial_epsilon
         self.RL_DATA["epsilon_min"] = decay_minimum
         if decay_fn is None:
@@ -124,6 +182,13 @@ class openRL:
         self.RL_DATA["epsilon_decay_threshold_rate"] = decay_threshold_rate
 
     def RL_RUN(self, initial_state, terminate_reward_condition=None):
+        """
+
+        :param initial_state:
+        :type initial_state: list or np.ndarray
+        :param terminate_reward_condition:
+        :type terminate_reward_condition: float
+        """
         # ----------playing initialization----------
         __update = 0
         replay_buffer = np.empty((0, 5))
@@ -138,7 +203,7 @@ class openRL:
                 update_step += 1
                 # ----------Get exp from action----------
                 r, t = self.RL_DATA["reward_fn"](s)  # get [r, t] (reward and terminated state)
-                a = self.RL_DATA["action_fn"](s=s, rl_data_dict=self.RL_DATA)  # get a (action)
+                a = RL_ACTION(s=s, rl_data_dict=self.RL_DATA)  # get a (action)
                 ss = self.RL_DATA["enviro_fn"](s, a)  # get ss (new state)
                 exp = np.array([s, a, r, ss, t], dtype=object)
                 # ----------Add experience buffer----------
@@ -168,11 +233,11 @@ class openRL:
             if terminate_reward_condition is not None and self.RL_DATA["total_reward"] >= terminate_reward_condition:
                 break
 
-    def RL_SAVE(self, file_name) -> None:
+    def RL_SAVE(self, file_name: str) -> None:
         os.makedirs("save", exist_ok=True)
         setting_file = np.array([
             self.RL_DATA['action_fn'],
-            self.RL_DATA[ 'rl_model'],
+            self.RL_DATA['rl_model'],
             self.RL_DATA['enviro_fn'],
             self.RL_DATA['reward_fn'],
             self.RL_DATA['act_list'],
@@ -204,35 +269,35 @@ class openRL:
         np.save("save/" + file_name + "_info", setting_file, allow_pickle=True)
         print("SAVE FINISH")
 
-    def RL_LOAD(self, file_name) -> None:
+    def RL_LOAD(self, file_name: str) -> None:
         [self.RL_DATA['action_fn'],
-            self.RL_DATA[ 'rl_model'],
-            self.RL_DATA['enviro_fn'],
-            self.RL_DATA['reward_fn'],
-            self.RL_DATA['act_list'],
-            self.RL_DATA['max_epoch'],
-            self.RL_DATA['max_iter'],
-            self.RL_DATA['replay_buffer_max_sz'],
-            self.RL_DATA['replay_sz'],
-            self.RL_DATA['replay_trial'],
-            self.RL_DATA['replay_opt'],
-            self.RL_DATA['gamma'],
-            self.RL_DATA['alpha'],
-            self.RL_DATA['agent_update_interval'],
-            self.RL_DATA['t_update_interval'],
-            self.RL_DATA['t_update_rate'],
-            self.RL_DATA['qn'],
-            self.RL_DATA['tqn'],
-            self.RL_DATA['agent'],
-            self.RL_DATA['SA_merge'],
-            self.RL_DATA['epsilon'],
-            self.RL_DATA['epsilon_min'],
-            self.RL_DATA['epsilon_decay_fn'],
-            self.RL_DATA['epsilon_decay_rate'],
-            self.RL_DATA['epsilon_decay_threshold'],
-            self.RL_DATA['epsilon_decay_threshold_rate'],
-            self.RL_DATA['total_reward'],
-            self.RL_DATA['epoch'],
-            self.RL_DATA["qn"],
-            self.RL_DATA["tqn"]] = np.load("save/" + file_name + "_info.npy", allow_pickle=True)
+         self.RL_DATA['rl_model'],
+         self.RL_DATA['enviro_fn'],
+         self.RL_DATA['reward_fn'],
+         self.RL_DATA['act_list'],
+         self.RL_DATA['max_epoch'],
+         self.RL_DATA['max_iter'],
+         self.RL_DATA['replay_buffer_max_sz'],
+         self.RL_DATA['replay_sz'],
+         self.RL_DATA['replay_trial'],
+         self.RL_DATA['replay_opt'],
+         self.RL_DATA['gamma'],
+         self.RL_DATA['alpha'],
+         self.RL_DATA['agent_update_interval'],
+         self.RL_DATA['t_update_interval'],
+         self.RL_DATA['t_update_rate'],
+         self.RL_DATA['qn'],
+         self.RL_DATA['tqn'],
+         self.RL_DATA['agent'],
+         self.RL_DATA['SA_merge'],
+         self.RL_DATA['epsilon'],
+         self.RL_DATA['epsilon_min'],
+         self.RL_DATA['epsilon_decay_fn'],
+         self.RL_DATA['epsilon_decay_rate'],
+         self.RL_DATA['epsilon_decay_threshold'],
+         self.RL_DATA['epsilon_decay_threshold_rate'],
+         self.RL_DATA['total_reward'],
+         self.RL_DATA['epoch'],
+         self.RL_DATA["qn"],
+         self.RL_DATA["tqn"]] = np.load("save/" + file_name + "_info.npy", allow_pickle=True)
         print("LOAD FINISH")
