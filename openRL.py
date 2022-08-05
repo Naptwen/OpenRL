@@ -113,16 +113,16 @@ class openRL:
         else:
             self.RL_DATA["agent"] = self.RL_DATA["qn"][0]  # call by object reference
             self.RL_DATA["rl_learn"] = RL_OFF_POLICY_LEARN
-        if self.RL_DATA["rl_model"] is D2QN or D3QN:
-            if self.RL_DATA["qn"][0].get_shape()[-1] == 2:
-                self.RL_DATA["SA_merge"] = True
+            if self.RL_DATA["rl_model"] is D2QN or D3QN:
+                if self.RL_DATA["qn"][0].get_shape()[-1] == 2:
+                    self.RL_DATA["SA_merge"] = True
+                else:
+                    self.RL_DATA["SA_merge"] = False
             else:
-                self.RL_DATA["SA_merge"] = False
-        else:
-            if self.RL_DATA["agent"].get_shape()[-1] == 1:
-                self.RL_DATA["SA_merge"] = True
-            else:
-                self.RL_DATA["SA_merge"] = False
+                if self.RL_DATA["agent"].get_shape()[-1] == 1:
+                    self.RL_DATA["SA_merge"] = True
+                else:
+                    self.RL_DATA["SA_merge"] = False
 
     def RL_RUN(self, initial_state, terminate_reward_condition=None, ep_decay_rate=0.9, show=True):
         """
