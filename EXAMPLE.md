@@ -7,8 +7,8 @@ if __name__ == '__main__':
 # this is one iteration if you want to epoch do while and check the error for data
     B = openNeural()
     B.add_layer(4)
-    B.add_layer(10, ReLU, znormal)
-    B.add_layer(4, parametricReLU(a = 0.03), znormal)
+    B.add_layer(10, ReLU, linear_x)
+    B.add_layer(4, ReLU, linear_x)
     B.add_layer(4)
     B.generate_weight()
     B.xavier_initialization()
@@ -150,18 +150,17 @@ def enviro(s, a) -> np.ndarray:
 
 
 class DQN_TEST():
+
+
     def start_Q_learning(self):
-        random_seed = int(time.time())
-        np.random.seed(seed=random_seed)
-        random.seed(random_seed)
         self.neural = openRL()
         self.neural.RL_SETTING(
             action_fn=RL_E_G_ACTION,
-            rl_model=D3QN,
+            rl_model=DDQN,
             enviro_fn=enviro,
             reward_fn=reward_policy,
             act_list=[0, 1, 2],
-            max_epoch=500,
+            max_epoch=5000,
             max_iter=300,
             replay_buffer_max_sz=64,
             replay_sz=4,
@@ -171,20 +170,20 @@ class DQN_TEST():
             alpha=0.001,
             agent_update_interval=5,
             t_update_interval=10,
-            t_update_rate=0.01)
+            t_update_rate=0.01,
+            epsilon_decay_fn = E_G_DECAY_BY_REWARD,
+            SA_merge = False)
         self.neural.CREATE_Q(
             learning_rate=0.001,
             dropout_rate=0.0,
             loss_fun=HUBER,
             learn_optima='NADAM',
-            q_layer=np.array([5, 8, 12, 2]),
-            q_activation_fn=
-                np.array([linear_x, leakReLU, leakReLU, linear_x], dtype=object),
-            q_normalization=
-                np.array([linear_x, znormal, znormal, linear_x], dtype=object))
-        self.neural.RL_Q_SETTING(True)
+            q_layer=np.array([4, 8, 12, 3]),
+            q_activation_fn=np.array([linear_x, leakReLU, leakReLU, linear_x], dtype=object),
+            q_normalization=np.array([linear_x, znormal, znormal, znormal], dtype=object))
         self.neural.E_G_DECAY_SETTING()
-        self.neural.RL_RUN(initial_state=np.array([0, 4, random.randint(0, 3), 0]), terminate_reward_condition=20)
+        self.neural.RL_RUN(initial_state=np.array([0, 4, random.randint(0, 3), 0]),
+                           terminate_reward_condition=20)
         self.static_function()
 
     def static_function(self):
@@ -295,4 +294,5 @@ if __name__ == '__main__':
     print('take time', time.time() - start)
     A.neural.RL_SAVE('Test__')
     B = PY_GAME()
+
 ```
