@@ -370,5 +370,4 @@ if __name__ == '__main__':
     print('take time', time.time() - start)
     A.neural.RL_SAVE('Test__')
     B = PY_GAME()
-
 ```
