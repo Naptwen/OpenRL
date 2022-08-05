@@ -27,65 +27,7 @@ How Apply it?\
 Example for Basic strucutre of LSTM\
 The structure is refernced from https://en.wikipedia.org/wiki/Long_short-term_memory#:~:text=A%20common%20LSTM%20unit%20is%20composed%20of%20a,of%20information%20into%20and%20out%20of%20the%20cell.
 ```python
-from OpenNeural import *
-class LSTM:
-   def __init__(self, input_sz, hidden_sz):
-        self.forget_gate = openNeural()
-        self.forget_gate.add_layer(input_sz)
-        self.forget_gate.add_layer(hidden_sz, ReLU, sigmoid)
-        self.forget_gate.add_layer(1)
-        self.forget_gate.generate_weight()
-        self.forget_gate.he_initialization()
-        self.forget_gate.opt_reset()
-        self.forget_gate.learning_set()
-
-        self.input_gate = openNeural()
-        self.input_gate.add_layer(input_sz)
-        self.input_gate.add_layer(hidden_sz, ReLU, sigmoid)
-        self.input_gate.add_layer(1)
-        self.input_gate.generate_weight()
-        self.input_gate.he_initialization()
-        self.input_gate.opt_reset()
-        self.input_gate.learning_set()
-
-        self.tanh_gate = openNeural()
-        self.tanh_gate.add_layer(input_sz)
-        self.tanh_gate.add_layer(hidden_sz, ReLU, arctan)
-        self.tanh_gate.add_layer(1)
-        self.tanh_gate.generate_weight()
-        self.tanh_gate.he_initialization()
-        self.tanh_gate.opt_reset()
-        self.tanh_gate.learning_set()
-
-        self.out_gate = openNeural()
-        self.out_gate.add_layer(input_sz)
-        self.out_gate.add_layer(hidden_sz, ReLU, sigmoid)
-        self.out_gate.add_layer(1)
-        self.out_gate.generate_weight()
-        self.out_gate.he_initialization()
-        self.out_gate.opt_reset()
-        self.out_gate.learning_set()
-
-
-    def run_gate(self, input_val, past_c, past_h):
-        assert len(input_val) + len(past_h) <= len(self.forget_gate.get_layer()[0])
-        if past_h is None:
-            input_list = np.zeros(self.forget_gate.get_layer()[0])
-            input_list[0:len(input_val)] = input_val
-        else:
-            input_list = np.apend(input_val, past_h)
-        self.forget_gate.run(input_list)
-        self.input_gate.run(input_list)
-        self.tanh_gate.run(input_list)
-        self.out_gate.run(input_list)
-        C = self.forget_gate.output * past_c.output \
-            + self.input_gate.output * self.tanh_gate.output
-        h = self.out_gate.output * arctan(arctan(C))
-        return C, h
-```
-ReinForcement Exmaple
-```py
-import time
+fimport time
 from matplotlib import pyplot as plt
 import pygame
 from openRL import *
@@ -151,12 +93,11 @@ def enviro(s, a) -> np.ndarray:
 
 class DQN_TEST():
 
-
     def start_Q_learning(self):
         self.neural = openRL()
         self.neural.RL_SETTING(
             action_fn=RL_E_G_ACTION,
-            rl_model=DDQN,
+            rl_model=D3QN,
             enviro_fn=enviro,
             reward_fn=reward_policy,
             act_list=[0, 1, 2],
@@ -172,13 +113,13 @@ class DQN_TEST():
             t_update_interval=10,
             t_update_rate=0.01,
             epsilon_decay_fn = E_G_DECAY_BY_REWARD,
-            SA_merge = False)
+            SA_merge = True)
         self.neural.CREATE_Q(
             learning_rate=0.001,
             dropout_rate=0.0,
             loss_fun=HUBER,
             learn_optima='NADAM',
-            q_layer=np.array([4, 8, 12, 3]),
+            q_layer=np.array([5, 8, 12, 2]),
             q_activation_fn=np.array([linear_x, leakReLU, leakReLU, linear_x], dtype=object),
             q_normalization=np.array([linear_x, znormal, znormal, znormal], dtype=object))
         self.neural.E_G_DECAY_SETTING()
@@ -294,5 +235,6 @@ if __name__ == '__main__':
     print('take time', time.time() - start)
     A.neural.RL_SAVE('Test__')
     B = PY_GAME()
+
 
 ```
