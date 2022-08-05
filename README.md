@@ -8,6 +8,8 @@ Open_pyAI v2.2.1
  - New : merge RL_ACTION functino
  - Working : SAC policy gradient update and alpha automatically function with guassian distribution algorithm
 
+**_NOTE_** there can be parallel algorithm in Q(S,A), neural network, mini-batch, prioritization replay buffer, A3C -- To sum up: there are several technics for applying parellizing; in the calculation algorithm of the matrix, finding the Q value by the state with all actions, reinforcement buffer run algorithm and gradient calculation for Y value and Q value, and buffer seperating then merging. 
+
 Open_pyAI v2.2.1
  - Edit: changed the algorithm structure for be more general
  - Fix: some reinforcement algorithms fix
