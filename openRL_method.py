@@ -91,9 +91,12 @@ def DQN(exp, rl_data_dict) -> dict:
     assert "tqn" in rl_data_dict
     assert "qn" in rl_data_dict
     assert "SA_merge" in rl_data_dict
+    assert len(rl_data_dict["qn"]) == 1
+
     gamma = rl_data_dict["gamma"]
     s, a, r, _s, t = exp
     if rl_data_dict["SA_merge"]:
+        assert rl_data_dict["qn"][0].get_shape()[-1] == 1
         if not t:
             yt = r + gamma * MAX_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"])
         else:
@@ -101,6 +104,7 @@ def DQN(exp, rl_data_dict) -> dict:
         q = rl_data_dict["qn"][0].run(np.append(s, a))
         a = 0
     else:
+        assert rl_data_dict["qn"][0].get_shape()[0] == len(s)
         if not t:
             yt = r + gamma * max(rl_data_dict["tqn"][0].run(_s))
         else:
@@ -121,6 +125,8 @@ def DDQN(exp, rl_data_dict) -> dict:
     assert "tqn" in rl_data_dict
     assert "qn" in rl_data_dict
     assert "SA_merge" in rl_data_dict
+    assert len(rl_data_dict["qn"]) == 1
+
     gamma = rl_data_dict["gamma"]
     s, a, r, _s, t = exp
     if rl_data_dict["SA_merge"]:
@@ -132,6 +138,7 @@ def DDQN(exp, rl_data_dict) -> dict:
         q = rl_data_dict["qn"][0].run(np.append(s, a))
         a = 0
     else:
+        assert rl_data_dict["qn"][0].get_shape()[0] == len(s)
         if not t:
             yt = r + gamma * rl_data_dict["tqn"][0].run(_s)[np.argmax(rl_data_dict["qn"][0].run(_s))]
         else:
@@ -152,6 +159,8 @@ def D2QN(exp, rl_data_dict) -> dict:
     assert "tqn" in rl_data_dict
     assert "qn" in rl_data_dict
     assert "SA_merge" in rl_data_dict
+    assert len(rl_data_dict["qn"]) == 1
+
     gamma = rl_data_dict["gamma"]
     s, a, r, _s, t = exp
     if rl_data_dict["SA_merge"]:
@@ -166,6 +175,7 @@ def D2QN(exp, rl_data_dict) -> dict:
         q = VA - MEAN_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"])
         a = 0
     else:
+        assert rl_data_dict["qn"][0].get_shape()[0] == len(s) + 1
         if not t:
             rl_data_dict["tqn"][0].run(_s)
             yt = r + gamma * (rl_data_dict["tqn"][0].output[-1]  # V
@@ -204,6 +214,8 @@ def D3QN(exp, rl_data_dict) -> dict:
     assert "tqn" in rl_data_dict
     assert "qn" in rl_data_dict
     assert "SA_merge" in rl_data_dict
+    assert len(rl_data_dict["qn"]) == 1
+
     gamma = rl_data_dict["gamma"]
     s, a, r, _s, t = exp
     if rl_data_dict["SA_merge"]:
@@ -218,6 +230,7 @@ def D3QN(exp, rl_data_dict) -> dict:
         q = VA - MEAN_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"])
         a = 0
     else:
+        assert rl_data_dict["qn"][0].get_shape()[0] == len(s) + 1
         if not t:
             rl_data_dict["tqn"][0].run(_s)
             yt = r + gamma * (rl_data_dict["tqn"][0].output[-1]  # V
@@ -251,16 +264,16 @@ def SAC(exp, rl_data_dict) -> dict:
     assert "tqn" in rl_data_dict
     assert "qn" in rl_data_dict
     assert "SA_merge" in rl_data_dict
-    assert len(rl_data_dict["tqn"]) == len(rl_data_dict["qn"])
-    assert rl_data_dict["SA_merge"] is True
+    assert len(rl_data_dict["qn"]) == 3
+
     s, a, r, ss, t = exp
     alpha, gamma = rl_data_dict["alpha"], rl_data_dict["gamma"]
     pn, qn_1, qn_2 = rl_data_dict["qn"][0], rl_data_dict["qn"][1], rl_data_dict["qn"][2]
-    tqn_1, tqn_2 = rl_data_dict["tqn"][0], rl_data_dict["tqn"][1]
+    tqn_1, tqn_2 = rl_data_dict["tqn"][1], rl_data_dict["tqn"][2]
     # -------------------------- State ----------------------------------------------------
     # --------------------- Select Index --------------------------------------------------
     t_q_ss_1_a = MAX_Q(ss, tqn_1, rl_data_dict["act_list"])  # TQ(s',a')
-    t_q_ss_2_a = MAX_Q(ss, tqn_1, rl_data_dict["act_list"])  # TQ(s',a')
+    t_q_ss_2_a = MAX_Q(ss, tqn_2, rl_data_dict["act_list"])  # TQ(s',a')
     I = np.argmin([t_q_ss_1_a, t_q_ss_2_a])  # Index
     q_i = [qn_1, qn_2][I]  # Q
     tq_i = [tqn_1, tqn_2][I]  # target Q
@@ -396,15 +409,19 @@ def RL_TRG_UPDATE(t_update_step, rl_data_dict):
 # ------------------PROCESS--------------------------
 
 def RL_E_G_ACTION(s, rl_data_dict) -> int:
+    assert rl_data_dict["rl_model"] != SAC
     agent = rl_data_dict["agent"]
     act_list = rl_data_dict["act_list"]
     if 0 < rl_data_dict["epsilon"] and random.uniform(0, 1) < rl_data_dict["epsilon"]:
         return np.random.choice(act_list)
     else:
         if rl_data_dict["SA_merge"]:
+            assert rl_data_dict["agent"].get_shape()[0] == len(s) + 1
             if rl_data_dict["rl_model"] is D2QN or rl_data_dict["rl_model"] is D3QN:
+                assert rl_data_dict["agent"].get_shape()[-1] == 2
                 return ARGMAX_VA_Q(s, agent, act_list)
             return ARG_MAXQ(s, agent, act_list)
+    assert rl_data_dict["agent"].get_shape()[0] == len(s)
     return int(np.argmax(agent.run(s)))
 
 
@@ -412,9 +429,12 @@ def RL_DIRECT_ACTION(s, rl_data_dict) -> int:
     agent = rl_data_dict["agent"]
     act_list = rl_data_dict["act_list"]
     if rl_data_dict["SA_merge"]:
+        assert rl_data_dict["agent"].get_shape()[0] == len(s) + 1
         if rl_data_dict["rl_model"] is D2QN or D3QN:
+            assert rl_data_dict["agent"].get_shape()[-1] == 2
             return ARGMAX_VA_Q(s, agent, act_list)
         return ARG_MAXQ(s, agent, act_list)
+    assert rl_data_dict["agent"].get_shape()[0] == len(s)
     return int(np.argmax(agent.run(s)))
 
 

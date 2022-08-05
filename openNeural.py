@@ -169,14 +169,15 @@ def RMSE(x, y):
 
 def HUBER(x, y):
     h = 1
-    return        np.where(np.abs(y - x) <= 1, x - y, h * np.sign(x - y)), \
-           np.sum(np.where(np.abs(y - x) <= 1, 0.5 * (y - x) ** 2, h * np.abs(y - x) - 0.5 * h**2))
+    return np.where(np.abs(y - x) <= 1, x - y, h * np.sign(x - y)), \
+           np.sum(np.where(np.abs(y - x) <= 1, 0.5 * (y - x) ** 2, h * np.abs(y - x) - 0.5 * h ** 2))
 
 
 def PSEUDO_HUBER(x, y):
-    a = np.abs(y-x) + 0.00000001
-    f = a * sqrt(1 + x**2/a**2)
-    return x/f, np.sum(f)
+    a = np.abs(y - x) + 0.00000001
+    f = a * sqrt(1 + x ** 2 / a ** 2)
+    return x / f, np.sum(f)
+
 
 # https://arxiv.org/pdf/2108.12627.pdf
 def STRIC_HUBER(x, y):
@@ -292,31 +293,31 @@ class openNeural:
         Args:
             trg(openNeural):
         """
-        self.__W_layer =                trg.__W_layer.copy()
-        self.__W_UPDATE_layer =         trg.__W_UPDATE_layer.copy()
-        self.__B_UPDATE_layer =         trg.__B_UPDATE_layer.copy()
-        self.__B_layer =                trg.__B_layer.copy()
-        self.__Z_layer =                trg.__Z_layer.copy()
-        self.__X_layer =                trg.__X_layer.copy()
-        self.__N_layer =                trg.__N_layer.copy()
-        self.__A_layer =                trg.__A_layer.copy()
-        self.__EQ_layer =               trg.__EQ_layer.copy()
-        self.__Layer_shape =            trg.__Layer_shape.copy()
-        self.__VtW_layer =              trg.__VtW_layer.copy()
-        self.__MtW_layer =              trg.__MtW_layer.copy()
-        self.__VtB_layer =              trg.__VtB_layer.copy()
-        self.__MtB_layer =              trg.__MtB_layer.copy()
-        self.__gE_layer =               trg.__gE_layer.copy()
-        self.__processor =              trg.__processor
+        self.__W_layer = trg.__W_layer.copy()
+        self.__W_UPDATE_layer = trg.__W_UPDATE_layer.copy()
+        self.__B_UPDATE_layer = trg.__B_UPDATE_layer.copy()
+        self.__B_layer = trg.__B_layer.copy()
+        self.__Z_layer = trg.__Z_layer.copy()
+        self.__X_layer = trg.__X_layer.copy()
+        self.__N_layer = trg.__N_layer.copy()
+        self.__A_layer = trg.__A_layer.copy()
+        self.__EQ_layer = trg.__EQ_layer.copy()
+        self.__Layer_shape = trg.__Layer_shape.copy()
+        self.__VtW_layer = trg.__VtW_layer.copy()
+        self.__MtW_layer = trg.__MtW_layer.copy()
+        self.__VtB_layer = trg.__VtB_layer.copy()
+        self.__MtB_layer = trg.__MtB_layer.copy()
+        self.__gE_layer = trg.__gE_layer.copy()
+        self.__processor = trg.__processor
         self.__gradient_clipping_norm = trg.__gradient_clipping_norm
-        self.__drop_Out_rate =          trg.__drop_Out_rate
-        self.__learning_rate =          trg.__learning_rate
-        self.__learn_optima =           trg.__learn_optima
-        self.__loss_fun =               trg.__loss_fun
-        self.__iteration =              trg.__iteration
-        self.__beta_1 =                 trg.__beta_1
-        self.__beta_2 =                 trg.__beta_2
-        self.__epsilon =                trg.__epsilon
+        self.__drop_Out_rate = trg.__drop_Out_rate
+        self.__learning_rate = trg.__learning_rate
+        self.__learn_optima = trg.__learn_optima
+        self.__loss_fun = trg.__loss_fun
+        self.__iteration = trg.__iteration
+        self.__beta_1 = trg.__beta_1
+        self.__beta_2 = trg.__beta_2
+        self.__epsilon = trg.__epsilon
 
     def __cpu_run(self) -> np.ndarray:
         """
@@ -348,7 +349,7 @@ class openNeural:
                 w_next += w_shape
                 a_next += a_shape
         self.output = self.__A_layer[-self.__Layer_shape[-1]:].copy()
-        return self.output.copy() # deepcopy value
+        return self.output.copy()  # deepcopy value
 
     def __cpu_back(self) -> None:
         """
@@ -379,19 +380,20 @@ class openNeural:
                                          axis=0)
                 dig_dE_dZ = np.diag(dE_dZ)
                 # gradient dE_dW
-                dE_dW = np.matmul(dig_dE_dZ, repeat_dZ_dA).transpose().flatten()  # (dig * repeat)^T is [a,b][2a 2b][3a 3b]
+                dE_dW = np.matmul(dig_dE_dZ,
+                                  repeat_dZ_dA).transpose().flatten()  # (dig * repeat)^T is [a,b][2a 2b][3a 3b]
                 if self.__learn_optima == 'ADAM':
                     # AdamRMSP Weight
                     self.__MtW_layer[w_next:w_next + w_shape] = \
                         self.__beta_1 * self.__MtW_layer[w_next:w_next + w_shape] + (
-                                    1 - self.__beta_1) * dE_dW  # pm + (1-p)g
+                                1 - self.__beta_1) * dE_dW  # pm + (1-p)g
                     self.__VtW_layer[w_next:w_next + w_shape] = \
                         self.__beta_2 * self.__VtW_layer[w_next:w_next + w_shape] + (
-                                    1 - self.__beta_2) * dE_dW ** 2  # pv + (1-p)g
+                                1 - self.__beta_2) * dE_dW ** 2  # pv + (1-p)g
                     mdw_corr = self.__MtW_layer[w_next:w_next + w_shape] / (
-                                1 - self.__beta_1 ** self.__iteration)  # m/(1-p)
+                            1 - self.__beta_1 ** self.__iteration)  # m/(1-p)
                     vdw_corr = self.__VtW_layer[w_next:w_next + w_shape] / (
-                                1 - self.__beta_2 ** self.__iteration)  # v/(1-p)
+                            1 - self.__beta_2 ** self.__iteration)  # v/(1-p)
                     w_update = self.__learning_rate * (mdw_corr / (np.sqrt(vdw_corr) + self.__epsilon))
                     # AdamRMSP Bias
                     self.__MtB_layer[a_next: a_next + a_shape] = \
@@ -662,99 +664,66 @@ class openNeural:
 
     def numpy_save(self, file_name) -> None:
         """
-        It exports the __W_layer and __B_layer for current neural network
-            'file_name_W_layer.csv' 'file_name_B_layer.csv'
-        The file will be saved in the same document
-
-        Args:
-            file_name(str)
-
+        save neural network as npy
         """
-        np.savetxt(file_name + '_W.csv', self.__W_layer, fmt="%f")
-        np.savetxt(file_name + '_B.csv', self.__B_layer, fmt="%f")
-        np.savetxt(file_name + '_Z.csv', self.__Z_layer, fmt="%f")
-        np.savetxt(file_name + '_X.csv', self.__X_layer, fmt="%f")
-        np.savetxt(file_name + '_A.csv', self.__A_layer, fmt="%f")
-        np.savetxt(file_name + '_L.csv', self.__Layer_shape, fmt="%d")
-        np.savetxt(file_name + '_Vw.csv', self.__VtW_layer, fmt="%f")
-        np.savetxt(file_name + '_Mw.csv', self.__MtW_layer, fmt="%f")
-        np.savetxt(file_name + '_Vb.csv', self.__VtB_layer, fmt="%f")
-        np.savetxt(file_name + '_Mb.csv', self.__MtB_layer, fmt="%f")
-        np.savetxt(file_name + '_Wu.csv', self.__W_UPDATE_layer, fmt="%f")
-        np.savetxt(file_name + '_Bu.csv', self.__B_UPDATE_layer, fmt="%f")
-        np.savetxt(file_name + '_E.csv', self.__gE_layer, fmt="%f")
-        eq_list = np.empty(0)
-        for T in self.__EQ_layer:
-            eq_list = np.append(eq_list, str(T.__name__))
-        n_list = np.empty(0)
-        for N in self.__N_layer:
-            n_list = np.append(n_list, str(N.__name__))
-        np.savetxt(file_name + '_Q.csv', eq_list, fmt="%s") # function
-        np.savetxt(file_name + '_N.csv', n_list, fmt="%s")  # function
+        setting_file = np.array(
+            [self.__W_layer,
+             self.__B_layer,
+             self.__Z_layer,
+             self.__X_layer,
+             self.__N_layer,
+             self.__A_layer,
+             self.__EQ_layer,
+             self.__Layer_shape,
+             self.__VtW_layer,
+             self.__MtW_layer,
+             self.__VtB_layer,
+             self.__MtB_layer,
+             self.__W_UPDATE_layer,
+             self.__B_UPDATE_layer,
+             self.__gE_layer,
+             self.__processor,
+             self.__gradient_clipping_norm,
+             self.__drop_Out_rate,
+             self.__learning_rate,
+             self.__learn_optima,
+             self.__loss_fun,
+             self.__iteration,
+             self.__beta_1,
+             self.__beta_2,
+             self.__epsilon], dtype=object)
+        np.save(file_name + "_neural_net", setting_file, allow_pickle=True)
 
     def numpy_load(self, file_name):
         """
-        It imports the __W_layer and __B_layer in current neural network
-            'file_name_W_layer.csv' and 'file_name_B_layer.csv'
-        The file will be loaded from the same document
-
-        Args:
-            file_name(str)
-
+        load neural network from npy
         """
         try:
-            self.__W_layer=np.loadtxt(file_name + '_W.csv', dtype=np.float32)
-            self.__B_layer=np.loadtxt(file_name + '_B.csv', dtype=np.float32)
-            self.__Z_layer=np.loadtxt(file_name + '_Z.csv', dtype=np.float32)
-            self.__X_layer=np.loadtxt(file_name + '_X.csv', dtype=np.float32)
-            self.__A_layer=np.loadtxt(file_name + '_A.csv', dtype=np.float32)
-            self.__Layer_shape=np.loadtxt(file_name + '_L.csv', dtype=int)
-            self.__VtW_layer=np.loadtxt(file_name + '_Vw.csv', dtype=np.float32)
-            self.__MtW_layer=np.loadtxt(file_name + '_Mw.csv', dtype=np.float32)
-            self.__VtB_layer=np.loadtxt(file_name + '_Vb.csv', dtype=np.float32)
-            self.__MtB_layer=np.loadtxt(file_name + '_Mb.csv', dtype=np.float32)
-            self.__W_UPDATE_layer=np.loadtxt(file_name + '_Wu.csv', dtype=np.float32)
-            self.__B_UPDATE_layer=np.loadtxt(file_name + '_Bu.csv', dtype=np.float32)
-            self.__gE_layer=np.loadtxt(file_name + '_E.csv', dtype=np.float32)
-
-            eq_list = np.loadtxt(file_name + '_Q.csv', dtype=str)
-            n_list = np.loadtxt(file_name + '_N.csv', dtype=str)
-            self.__EQ_layer = np.empty(0)
-            for eq_str in eq_list:
-                if eq_str == linear_x.__name__ :
-                    self.__EQ_layer = np.append(self.__EQ_layer, linear_x)
-                elif eq_str == leakReLU.__name__ :
-                    self.__EQ_layer = np.append(self.__EQ_layer, leakReLU)
-                elif eq_str == ReLU.__name__ :
-                    self.__EQ_layer = np.append(self.__EQ_layer, ReLU)
-                elif eq_str == logp1_x.__name__ :
-                    self.__EQ_layer = np.append(self.__EQ_layer, logp1_x)
-                elif eq_str == linear_x.__name__ :
-                    self.__EQ_layer = np.append(self.__EQ_layer, linear_x)
-                elif eq_str == znormal.__name__ :
-                    self.__EQ_layer = np.append(self.__EQ_layer, znormal)
-                elif eq_str == min_max_normal.__name__ :
-                    self.__EQ_layer = np.append(self.__EQ_layer, parametricReLU)
-                elif eq_str == softmax.__name__ :
-                    self.__EQ_layer = np.append(self.__EQ_layer, softmax)
-            self.__N_layer = np.empty(0)
-            for n_str in n_list:
-                if n_str == linear_x.__name__ :
-                    self.__N_layer = np.append(self.__N_layer, linear_x)
-                elif n_str == leakReLU.__name__ :
-                    self.__N_layer = np.append(self.__N_layer, leakReLU)
-                elif n_str == ReLU.__name__ :
-                    self.__N_layer = np.append(self.__N_layer, ReLU)
-                elif n_str == logp1_x.__name__ :
-                    self.__N_layer = np.append(self.__N_layer, logp1_x)
-                elif n_str == linear_x.__name__ :
-                    self.__N_layer = np.append(self.__N_layer, linear_x)
-                elif n_str == znormal.__name__ :
-                    self.__N_layer = np.append(self.__N_layer, znormal)
-                elif n_str == min_max_normal.__name__ :
-                    self.__N_layer = np.append(self.__N_layer, parametricReLU)
-                elif n_str == softmax.__name__ :
-                    self.__N_layer = np.append(self.__N_layer, softmax)
+            [self.__W_layer,
+             self.__B_layer,
+             self.__Z_layer,
+             self.__X_layer,
+             self.__N_layer,
+             self.__A_layer,
+             self.__EQ_layer,
+             self.__Layer_shape,
+             self.__VtW_layer,
+             self.__MtW_layer,
+             self.__VtB_layer,
+             self.__MtB_layer,
+             self.__W_UPDATE_layer,
+             self.__B_UPDATE_layer,
+             self.__gE_layer,
+             self.__processor,
+             self.__gradient_clipping_norm,
+             self.__drop_Out_rate,
+             self.__learning_rate,
+             self.__learn_optima,
+             self.__loss_fun,
+             self.__iteration,
+             self.__beta_1,
+             self.__beta_2,
+             self.__epsilon] = np.load(file_name + "_neural_net.npy", allow_pickle=True)
         except FileNotFoundError as e:
             print('File is not exist')
             pass
