@@ -136,7 +136,7 @@ class openRL:
         # ----------playing episode----------
         max_reward = 0
         total_reward = 0
-        action_probability = 0.8
+        action_probability = 0.8 if not self.RL_DATA["rl_model"] is SAC else 0
         reward_threshold = 1
         replay_buffer = np.empty((0, 5))
         update_step = 0
@@ -150,10 +150,7 @@ class openRL:
                 # ----------Get exp from action----------
                 r, t = self.RL_DATA["reward_fn"](s)  # get [r, t] (reward and terminated state)
                 a = RL_ACTION(s=s,
-                              epsilon=action_probability,
-                              agent=self.RL_DATA["agent"],
-                              act_list=self.RL_DATA["act_list"],
-                              SA_merge=self.RL_DATA["SA_merge"])  # get a (action)
+                              epsilon=action_probability, rl_data_dict=self.RL_DATA)  # get a (action)
                 ss = self.RL_DATA["enviro_fn"](s, a)  # get ss (new state)
                 exp = np.array([s, a, r, ss, t], dtype=object)
                 # ----------Add experience buffer----------
@@ -229,6 +226,9 @@ class openRL:
          self.RL_DATA["t_update_rate"],
          qn_sz, tqn_sz] = np.load("save/" + file_name + "_info.npy", allow_pickle=True)
         # ----------------------------------------------------
+        self.RL_DATA["qn"] = np.empty(0)
+        self.RL_DATA["tqn"] = np.empty(0)
+        self.RL_DATA["pn"] = openNeural()
         for i in range(qn_sz):
             q_network = openNeural()
             q_network.numpy_load("save/" + file_name + "_qn_" + str(i))
@@ -238,9 +238,10 @@ class openRL:
             q_network.numpy_load("save/" + file_name + "_tqn_" + str(i))
             self.RL_DATA["tqn"] = np.append(self.RL_DATA["tqn"], q_network)
         try:
-            self.RL_DATA["pn"].numpy_load("save/" + file_name + "_pn")
+            p_network = openNeural()
+            p_network.numpy_load("save/" + file_name + "_pn")
+            self.RL_DATA["pn"] = p_network
         except Exception as e:
             pass
         self.RL_NEURAL_SETTING()
-
         print("LOAD FINISH")
