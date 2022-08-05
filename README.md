@@ -199,10 +199,6 @@ def reward_policy(s, g=None) -> [float, bool]:
             t = False
         return r, t
 
-
-# 환경 함수로 s 는 현재 상태 a는 액션으로
-# a에 의해 변한 환경 상태 s를 리턴한다.
-# 테스트를 위한 환경 함수로 이와 같은 꼴의 함수는 모두 사용 가능하다
 def enviro(s, a) -> np.ndarray:
     assert 0 <= a <= 3
     ss = s.copy()
