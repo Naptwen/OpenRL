@@ -121,7 +121,7 @@ def softmax(values, gradient=False):
 
 
 def drop_Out(layer, drop_per):
-    assert 0 <= drop_per < 1
+    assert 0 <= drop_per < 1, "drop percentage must be between 0 and 1"
     mask = np.random.uniform(0, 1, layer.shape[0]) > drop_per
     return mask * layer.shape[0] / (1.0 - drop_per)
 
@@ -455,8 +455,8 @@ class openNeural:
             input_val(np.ndarray)
             dropout_rate(float):drop out rate
         """
-        assert len(input_val) == self.__Layer_shape[0]
-        assert 0 <= dropout_rate <= 1
+        assert len(input_val) == self.__Layer_shape[0], "the input size must be as same as input layer size"
+        assert 0 <= dropout_rate <= 1, "drop out rate must between 0 and 1"
         self.__Z_layer[0:self.__Layer_shape[0]] = np.array(input_val)  # input
         self.__drop_Out_rate = dropout_rate
         return self.__cpu_run()
@@ -497,8 +497,8 @@ class openNeural:
             learn_optima(str): ADAM, NADAM, None
             processor(str): Process type
         """
-        assert 0 < learning_rate
-        assert 0 <= gradient_clipping_norm
+        assert 0 < learning_rate, "learning rate must be greater than 0"
+        assert 0 <= gradient_clipping_norm, "gradient clipping norm must be greater or equal than 0"
         self.__gradient_clipping_norm = gradient_clipping_norm
         self.__drop_Out_rate = dropout_rate
         self.__learning_rate = learning_rate
@@ -520,10 +520,10 @@ class openNeural:
             True is success for back propagation, False is Nan or Inf detected in update
         """
         if str(type(out_val)) == "<class 'numpy.ndarray'>" or str(type(out_val)) == "<class 'list'>":
-            assert len(out_val) == self.__Layer_shape[-1]
-            assert len(target_val) == self.__Layer_shape[-1]
+            assert len(out_val) == self.__Layer_shape[-1], "output value size must be as same as output layer size"
+            assert len(target_val) == self.__Layer_shape[-1], "target value size must be as same as output layer size"
         else:
-            assert self.__Layer_shape[-1] == 1
+            assert self.__Layer_shape[-1] == 1, "if output and target are a single number than Layer size must be 1"
         # set value
         self.output = out_val
         self.target_val = target_val
@@ -539,7 +539,7 @@ class openNeural:
     def generate_weight(self) -> None:
         """This is generating weight layer by current layer shape.
         """
-        assert len(self.__Layer_shape) >= 2
+        assert len(self.__Layer_shape) >= 2, "Layer size must be greater or equal than 2 (input and output)"
         self.__W_layer = np.empty(0)
         self.__VtW_layer = np.empty(0)
         for i in range(len(self.__Layer_shape) - 1):
@@ -651,7 +651,7 @@ class openNeural:
         Args:
             layer(np.ndarray[np.float])
         """
-        assert len(self.__W_layer) == len(layer)
+        assert len(self.__W_layer) == len(layer), "Layer size must be the same"
         self.__W_layer = layer.copy()
 
     def set_b_layer(self, layer):
@@ -659,7 +659,7 @@ class openNeural:
         Args:
             layer(np.ndarray[np.float])
         """
-        assert len(self.__B_layer) == len(layer)
+        assert len(self.__B_layer) == len(layer), "Layer size must be the same"
         self.__B_layer = layer.copy()
 
     def numpy_save(self, file_name) -> None:
@@ -734,6 +734,7 @@ class openNeural:
             __W_layer (list)
             __B_layer (list)
         """
-        assert len(self.__W_layer) == len(__W_layer) and len(self.__B_layer) == len(__B_layer)
+        assert len(self.__W_layer) == len(__W_layer) \
+               and len(self.__B_layer) == len(__B_layer), "Layer size must be the same"
         self.__W_layer = np.copy(__W_layer)
         self.__B_layer = np.copy(__B_layer)
