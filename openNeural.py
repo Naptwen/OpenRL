@@ -4,9 +4,7 @@ from numpy import ndarray
 from sympy import sqrt, diff
 from colorama import Fore
 from opencl_algorithm import *
-import os
 from copy import deepcopy
-import random
 
 
 def shannon_entropy(values):
@@ -519,8 +517,11 @@ class openNeural:
         Returns:
             True is success for back propagation, False is Nan or Inf detected in update
         """
-        assert len(out_val) == self.__Layer_shape[-1]
-        assert len(target_val) == self.__Layer_shape[-1]
+        if str(type(out_val)) == "<class 'numpy.ndarray'>" or str(type(out_val)) == "<class 'list'>":
+            assert len(out_val) == self.__Layer_shape[-1]
+            assert len(target_val) == self.__Layer_shape[-1]
+        else:
+            assert self.__Layer_shape[-1] == 1
         # set value
         self.output = out_val
         self.target_val = target_val
@@ -564,7 +565,7 @@ class openNeural:
         n_in = self.__Layer_shape[0]
         self.__W_layer = np.random.uniform(-sqrt(6 / n_in), sqrt(6 / n_in), self.__W_layer.shape[0])
 
-    def show_layer(self):
+    def show_info(self):
         w_next = 0
         print(Fore.LIGHTMAGENTA_EX, self.__Layer_shape)
         for i in range(len(self.__Layer_shape) - 1):
@@ -588,6 +589,17 @@ class openNeural:
             a_shape = self.__Layer_shape[i]
             print(Fore.LIGHTCYAN_EX, self.__B_layer[a_next:a_next + a_shape], Fore.RESET)
             a_next += a_shape
+
+        print("--------------------EQ-----------------------")
+        for eq in self.__EQ_layer:
+            print(eq.__name__)
+
+        print("--------------------N-----------------------")
+        for n in self.__N_layer:
+            print(n.__name__)
+
+    def show_EQ(self):
+        print('equation : ', self.__EQ_layer)
 
     def add_layer(self, number, active_fn=ReLU, normal=linear_x):
         """
@@ -658,27 +670,27 @@ class openNeural:
             file_name(str)
 
         """
-        np.savetxt(file_name + '_W.csv', self.__W_layer)
-        np.savetxt(file_name + '_B.csv', self.__B_layer)
-        np.savetxt(file_name + '_Z.csv', self.__Z_layer)
-        np.savetxt(file_name + '_X.csv', self.__X_layer)
-        np.savetxt(file_name + '_A.csv', self.__A_layer)
+        np.savetxt(file_name + '_W.csv', self.__W_layer, fmt="%f")
+        np.savetxt(file_name + '_B.csv', self.__B_layer, fmt="%f")
+        np.savetxt(file_name + '_Z.csv', self.__Z_layer, fmt="%f")
+        np.savetxt(file_name + '_X.csv', self.__X_layer, fmt="%f")
+        np.savetxt(file_name + '_A.csv', self.__A_layer, fmt="%f")
         np.savetxt(file_name + '_L.csv', self.__Layer_shape, fmt="%d")
-        np.savetxt(file_name + '_Vw.csv', self.__VtW_layer)
-        np.savetxt(file_name + '_Mw.csv', self.__MtW_layer)
-        np.savetxt(file_name + '_Vb.csv', self.__VtB_layer)
-        np.savetxt(file_name + '_Mb.csv', self.__MtB_layer)
-        np.savetxt(file_name + '_Wu.csv', self.__W_UPDATE_layer)
-        np.savetxt(file_name + '_Bu.csv', self.__B_UPDATE_layer)
-        np.savetxt(file_name + '_E.csv', self.__gE_layer)
+        np.savetxt(file_name + '_Vw.csv', self.__VtW_layer, fmt="%f")
+        np.savetxt(file_name + '_Mw.csv', self.__MtW_layer, fmt="%f")
+        np.savetxt(file_name + '_Vb.csv', self.__VtB_layer, fmt="%f")
+        np.savetxt(file_name + '_Mb.csv', self.__MtB_layer, fmt="%f")
+        np.savetxt(file_name + '_Wu.csv', self.__W_UPDATE_layer, fmt="%f")
+        np.savetxt(file_name + '_Bu.csv', self.__B_UPDATE_layer, fmt="%f")
+        np.savetxt(file_name + '_E.csv', self.__gE_layer, fmt="%f")
         eq_list = np.empty(0)
         for T in self.__EQ_layer:
-            eq_list = np.append(eq_list, T.__name__)
+            eq_list = np.append(eq_list, str(T.__name__))
         n_list = np.empty(0)
         for N in self.__N_layer:
-            n_list = np.append(n_list, N.__name__)
-        np.save(file_name + '_Q', eq_list) # function
-        np.save(file_name + '_N', n_list) # function
+            n_list = np.append(n_list, str(N.__name__))
+        np.savetxt(file_name + '_Q.csv', eq_list, fmt="%s") # function
+        np.savetxt(file_name + '_N.csv', n_list, fmt="%s")  # function
 
     def numpy_load(self, file_name):
         """
@@ -691,23 +703,22 @@ class openNeural:
 
         """
         try:
-            self.__W_layer=np.loadtxt(file_name + '_W.csv')
-            self.__B_layer=np.loadtxt(file_name + '_B.csv')
-            self.__Z_layer=np.loadtxt(file_name + '_Z.csv')
-            self.__X_layer=np.loadtxt(file_name + '_X.csv')
-            self.__A_layer=np.loadtxt(file_name + '_A.csv')
+            self.__W_layer=np.loadtxt(file_name + '_W.csv', dtype=np.float32)
+            self.__B_layer=np.loadtxt(file_name + '_B.csv', dtype=np.float32)
+            self.__Z_layer=np.loadtxt(file_name + '_Z.csv', dtype=np.float32)
+            self.__X_layer=np.loadtxt(file_name + '_X.csv', dtype=np.float32)
+            self.__A_layer=np.loadtxt(file_name + '_A.csv', dtype=np.float32)
             self.__Layer_shape=np.loadtxt(file_name + '_L.csv', dtype=int)
-            self.__VtW_layer=np.loadtxt(file_name + '_Vw.csv')
-            self.__MtW_layer=np.loadtxt(file_name + '_Mw.csv')
-            self.__VtB_layer=np.loadtxt(file_name + '_Vb.csv')
-            self.__MtB_layer=np.loadtxt(file_name + '_Mb.csv')
-            self.__W_UPDATE_layer=np.loadtxt(file_name + '_Wu.csv')
-            self.__B_UPDATE_layer=np.loadtxt(file_name + '_Bu.csv')
-            self.__gE_layer=np.loadtxt(file_name + '_E.csv')
+            self.__VtW_layer=np.loadtxt(file_name + '_Vw.csv', dtype=np.float32)
+            self.__MtW_layer=np.loadtxt(file_name + '_Mw.csv', dtype=np.float32)
+            self.__VtB_layer=np.loadtxt(file_name + '_Vb.csv', dtype=np.float32)
+            self.__MtB_layer=np.loadtxt(file_name + '_Mb.csv', dtype=np.float32)
+            self.__W_UPDATE_layer=np.loadtxt(file_name + '_Wu.csv', dtype=np.float32)
+            self.__B_UPDATE_layer=np.loadtxt(file_name + '_Bu.csv', dtype=np.float32)
+            self.__gE_layer=np.loadtxt(file_name + '_E.csv', dtype=np.float32)
 
-            eq_list = np.load(file_name + '_Q.npy')
-            n_list = np.load(file_name + '_N.npy')
-
+            eq_list = np.loadtxt(file_name + '_Q.csv', dtype=str)
+            n_list = np.loadtxt(file_name + '_N.csv', dtype=str)
             self.__EQ_layer = np.empty(0)
             for eq_str in eq_list:
                 if eq_str == linear_x.__name__ :
@@ -718,10 +729,25 @@ class openNeural:
                     self.__EQ_layer = np.append(self.__EQ_layer, ReLU)
                 elif eq_str == logp1_x.__name__ :
                     self.__EQ_layer = np.append(self.__EQ_layer, logp1_x)
-
+                elif eq_str == linear_x.__name__ :
+                    self.__EQ_layer = np.append(self.__EQ_layer, linear_x)
+                elif eq_str == znormal.__name__ :
+                    self.__EQ_layer = np.append(self.__EQ_layer, znormal)
+                elif eq_str == min_max_normal.__name__ :
+                    self.__EQ_layer = np.append(self.__EQ_layer, parametricReLU)
+                elif eq_str == softmax.__name__ :
+                    self.__EQ_layer = np.append(self.__EQ_layer, softmax)
             self.__N_layer = np.empty(0)
             for n_str in n_list:
                 if n_str == linear_x.__name__ :
+                    self.__N_layer = np.append(self.__N_layer, linear_x)
+                elif n_str == leakReLU.__name__ :
+                    self.__N_layer = np.append(self.__N_layer, leakReLU)
+                elif n_str == ReLU.__name__ :
+                    self.__N_layer = np.append(self.__N_layer, ReLU)
+                elif n_str == logp1_x.__name__ :
+                    self.__N_layer = np.append(self.__N_layer, logp1_x)
+                elif n_str == linear_x.__name__ :
                     self.__N_layer = np.append(self.__N_layer, linear_x)
                 elif n_str == znormal.__name__ :
                     self.__N_layer = np.append(self.__N_layer, znormal)
