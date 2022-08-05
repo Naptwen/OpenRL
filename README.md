@@ -2,6 +2,11 @@
 GNU AFFERO GPL (c) Useop Gim 2022
 
 OpenRL
+v2.0.0
+ - Edit : Seperate class and functions for reinforcement learning, setting functions, load and save functions
+ - Edit : editing reinforcement learning model functions
+ - New : function by policy setting SAC (not fully compelted)
+
 v1.2.1
 - Since there are two type of calculating Q value; "[s,ai]->Q(s,ai) for i in Z" and "[s]->Q(s,a1,a2,a3....)"
 - Thus edited algorithm for working in both way by set the variable of using act_sz and act_list
@@ -157,12 +162,8 @@ ReinForcement Exmaple
 ```py
 import time
 from matplotlib import pyplot as plt
-
-import numpy as np
 import pygame
-
 from openRL import *
-import random
 
 def reward_policy(s, g=None) -> [float, bool]:
     """
@@ -198,6 +199,10 @@ def reward_policy(s, g=None) -> [float, bool]:
             t = False
         return r, t
 
+
+# 환경 함수로 s 는 현재 상태 a는 액션으로
+# a에 의해 변한 환경 상태 s를 리턴한다.
+# 테스트를 위한 환경 함수로 이와 같은 꼴의 함수는 모두 사용 가능하다
 def enviro(s, a) -> np.ndarray:
     assert 0 <= a <= 3
     ss = s.copy()
@@ -224,22 +229,42 @@ def enviro(s, a) -> np.ndarray:
 
 
 class DQN_TEST():
+    # 강화학습 실행할 함수
     def start_Q_learning(self):
         random_seed = int(time.time())
-        self.neural = openRL(model=DDQN, action_size=3, random_seed=random_seed)
-        self.neural.RL_LEARN_SETTING(
-            enviro_fn=enviro, reward_fn=reward_policy, max_iter=120, max_epoch=800,
-            buffer_maximum_sz=32, buffer_replay_sz=1, buffer_replay_trial=1,
+        np.random.seed(seed=random_seed)
+        random.seed(random_seed)
+        self.neural = openRL()
+        self.neural.RL_SETTING(
+            rl_model=D3QN,
+            enviro_fn=enviro,
+            reward_fn=reward_policy,
+            act_list=[0, 1, 2],
+            max_epoch=100,
+            max_iter=100,
+            replay_buffer_max_sz=64,
+            replay_sz=1,
+            replay_trial=1,
+            replay_opt=None,
+            gamma=0.99,
+            alpha=0.5,
+            agent_update_interval=5,
+            t_update_interval=10,
+            t_update_rate=0.01)
+        self.neural.CREATE_Q(
+            learning_rate=0.001,
             dropout_rate=0.0,
-            learning_rate=0.005, learn_optima='NADAM', loss_fun=HUBER,
-            w_update_interval=5, t_update_interval=10, gamma=0.99, t_update_rate=0.01
-        )
-
-        self.neural.RL_SETTING(q_layer=[4, 8, 12, 3],
-                               q_activation_fn=[linear_x, leakReLU, leakReLU, linear_x],
-                               q_normalization=[linear_x, znormal, znormal, linear_x])
-        self.neural.RL_LOAD(file_name='TEST__')
-
+            loss_fun=HUBER,
+            learn_optima='NADAM',
+            q_layer=np.array([5, 8, 12, 2]),
+            q_activation_fn=
+                np.array([linear_x, leakReLU, leakReLU, linear_x], dtype=object),
+            q_normalization=
+                np.array([linear_x, znormal, znormal, linear_x], dtype=object))
+        self.neural.RL_NEURAL_SETTING()
+        self.neural.RL_RUN(initial_state=np.array([0, 4, random.randint(0, 3), 0]),
+                           terminate_reward_condition=24,
+                           show=True)
         self.static_function()
 
     def static_function(self):
@@ -259,9 +284,9 @@ class PY_GAME():
     neural = object
     ball_x, ball_y, cx, cy = random.randint(0, 3), 0, 0, 4
 
-    def __init__(self, random_seed):
-        self.neural = openRL(D3QN, 3, random_seed)
-        self.neural.RL_LOAD('TEST__')
+    def __init__(self):
+        self.neural = openRL()
+        self.neural.RL_LOAD('Test__')
         self.test_play()
 
     def drawing(self):
@@ -318,19 +343,25 @@ class PY_GAME():
             # -------------REWARD----------------------
             reward, t = reward_policy(np.array([self.cx, self.cy, self.ball_x, self.ball_y]))
             # ------------ACTION-----------------------
-            act = RL_ACTION(s=np.array([self.cx, self.cy, self.ball_x, self.ball_y]), epsilon=0.0, rl_data_dict=self.neural.RL_DATA)
+            act = RL_ACTION(s=np.array([self.cx, self.cy, self.ball_x, self.ball_y]),
+                            epsilon=0.0,
+                            agent = self.neural.RL_DATA["agent"],
+                            act_list=self.neural.RL_DATA["act_list"],
+                            SA_merge=self.neural.RL_DATA["SA_merge"])
             print(
                 Fore.LIGHTRED_EX,
                 f'Ac : {act}',
                 Fore.LIGHTBLACK_EX,
                 [self.cx, self.cy, self.ball_x, self.ball_y],
-                Fore.LIGHTBLUE_EX,
-                f'{self.neural.RL_DATA["qn"].run(np.array([self.cx, self.cy, self.ball_x, self.ball_y]))}',
                 Fore.LIGHTYELLOW_EX,
-                f'qn : {np.where(self.neural.RL_DATA["qn"].output[0:3] == np.max(self.neural.RL_DATA["qn"].output[0:3]), 1, 0)}',
+                f'qn : {np.where(self.neural.RL_DATA["agent"].output[0:len(self.neural.RL_DATA["act_list"])]), 1, 0}',
                 Fore.LIGHTBLUE_EX,
                 total_reward,
                 Fore.RESET)
+            for a in self.neural.RL_DATA["act_list"]:
+                print(Fore.LIGHTGREEN_EX, a, Fore.LIGHTWHITE_EX, self.neural.RL_DATA["agent"].run(
+                    np.append(np.array([self.cx, self.cy, self.ball_x, self.ball_y]), a)
+                ))
             self.cx, self.cy, self.ball_x, self.ball_y = enviro([self.cx, self.cy, self.ball_x, self.ball_y], act)
             total_reward += reward
             if reward < 0:
@@ -346,11 +377,11 @@ class PY_GAME():
 
 
 if __name__ == '__main__':
-    A = DQN_TEST()  
-    start = time.time()  
-    A.start_Q_learning()  
-    print('take time', time.time() - start) 
-    A.neural.RL_SAVE('TEST__')  
-    B = PY_GAME(int(time.time()))  
+    A = DQN_TEST()
+    start = time.time()
+    A.start_Q_learning()
+    print('take time', time.time() - start)
+    A.neural.RL_SAVE('Test__')
+    B = PY_GAME()
 
 ```
