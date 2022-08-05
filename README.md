@@ -225,25 +225,25 @@ def enviro(s, a) -> np.ndarray:
 
 
 class DQN_TEST():
-    # 강화학습 실행할 함수
     def start_Q_learning(self):
         random_seed = int(time.time())
         np.random.seed(seed=random_seed)
         random.seed(random_seed)
         self.neural = openRL()
         self.neural.RL_SETTING(
+            action_fn=RL_E_G_ACTION,
             rl_model=D3QN,
             enviro_fn=enviro,
             reward_fn=reward_policy,
             act_list=[0, 1, 2],
-            max_epoch=100,
-            max_iter=100,
+            max_epoch=500,
+            max_iter=300,
             replay_buffer_max_sz=64,
-            replay_sz=1,
+            replay_sz=4,
             replay_trial=1,
-            replay_opt=None,
+            replay_opt=REPLAY_PRIORITIZATION,
             gamma=0.99,
-            alpha=0.5,
+            alpha=0.001,
             agent_update_interval=5,
             t_update_interval=10,
             t_update_rate=0.01)
@@ -257,10 +257,9 @@ class DQN_TEST():
                 np.array([linear_x, leakReLU, leakReLU, linear_x], dtype=object),
             q_normalization=
                 np.array([linear_x, znormal, znormal, linear_x], dtype=object))
-        self.neural.RL_NEURAL_SETTING()
-        self.neural.RL_RUN(initial_state=np.array([0, 4, random.randint(0, 3), 0]),
-                           terminate_reward_condition=24,
-                           show=True)
+        self.neural.RL_Q_SETTING(True)
+        self.neural.E_G_DECAY_SETTING()
+        self.neural.RL_RUN(initial_state=np.array([0, 4, random.randint(0, 3), 0]), terminate_reward_condition=20)
         self.static_function()
 
     def static_function(self):
@@ -339,25 +338,17 @@ class PY_GAME():
             # -------------REWARD----------------------
             reward, t = reward_policy(np.array([self.cx, self.cy, self.ball_x, self.ball_y]))
             # ------------ACTION-----------------------
-            act = RL_ACTION(s=np.array([self.cx, self.cy, self.ball_x, self.ball_y]),
-                            epsilon=0.0,
-                            agent = self.neural.RL_DATA["agent"],
-                            act_list=self.neural.RL_DATA["act_list"],
-                            SA_merge=self.neural.RL_DATA["SA_merge"])
+            act = RL_DIRECT_ACTION(s=np.array([self.cx, self.cy, self.ball_x, self.ball_y]), rl_data_dict=self.neural.RL_DATA)
             print(
                 Fore.LIGHTRED_EX,
-                f'Ac : {act}',
+                total_reward,
                 Fore.LIGHTBLACK_EX,
                 [self.cx, self.cy, self.ball_x, self.ball_y],
                 Fore.LIGHTYELLOW_EX,
-                f'qn : {np.where(self.neural.RL_DATA["agent"].output[0:len(self.neural.RL_DATA["act_list"])]), 1, 0}',
+                f'agent : {self.neural.RL_DATA["agent"].output[0:len(self.neural.RL_DATA["act_list"])]}',
                 Fore.LIGHTBLUE_EX,
-                total_reward,
+                f'Ac : {act}',
                 Fore.RESET)
-            for a in self.neural.RL_DATA["act_list"]:
-                print(Fore.LIGHTGREEN_EX, a, Fore.LIGHTWHITE_EX, self.neural.RL_DATA["agent"].run(
-                    np.append(np.array([self.cx, self.cy, self.ball_x, self.ball_y]), a)
-                ))
             self.cx, self.cy, self.ball_x, self.ball_y = enviro([self.cx, self.cy, self.ball_x, self.ball_y], act)
             total_reward += reward
             if reward < 0:
