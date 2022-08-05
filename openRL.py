@@ -16,27 +16,47 @@ class openRL:
     RL_DQN_SETTING : Make the neural network
     """
 
-    __up_step = 0
-    __reward_terminate_max = 12
     reward_time_stamp = np.array(0)
-
-    qn = openNeural()  # value neural
-    tqn = openNeural()  # target value neural
-
-    __replay_buffer = np.ndarray  # structure as [state, action, reward, future, termination, TDerror]
-    __replay_index_list = np.empty((0, 6))
-
-    RL_DATA = {}
+    RL_DATA = {'action_fn': object,
+               'rl_model': object,
+               'enviro_fn': object,
+               'reward_fn': object,
+               'act_list': list,
+               'max_epoch': int,
+               'max_iter': int,
+               'replay_buffer_max_sz': int,
+               'replay_sz': int,
+               'replay_trial': int,
+               'replay_opt': object,
+               'gamma': float,
+               'alpha': float,
+               'agent_update_interval': int,
+               't_update_interval': int,
+               't_update_rate': float,
+               'qn': list,
+               'tqn': list,
+               'agent': openNeural,
+               'SA_merge': bool,
+               'epsilon': float,
+               'epsilon_min': float,
+               'epsilon_decay_fn': object,
+               'epsilon_decay_rate': float,
+               'epsilon_decay_threshold': float,
+               'epsilon_decay_threshold_rate': float,
+               'total_reward': float,
+               'epoch': int}
 
     def __init__(self):
         pass
 
     def RL_SETTING(self,
+                   action_fn,
                    rl_model, enviro_fn, reward_fn, act_list,
                    max_epoch, max_iter,
-                   replay_buffer_max_sz, replay_sz, replay_trial, replay_opt,
-                   gamma, alpha, agent_update_interval, t_update_interval, t_update_rate):
+                   replay_buffer_max_sz, replay_sz, replay_trial,
+                   gamma, alpha, agent_update_interval, t_update_interval, t_update_rate, replay_opt=None):
         # -------RL setting-----------
+        self.RL_DATA["action_fn"] = action_fn
         self.RL_DATA["rl_model"] = rl_model
         self.RL_DATA["enviro_fn"] = enviro_fn
         self.RL_DATA["reward_fn"] = reward_fn
@@ -83,74 +103,45 @@ class openRL:
         self.RL_DATA["qn"] = np.append(self.RL_DATA["qn"], q_network)
         self.RL_DATA["tqn"] = np.append(self.RL_DATA["tqn"], tq_network)
 
-    def CREATE_P(self,
-                 learning_rate, dropout_rate, loss_fun, learn_optima,
-                 p_layer=np.array([4, 8, 12, 3]),
-                 p_activation_fn=
-                 np.array([linear_x, leakReLU, leakReLU, linear_x], dtype=object),
-                 p_normalization=
-                 np.array([linear_x, znormal, znormal, linear_x], dtype=object),
-                 ):
-        # layer setting
-        p_network = openNeural()
-        for i, L in enumerate(p_layer):
-            p_network.add_layer(L, p_activation_fn[i], normal=p_normalization[i])
-        p_network.generate_weight()
-        p_network.opt_reset()
-        p_network.learning_set(learning_rate=learning_rate,
-                               dropout_rate=dropout_rate,
-                               loss_fun=loss_fun,
-                               learn_optima=learn_optima)
-        self.RL_DATA["pn"] = p_network
 
-    def RL_NEURAL_SETTING(self):
-        # --------Neural setting------
-        if self.RL_DATA["rl_model"] is SAC:
-            assert len(self.RL_DATA["qn"]) == 2
-            self.RL_DATA["agent"] = self.RL_DATA["pn"]  # call by object reference
-            self.RL_DATA["SA_merge"] = True
-            self.RL_DATA["rl_learn"] = RL_ON_POLICY_LEARN
+    def RL_Q_SETTING(self, SA_merge):
+        self.RL_DATA["SA_merge"] = SA_merge
+        self.RL_DATA["agent"] = self.RL_DATA["qn"][0]
+
+
+    def E_G_DECAY_SETTING(self,
+                          initial_epsilon=1,
+                          epsilon_decay_rate=0.9,
+                          decay_threshold=1,
+                          decay_threshold_rate=0.8,
+                          decay_minimum=0.1,
+                          decay_fn=E_G_DECAY_BY_REWARD):
+        self.RL_DATA["epsilon"] = initial_epsilon
+        self.RL_DATA["epsilon_min"] = decay_minimum
+        if decay_fn is None:
+            self.RL_DATA["epsilon_decay_fn"] = E_G_DECAY_BY_REWARD
         else:
-            self.RL_DATA["agent"] = self.RL_DATA["qn"][0]  # call by object reference
-            self.RL_DATA["rl_learn"] = RL_OFF_POLICY_LEARN
-            if self.RL_DATA["rl_model"] is D2QN or D3QN:
-                if self.RL_DATA["qn"][0].get_shape()[-1] == 2:
-                    self.RL_DATA["SA_merge"] = True
-                else:
-                    self.RL_DATA["SA_merge"] = False
-            else:
-                if self.RL_DATA["agent"].get_shape()[-1] == 1:
-                    self.RL_DATA["SA_merge"] = True
-                else:
-                    self.RL_DATA["SA_merge"] = False
+            self.RL_DATA["epsilon_decay_fn"] = decay_fn
+        self.RL_DATA["epsilon_decay_rate"] = epsilon_decay_rate
+        self.RL_DATA["epsilon_decay_threshold"] = decay_threshold
+        self.RL_DATA["epsilon_decay_threshold_rate"] = decay_threshold_rate
 
-    def RL_RUN(self, initial_state, terminate_reward_condition=None, ep_decay_rate=0.9, show=True):
-        """
-        Args:
-            initial_state(np.ndarray) : initial state
-            terminate_reward_condition(float) : terminate_reward_condition if None the program do until max epoch
-            ep_decay_rate(float) : epsilon decay rate
-            show(bool): show each reward
-        """
+    def RL_RUN(self, initial_state, terminate_reward_condition=None):
+        # ----------playing initialization----------
         __update = 0
-        # ----------playing episode----------
-        max_reward = 0
-        total_reward = 0
-        action_probability = 0.8 if not self.RL_DATA["rl_model"] is SAC else 0
-        reward_threshold = 1
         replay_buffer = np.empty((0, 5))
         update_step = 0
+        # ----------playing episode----------
         for __ep in range(self.RL_DATA["max_epoch"]):
             # ----------playing----------
+            self.RL_DATA["total_reward"] = 0
+            self.RL_DATA["epoch"] = __ep
             s = initial_state.copy()  # initialize state S
-            max_reward = max(total_reward, max_reward)
-            total_reward = 0
             for __it in range(self.RL_DATA["max_iter"]):  # increase the interation
                 update_step += 1
                 # ----------Get exp from action----------
                 r, t = self.RL_DATA["reward_fn"](s)  # get [r, t] (reward and terminated state)
-                a = RL_ACTION(s=s,
-                              epsilon=action_probability, rl_data_dict=self.RL_DATA)  # get a (action)
+                a = self.RL_DATA["action_fn"](s=s, rl_data_dict=self.RL_DATA)  # get a (action)
                 ss = self.RL_DATA["enviro_fn"](s, a)  # get ss (new state)
                 exp = np.array([s, a, r, ss, t], dtype=object)
                 # ----------Add experience buffer----------
@@ -162,19 +153,22 @@ class openRL:
                 # ------target uupdate--------------------
                 RL_TRG_UPDATE(update_step, rl_data_dict=self.RL_DATA)
                 # ---------e-greedy policy -----------------
-                total_reward += r
+                self.RL_DATA["total_reward"] += r
                 # ---------Info -----------------
-                if total_reward >= reward_threshold:
-                    action_probability *= ep_decay_rate
-                    reward_threshold += 0.5
-                    action_probability = max(action_probability, 0.01)
-                    print(__ep, __it, total_reward, action_probability)
+                if "epsilon_decay_fn" in self.RL_DATA:
+                    self.RL_DATA["epsilon_decay_fn"](self.RL_DATA)
+                # ---------Info------------------
+                print(Fore.RESET, __ep, __it, Fore.LIGHTCYAN_EX, s, Fore.LIGHTYELLOW_EX, a, Fore.LIGHTYELLOW_EX, r,
+                      Fore.LIGHTCYAN_EX, ss, t, Fore.LIGHTGREEN_EX, self.RL_DATA["epsilon"])
                 # ---------Termination check -----------------
-                if t: break
+                if t:
+                    break
                 s = ss.copy()  # update new state
-            self.reward_time_stamp = np.append(self.reward_time_stamp, total_reward)
-            if terminate_reward_condition is not None and total_reward >= terminate_reward_condition:
+            # ---------graph-----------------
+            self.reward_time_stamp = np.append(self.reward_time_stamp, self.RL_DATA["total_reward"])
+            if terminate_reward_condition is not None and self.RL_DATA["total_reward"] >= terminate_reward_condition:
                 break
+        print(self.RL_DATA)
 
     def RL_SAVE(self, file_name) -> None:
         os.makedirs("save", exist_ok=True)
@@ -201,10 +195,6 @@ class openRL:
             qn.numpy_save("save/" + file_name + "_qn_" + str(i))
         for i, tqn in enumerate(self.RL_DATA["tqn"]):
             tqn.numpy_save("save/" + file_name + "_tqn_" + str(i))
-        try:
-            self.RL_DATA["pn"].numpy_save("save/" + file_name + "_pn")
-        except Exception as e:
-            pass
         print("SAVE FINISH")
 
     def RL_LOAD(self, file_name) -> None:
@@ -228,7 +218,6 @@ class openRL:
         # ----------------------------------------------------
         self.RL_DATA["qn"] = np.empty(0)
         self.RL_DATA["tqn"] = np.empty(0)
-        self.RL_DATA["pn"] = openNeural()
         for i in range(qn_sz):
             q_network = openNeural()
             q_network.numpy_load("save/" + file_name + "_qn_" + str(i))
@@ -237,11 +226,4 @@ class openRL:
             q_network = openNeural()
             q_network.numpy_load("save/" + file_name + "_tqn_" + str(i))
             self.RL_DATA["tqn"] = np.append(self.RL_DATA["tqn"], q_network)
-        try:
-            p_network = openNeural()
-            p_network.numpy_load("save/" + file_name + "_pn")
-            self.RL_DATA["pn"] = p_network
-        except Exception as e:
-            pass
-        self.RL_NEURAL_SETTING()
         print("LOAD FINISH")

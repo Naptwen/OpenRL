@@ -1,4 +1,7 @@
 import random
+
+import numpy as np
+
 from openNeural import *
 
 
@@ -35,12 +38,12 @@ def MEAN_Q(status, neural, act_list) -> float:
 
 
 # base on the all actions, finding the Value and Advantage
-def ARGMAX_VA_Q(status, neural, act_list) -> float:
+def ARGMAX_VA_Q(status, neural, act_list) -> int:
     max_list = np.empty(len(act_list))
     for i, act in enumerate(act_list):
         neural.run(np.append(status, act))
         max_list[i] = neural.output[1] + neural.output[0]
-    return np.max(max_list)
+    return int(np.argmax(max_list))
 
 
 # base on the all actions, finding the Value and Advantage
@@ -63,6 +66,26 @@ def ALL_Q(status, neural, act_list) -> np.ndarray:
 
 # ------------------MODEL--------------------------
 
+# call by object reference
+def E_G_DECAY_BY_REWARD(rl_data_dict):
+    assert "total_reward" in rl_data_dict
+    assert "epsilon" in rl_data_dict
+    assert "epsilon_decay_rate" in rl_data_dict
+    assert "epsilon_decay_threshold" in rl_data_dict
+    assert "epsilon_decay_threshold_rate" in rl_data_dict
+    assert "epsilon_min" in rl_data_dict
+    if rl_data_dict["total_reward"] >= rl_data_dict["epsilon_decay_threshold"]:
+        rl_data_dict["epsilon"] *= rl_data_dict["epsilon_decay_rate"]
+        rl_data_dict["epsilon_decay_threshold"] += rl_data_dict["epsilon_decay_threshold_rate"]
+        rl_data_dict["epsilon"] = max(rl_data_dict["epsilon"], rl_data_dict["epsilon_min"])
+
+
+def E_G_DECAY_BY_EPISODE(rl_data_dict):
+    assert "max_epoch" in rl_data_dict
+    assert "epsilon" in rl_data_dict
+    rl_data_dict["epsilon"] = 1 - rl_data_dict["epoch"]/rl_data_dict["max_epoch"]
+
+
 def DQN(exp, rl_data_dict) -> dict:
     assert "gamma" in rl_data_dict
     assert "tqn" in rl_data_dict
@@ -76,13 +99,21 @@ def DQN(exp, rl_data_dict) -> dict:
         else:
             yt = r
         q = rl_data_dict["qn"][0].run(np.append(s, a))
+        a = 0
     else:
         if not t:
             yt = r + gamma * max(rl_data_dict["tqn"][0].run(_s))
         else:
             yt = r
         q = rl_data_dict["qn"][0].run(s)[a]
-    return {"Y": yt, "Q": q, "E": 0.5 * (yt - q)}
+    # ---------------------------------- RETURN LOSS -----------------------------------------
+    Q = np.empty(len(rl_data_dict["qn"]), dtype=list)
+    for i, qn in enumerate(rl_data_dict["qn"]):
+        Q[i] = np.zeros(qn.get_shape()[-1])
+    Y = Q.copy()
+    Q[a] = q
+    Y[a] = yt
+    return {"Q": Q, "Y": Y,  "E": 0.5 * (yt - q)}
 
 
 def DDQN(exp, rl_data_dict) -> dict:
@@ -99,13 +130,21 @@ def DDQN(exp, rl_data_dict) -> dict:
         else:
             yt = r
         q = rl_data_dict["qn"][0].run(np.append(s, a))
+        a = 0
     else:
         if not t:
             yt = r + gamma * rl_data_dict["tqn"][0].run(_s)[np.argmax(rl_data_dict["qn"][0].run(_s))]
         else:
             yt = r
         q = rl_data_dict["qn"][0].run(s)[a]
-    return {"Y": yt, "Q": q, "E": 0.5 * (yt - q)}
+    # ---------------------------------- RETURN LOSS -----------------------------------------
+    Q = np.empty(len(rl_data_dict["qn"]), dtype=list)
+    for i, qn in enumerate(rl_data_dict["qn"]):
+        Q[i] = np.zeros(qn.get_shape()[-1])
+    Y = Q.copy()
+    Q[a] = q
+    Y[a] = yt
+    return {"Q": Q, "Y": Y, "E": 0.5 * (yt - q)}
 
 
 def D2QN(exp, rl_data_dict) -> dict:
@@ -125,6 +164,7 @@ def D2QN(exp, rl_data_dict) -> dict:
             yt = r
         VA = np.sum(rl_data_dict["qn"][0].run(np.append(s, a)))
         q = VA - MEAN_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"])
+        a = 0
     else:
         if not t:
             rl_data_dict["tqn"][0].run(_s)
@@ -137,7 +177,14 @@ def D2QN(exp, rl_data_dict) -> dict:
         q = (rl_data_dict["qn"][0].output[-1]  # V
              + rl_data_dict["qn"][0].output[a]  # A
              - np.mean(rl_data_dict["qn"][0].output[:-1]))  # mean A
-    return {"Y": yt, "Q": q, "E": 0.5 * (yt - q)}
+    # ---------------------------------- RETURN LOSS -----------------------------------------
+    Q = np.empty(len(rl_data_dict["qn"]), dtype=list)
+    for i, qn in enumerate(rl_data_dict["qn"]):
+        Q[i] = np.zeros(qn.get_shape()[-1])
+    Y = Q.copy()
+    Q[a] = q
+    Y[a] = yt
+    return {"Q": Q, "Y": Y, "E": 0.5 * (yt - q)}
 
 
 def D3QN(exp, rl_data_dict) -> dict:
@@ -169,6 +216,7 @@ def D3QN(exp, rl_data_dict) -> dict:
             yt = r
         VA = np.sum(rl_data_dict["qn"][0].run(np.append(s, a)))
         q = VA - MEAN_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"])
+        a = 0
     else:
         if not t:
             rl_data_dict["tqn"][0].run(_s)
@@ -181,7 +229,14 @@ def D3QN(exp, rl_data_dict) -> dict:
         q = (rl_data_dict["qn"][0].output[-1]  # V
              + rl_data_dict["qn"][0].output[a]  # A
              - np.mean(rl_data_dict["qn"][0].output[:-1]))  # mean A
-    return {"Y": yt, "Q": q, "E": 0.5 * (yt - q)}
+    # ---------------------------------- RETURN LOSS -----------------------------------------
+    Q = np.empty(len(rl_data_dict["qn"]), dtype=list)
+    for i, qn in enumerate(rl_data_dict["qn"]):
+        Q[i] = np.zeros(qn.get_shape()[-1])
+    Y = Q.copy()
+    Q[a] = q
+    Y[a] = yt
+    return {"Q": Q, "Y": Y, "E": 0.5 * (yt - q)}
 
 
 def SAC(exp, rl_data_dict) -> dict:
@@ -200,7 +255,7 @@ def SAC(exp, rl_data_dict) -> dict:
     assert rl_data_dict["SA_merge"] is True
     s, a, r, ss, t = exp
     alpha, gamma = rl_data_dict["alpha"], rl_data_dict["gamma"]
-    qn_1, qn_2, pn = rl_data_dict["qn"][0], rl_data_dict["qn"][1], rl_data_dict["pn"]
+    pn, qn_1, qn_2 = rl_data_dict["qn"][0], rl_data_dict["qn"][1], rl_data_dict["qn"][2]
     tqn_1, tqn_2 = rl_data_dict["tqn"][0], rl_data_dict["tqn"][1]
     # -------------------------- State ----------------------------------------------------
     # --------------------- Select Index --------------------------------------------------
@@ -228,7 +283,16 @@ def SAC(exp, rl_data_dict) -> dict:
     rl_data_dict["act_list"] = original
     # ---------------------- Update alpha function ------------------------------------------
     rl_data_dict["alpha"] = 0.5
-    return {"Q": q, "Y": y_ss, "P": p_l, "YP": q_s_rp, "I": I, "E": shannon_entropy(p_l)}
+    # ---------------------------------- RETURN LOSS -----------------------------------------
+    Q = np.empty(len(rl_data_dict["qn"]), dtype=list)
+    for i, qn in enumerate(rl_data_dict["qn"]):
+        Q[i] = np.zeros(qn.get_shape()[-1])
+    Y = Q.copy()
+    Q[I] = q
+    Y[I] = y_ss
+    Q[2] = p_l
+    Q[2] = q_s_rp
+    return {"Q": Q, "Y": Y, "E": shannon_entropy(p_l)}
 
 
 # -------------------OPTIMIZATION-----------------------------
@@ -248,6 +312,7 @@ def REPLAY_SHUFFLE(replay_buffer, rl_data_dict):
         replay_buffer(np.ndarray): replay buffer array
         rl_data_dict(dict): dictionary for reinforcement learning data
     """
+    assert len(replay_buffer) > 0
     index_list = np.arange(len(replay_buffer))
     np.random.shuffle(index_list)
     return index_list
@@ -258,7 +323,6 @@ def REPLAY_PRIORITIZATION(replay_buffer, rl_data_dict) -> np.ndarray:
     """
     This is reordering the replay buffer index through
     the values with the largest difference are listed with the highest probability with annealing bias
-
     Args:
         replay_buffer(np.ndarray): replay buffer array
         rl_data_dict(dict): dictionary for reinforcement learning data
@@ -266,8 +330,9 @@ def REPLAY_PRIORITIZATION(replay_buffer, rl_data_dict) -> np.ndarray:
     Return:
         re-ordered index array
     """
+    assert len(replay_buffer) > 0
+    assert "rl_model" in rl_data_dict
     robust_priority = np.empty(0)
-    replay_buffer = rl_data_dict
     for exp in replay_buffer:
         err = rl_data_dict["rl_model"](exp, rl_data_dict)["E"]
         robust_priority = np.append(robust_priority, err)
@@ -330,28 +395,26 @@ def RL_TRG_UPDATE(t_update_step, rl_data_dict):
 
 # ------------------PROCESS--------------------------
 
-def RL_ACTION(s, epsilon, rl_data_dict) -> int:
-    """
-    Args:
-        s(np.ndarray) : current state
-        epsilon(float) : between 0 and 1 portability
-        agent(openNeural) : agent neural
-        act_list(np.ndarray) : the list for the actions
-        SA_merge(bool) : if the input value include action and status True other False
-    Return:
-        action(int): action from fn(s)
-    """
+def RL_E_G_ACTION(s, rl_data_dict) -> int:
     agent = rl_data_dict["agent"]
     act_list = rl_data_dict["act_list"]
-    if rl_data_dict["rl_model"] is SAC:
-        return int(np.argmax(rl_data_dict["pn"].run(s)))
-    if 0 < epsilon and random.uniform(0, 1) < epsilon:
+    if 0 < rl_data_dict["epsilon"] and random.uniform(0, 1) < rl_data_dict["epsilon"]:
         return np.random.choice(act_list)
     else:
         if rl_data_dict["SA_merge"]:
             if rl_data_dict["rl_model"] is D2QN or D3QN:
-                return int(ARGMAX_VA_Q(s, agent, act_list))
-            return int(ARG_MAXQ(s, agent, act_list))
+                return ARGMAX_VA_Q(s, agent, act_list)
+            return ARG_MAXQ(s, agent, act_list)
+    return int(np.argmax(agent.run(s)))
+
+
+def RL_DIRECT_ACTION(s, rl_data_dict) -> int:
+    agent = rl_data_dict["agent"]
+    act_list = rl_data_dict["act_list"]
+    if rl_data_dict["SA_merge"]:
+        if rl_data_dict["rl_model"] is D2QN or D3QN:
+            return ARGMAX_VA_Q(s, agent, act_list)
+        return ARG_MAXQ(s, agent, act_list)
     return int(np.argmax(agent.run(s)))
 
 
@@ -370,46 +433,24 @@ def RL_ADD_EXP(exp, replay_buffer, replay_buffer_max_sz) -> np.ndarray:
     return replay_buffer
 
 
-def RL_ON_POLICY_LEARN(replay_buffer, rl_data_dict):
-    assert rl_data_dict["replay_sz"] == 1
-    for trial in range(rl_data_dict["replay_trial"]):
-        # ---------SGD-----------
-        for exp in replay_buffer:
-            loss_data = rl_data_dict["rl_model"](exp=exp, rl_data_dict=rl_data_dict)
-            Q = loss_data["Q"]
-            Y = loss_data["Y"]
-            P = np.zeros(rl_data_dict["pn"].get_shape()[-1])
-            YP = P.copy()
-            P[exp[1]] = loss_data["P"]
-            YP[exp[1]] = loss_data["YP"]
-            I = loss_data["I"]
-            if I == 0:
-                rl_data_dict["qn"][0].learn_start(Q, Y)
-            else:
-                rl_data_dict["qn"][1].learn_start(Q, Y)
-            rl_data_dict["pn"].learn_start(P, YP)
-
-
-def RL_OFF_POLICY_LEARN(replay_buffer, rl_data_dict):
+def RL_LEARN(replay_buffer, rl_data_dict):
     for trial in range(rl_data_dict["replay_trial"]):
         # ---------mini batch split-----------
         mini_batch = \
             replay_buffer[rl_data_dict["replay_sz"] * trial: rl_data_dict["replay_sz"] * (trial + 1)]
         # ---------mini batch replay----------
-        Q = np.zeros(rl_data_dict["qn"][0].get_shape()[-1])
+        Q = np.empty(len(rl_data_dict["qn"]), dtype = list)
+        for i, qn in enumerate(rl_data_dict["qn"]):
+            Q[i] = np.zeros(qn.get_shape()[-1])
         Y = Q.copy()
-
         # ---------accumulate gradient---------
         if len(mini_batch) >= rl_data_dict["replay_sz"]:
             for exp in mini_batch:
                 loss_data = rl_data_dict["rl_model"](exp=exp, rl_data_dict=rl_data_dict)
-                if rl_data_dict["SA_merge"]:
-                    Y += loss_data["Y"]
-                    Q += loss_data["Q"]
-                else:
-                    Y[exp[1]] += loss_data["Y"]
-                    Q[exp[1]] += loss_data["Q"]
-            rl_data_dict["qn"][0].learn_start(Q, Y)
+                Y += loss_data["Y"]
+                Q += loss_data["Q"]
+            for i, qn in enumerate(rl_data_dict["qn"]):
+                qn.learn_start(Q[i], Y[i])
         else:
             break
 
@@ -426,7 +467,6 @@ def RL_REPLAY(replay_buffer, update_step, rl_data_dict):
     assert "replay_trial" in rl_data_dict
     assert "replay_opt" in rl_data_dict
     assert "agent_update_interval" in rl_data_dict
-    assert "rl_learn" in rl_data_dict
 
     if len(replay_buffer) == rl_data_dict["replay_buffer_max_sz"] \
             and update_step % rl_data_dict["agent_update_interval"] == 0:
@@ -436,4 +476,4 @@ def RL_REPLAY(replay_buffer, update_step, rl_data_dict):
         else:
             replay_index_list = rl_data_dict["replay_opt"](replay_buffer, rl_data_dict)
         re_ordered_replay = replay_buffer[replay_index_list]  # deepcopy array
-        rl_data_dict["rl_learn"](re_ordered_replay, rl_data_dict)
+        RL_LEARN(re_ordered_replay, rl_data_dict)
