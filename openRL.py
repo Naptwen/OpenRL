@@ -68,7 +68,7 @@ class openRL:
         :param replay_trial:
         :type replay_trial: int
         :param replay_opt:
-        :type replay_opt: function
+        :type replay_opt: function or None
         :param gamma:
         :type gamma: float
         :param alpha:
@@ -82,7 +82,7 @@ class openRL:
         :param sa_merge:
         :type sa_merge: bool
         :param epsilon_decay_fn:
-        :type epsilon_decay_fn: function
+        :type epsilon_decay_fn: function or None
         """
         # -------RL setting-----------
         self.RL_DATA["rl_model"] = rl_model
@@ -107,7 +107,6 @@ class openRL:
         self.RL_DATA["epsilon"] = 0
         self.RL_DATA["epsilon_decay_fn"] = epsilon_decay_fn
         self.RL_DATA["SA_merge"] = sa_merge
-
     def CREATE_Q(self,
                  learning_rate, dropout_rate, loss_fun, learn_optima,
                  q_layer=np.array([4, 8, 12, 3]),
@@ -153,7 +152,7 @@ class openRL:
                           initial_epsilon=1,
                           epsilon_decay_rate=0.9,
                           decay_threshold=1,
-                          decay_threshold_rate=0.8,
+                          decay_threshold_rate=1,
                           decay_minimum=0.1,
                           decay_fn=E_G_DECAY_BY_REWARD):
         """
@@ -193,6 +192,8 @@ class openRL:
         __update = 0
         replay_buffer = np.empty((0, 5))
         update_step = 0
+        for k, v in self.RL_DATA.items():
+            print(f'key {k} : item : {v}')
         # ----------playing episode----------
         for __ep in range(self.RL_DATA["max_epoch"]):
             # ----------playing----------
@@ -220,8 +221,13 @@ class openRL:
                 if self.RL_DATA["epsilon_decay_fn"] is not None:
                     self.RL_DATA["epsilon_decay_fn"](self.RL_DATA)
                 # ---------Info------------------
-                print(Fore.RESET, __ep, __it, Fore.LIGHTCYAN_EX, s, Fore.LIGHTYELLOW_EX, a, Fore.LIGHTYELLOW_EX, r,
-                      Fore.LIGHTCYAN_EX, ss, t, Fore.LIGHTGREEN_EX, self.RL_DATA["epsilon"])
+                print(Fore.RESET, __ep, __it,
+                      Fore.LIGHTBLUE_EX, self.RL_DATA["qn"][0].run(s),
+                      Fore.LIGHTCYAN_EX, s, Fore.LIGHTYELLOW_EX, a, Fore.LIGHTYELLOW_EX, r,
+                      Fore.LIGHTCYAN_EX, ss, t, Fore.LIGHTGREEN_EX,
+                        Fore.LIGHTYELLOW_EX,
+                        f'TR : {self.RL_DATA["total_reward"]}',
+                      self.RL_DATA["epsilon"])
                 # ---------Termination check -----------------
                 if t:
                     break
@@ -270,34 +276,37 @@ class openRL:
         print("SAVE FINISH")
 
     def RL_LOAD(self, file_name: str) -> None:
-        [self.RL_DATA['action_fn'],
-         self.RL_DATA['rl_model'],
-         self.RL_DATA['enviro_fn'],
-         self.RL_DATA['reward_fn'],
-         self.RL_DATA['act_list'],
-         self.RL_DATA['max_epoch'],
-         self.RL_DATA['max_iter'],
-         self.RL_DATA['replay_buffer_max_sz'],
-         self.RL_DATA['replay_sz'],
-         self.RL_DATA['replay_trial'],
-         self.RL_DATA['replay_opt'],
-         self.RL_DATA['gamma'],
-         self.RL_DATA['alpha'],
-         self.RL_DATA['agent_update_interval'],
-         self.RL_DATA['t_update_interval'],
-         self.RL_DATA['t_update_rate'],
-         self.RL_DATA['qn'],
-         self.RL_DATA['tqn'],
-         self.RL_DATA['agent'],
-         self.RL_DATA['SA_merge'],
-         self.RL_DATA['epsilon'],
-         self.RL_DATA['epsilon_min'],
-         self.RL_DATA['epsilon_decay_fn'],
-         self.RL_DATA['epsilon_decay_rate'],
-         self.RL_DATA['epsilon_decay_threshold'],
-         self.RL_DATA['epsilon_decay_threshold_rate'],
-         self.RL_DATA['total_reward'],
-         self.RL_DATA['epoch'],
-         self.RL_DATA["qn"],
-         self.RL_DATA["tqn"]] = np.load("save/" + file_name + "_info.npy", allow_pickle=True)
+        try:
+            [self.RL_DATA['action_fn'],
+             self.RL_DATA['rl_model'],
+             self.RL_DATA['enviro_fn'],
+             self.RL_DATA['reward_fn'],
+             self.RL_DATA['act_list'],
+             self.RL_DATA['max_epoch'],
+             self.RL_DATA['max_iter'],
+             self.RL_DATA['replay_buffer_max_sz'],
+             self.RL_DATA['replay_sz'],
+             self.RL_DATA['replay_trial'],
+             self.RL_DATA['replay_opt'],
+             self.RL_DATA['gamma'],
+             self.RL_DATA['alpha'],
+             self.RL_DATA['agent_update_interval'],
+             self.RL_DATA['t_update_interval'],
+             self.RL_DATA['t_update_rate'],
+             self.RL_DATA['qn'],
+             self.RL_DATA['tqn'],
+             self.RL_DATA['agent'],
+             self.RL_DATA['SA_merge'],
+             self.RL_DATA['epsilon'],
+             self.RL_DATA['epsilon_min'],
+             self.RL_DATA['epsilon_decay_fn'],
+             self.RL_DATA['epsilon_decay_rate'],
+             self.RL_DATA['epsilon_decay_threshold'],
+             self.RL_DATA['epsilon_decay_threshold_rate'],
+             self.RL_DATA['total_reward'],
+             self.RL_DATA['epoch'],
+             self.RL_DATA["qn"],
+             self.RL_DATA["tqn"]] = np.load("save/" + file_name + "_info.npy", allow_pickle=True)
+        except Exception as e:
+            print(file_name, " is not exists in save folder")
         print("LOAD FINISH")

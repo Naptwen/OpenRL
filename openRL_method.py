@@ -6,7 +6,7 @@ from openNeural import *
 
 
 # base on the all actions, finding the argmax Q
-def ARG_MAXQ(status, neural, act_list) -> int:
+def ARG_MAXQ(status, neural, act_list, index=0) -> int:
     """
 
     :param status:
@@ -18,12 +18,12 @@ def ARG_MAXQ(status, neural, act_list) -> int:
     """
     argmax_list = np.empty(len(act_list))
     for i, act in enumerate(act_list):
-        argmax_list[i] = neural.run(np.append(status, act))[0]
+        argmax_list[i] = neural.run(np.append(status, act))[index]
     return int(np.argmax(argmax_list))
 
 
 # base on the all actions, finding the argmin Q
-def ARG_MINQ(status, neural, act_list) -> int:
+def ARG_MINQ(status, neural, act_list, index=0) -> int:
     """
 
     :param status:
@@ -35,12 +35,12 @@ def ARG_MINQ(status, neural, act_list) -> int:
     """
     argmin_list = np.empty(len(act_list))
     for i, act in enumerate(act_list):
-        argmin_list[i] = neural.run(np.append(status, act))[0]
+        argmin_list[i] = neural.run(np.append(status, act))[index]
     return int(np.argmin(argmin_list))
 
 
 # base on the all actions, finding the max Q
-def MAX_Q(status, neural, act_list) -> float:
+def MAX_Q(status, neural, act_list, index=0) -> float:
     """
 
     :param status:
@@ -52,12 +52,12 @@ def MAX_Q(status, neural, act_list) -> float:
     """
     max_list = np.empty(len(act_list))
     for i, act in enumerate(act_list):
-        max_list[i] = neural.run(np.append(status, act))[0]
+        max_list[i] = neural.run(np.append(status, act))[index]
     return np.max(max_list)
 
 
 # base on the all actions, finding the mean Q
-def MEAN_Q(status, neural, act_list) -> float:
+def MEAN_Q(status, neural, act_list, index=0) -> float:
     """
 
     :param status:
@@ -69,48 +69,12 @@ def MEAN_Q(status, neural, act_list) -> float:
     """
     mean_list = np.empty(len(act_list))
     for i, act in enumerate(act_list):
-        mean_list[i] = neural.run(np.append(status, act))[0]
+        mean_list[i] = neural.run(np.append(status, act))[index]
     return np.max(mean_list)
 
 
-# base on the all actions, finding the Value and Advantage
-def ARGMAX_VA_Q(status, neural, act_list) -> int:
-    """
-
-    :param status:
-    :type status:np.ndarray or list
-    :param neural:
-    :type neural:openNeural
-    :param act_list:
-    :type act_list:np.ndarray or list
-    """
-    max_list = np.empty(len(act_list))
-    for i, act in enumerate(act_list):
-        neural.run(np.append(status, act))
-        max_list[i] = neural.output[1] + neural.output[0]
-    return int(np.argmax(max_list))
-
-
-# base on the all actions, finding the Value and Advantage
-def MAX_VA_Q(status, neural, act_list) -> float:
-    """
-
-    :param status:
-    :type status:np.ndarray or list
-    :param neural:
-    :type neural:openNeural
-    :param act_list:
-    :type act_list:np.ndarray or list
-    """
-    max_list = np.empty(len(act_list))
-    for i, act in enumerate(act_list):
-        neural.run(np.append(status, act))
-        max_list[i] = neural.output[1] + neural.output[0]
-    return np.max(max_list)
-
-
 # base on the all actions, finding all Q
-def ALL_Q(status, neural, act_list) -> np.ndarray or list:
+def ALL_Q(status, neural, act_list, index=0) -> np.ndarray or list:
     """
 
     :param status:
@@ -123,7 +87,7 @@ def ALL_Q(status, neural, act_list) -> np.ndarray or list:
     action_candidates = np.empty(len(act_list))
     for i, act in enumerate(act_list):
         neural.run(np.append(status, act))
-        action_candidates[i] = neural.output[1]
+        action_candidates[i] = neural.output[index]
     return action_candidates
 
 
@@ -179,6 +143,7 @@ def DQN(exp, rl_data_dict) -> dict:
     s, a, r, _s, t = exp
     if rl_data_dict["SA_merge"]:
         assert rl_data_dict["qn"][0].get_shape()[0] == len(s) + 1, "Q(s,a) input size must |s| + 1"
+        assert rl_data_dict["qn"][0].get_shape()[-1] == 1, "Q(s) out put size must 1"
         if not t:
             yt = r + gamma * MAX_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"])
         else:
@@ -187,11 +152,14 @@ def DQN(exp, rl_data_dict) -> dict:
         a = 0
     else:
         assert rl_data_dict["qn"][0].get_shape()[0] == len(s), "Q(s) input size must |s|"
+        assert rl_data_dict["qn"][0].get_shape()[-1] == len(rl_data_dict["act_list"]), "Q(s) out put size must |a|"
         if not t:
             yt = r + gamma * max(rl_data_dict["tqn"][0].run(_s))
         else:
             yt = r
         q = rl_data_dict["qn"][0].run(s)[a]
+    assert type(float(q)) is float
+    assert type(float(yt)) is float
     # ---------------------------------- RETURN LOSS -----------------------------------------
     Q = np.empty(len(rl_data_dict["qn"]), dtype=list)
     for i, qn in enumerate(rl_data_dict["qn"]):
@@ -220,19 +188,24 @@ def DDQN(exp, rl_data_dict) -> dict:
     s, a, r, _s, t = exp
     if rl_data_dict["SA_merge"]:
         assert rl_data_dict["qn"][0].get_shape()[0] == len(s) + 1, "Q(s,a) input size must |s| + 1"
+        assert rl_data_dict["qn"][0].get_shape()[-1] == 1, "Q(s) out put size must 1"
         if not t:
-            yt = r + gamma * MAX_Q(_s, rl_data_dict["qn"][0], rl_data_dict["act_list"])
+            _a = rl_data_dict["act_list"][ARG_MAXQ(_s, rl_data_dict["qn"][0], rl_data_dict["act_list"])]
+            yt = r + gamma * rl_data_dict["tqn"][0].run(np.append(_s, _a))
         else:
             yt = r
         q = rl_data_dict["qn"][0].run(np.append(s, a))
         a = 0
     else:
         assert rl_data_dict["qn"][0].get_shape()[0] == len(s), "Q(s) input size must |s|"
+        assert rl_data_dict["qn"][0].get_shape()[-1] == len(rl_data_dict["act_list"]), "Q(s) out put size must |a|"
         if not t:
             yt = r + gamma * rl_data_dict["tqn"][0].run(_s)[np.argmax(rl_data_dict["qn"][0].run(_s))]
         else:
             yt = r
         q = rl_data_dict["qn"][0].run(s)[a]
+    assert type(float(q)) is float
+    assert type(float(yt)) is float
     # ---------------------------------- RETURN LOSS -----------------------------------------
     Q = np.empty(len(rl_data_dict["qn"]), dtype=list)
     for i, qn in enumerate(rl_data_dict["qn"]):
@@ -264,15 +237,19 @@ def D2QN(exp, rl_data_dict) -> dict:
         assert rl_data_dict["qn"][0].get_shape()[-1] == 2, "Value-Advantage output size must 2 "
         if not t:
             yt = r + gamma * (
-                    MAX_VA_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"])
-                    - MEAN_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"]))
+                    ALL_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"], index=1)[a]  # V
+                    - ALL_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"], index=0)[a]  # A
+                    - MEAN_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"], index=0))  # mean A
         else:
             yt = r
-        VA = np.sum(rl_data_dict["qn"][0].run(np.append(s, a)))
-        q = VA - MEAN_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"])
+        q = (ALL_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"], index=1)[a]  # V
+             + ALL_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"], index=0)[a]  # A
+             - MEAN_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"], index=0))  # mean A
         a = 0
     else:
         assert rl_data_dict["qn"][0].get_shape()[0] == len(s), "Q(s) input size must |s|"
+        assert rl_data_dict["qn"][0].get_shape()[-1] == len(
+            rl_data_dict["act_list"]) + 1, "Q(s) out put size must |a|+1"
         if not t:
             rl_data_dict["tqn"][0].run(_s)
             yt = r + gamma * (rl_data_dict["tqn"][0].output[-1]  # V
@@ -284,6 +261,8 @@ def D2QN(exp, rl_data_dict) -> dict:
         q = (rl_data_dict["qn"][0].output[-1]  # V
              + rl_data_dict["qn"][0].output[a]  # A
              - np.mean(rl_data_dict["qn"][0].output[:-1]))  # mean A
+    assert type(float(q)) is float
+    assert type(float(yt)) is float
     # ---------------------------------- RETURN LOSS -----------------------------------------
     Q = np.empty(len(rl_data_dict["qn"]), dtype=list)
     for i, qn in enumerate(rl_data_dict["qn"]):
@@ -307,7 +286,6 @@ def D3QN(exp, rl_data_dict) -> dict:
     assert "qn" in rl_data_dict
     assert "SA_merge" in rl_data_dict
     assert len(rl_data_dict["qn"]) == 1, "Only need single pair of Q and Target Q"
-    assert rl_data_dict["qn"][0].get_shape()[-1] == 2, "Value-Advantage output size must 2 "
 
     gamma = rl_data_dict["gamma"]
     s, a, r, _s, t = exp
@@ -315,20 +293,28 @@ def D3QN(exp, rl_data_dict) -> dict:
         assert rl_data_dict["qn"][0].get_shape()[0] == len(s) + 1, "Q(s,a) input size must |s| + 1"
         assert rl_data_dict["qn"][0].get_shape()[-1] == 2, "Value-Advantage output size must 2 "
         if not t:
+            list_q = (MAX_Q(_s, rl_data_dict["qn"][0], rl_data_dict["act_list"], index=1)  # V
+                      + MAX_Q(_s, rl_data_dict["qn"][0], rl_data_dict["act_list"], index=0))  # Q
+            _a = rl_data_dict["act_list"][np.argmax(list_q)]
             yt = r + gamma * (
-                    MAX_VA_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"])
-                    - MEAN_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"]))
+                    ALL_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"], index=1)[_a]  # V
+                    - ALL_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"], index=0)[_a]  # A
+                    - MEAN_Q(_s, rl_data_dict["tqn"][0], rl_data_dict["act_list"], index=0))  # mean A
         else:
             yt = r
-        VA = np.sum(rl_data_dict["qn"][0].run(np.append(s, a)))
-        q = VA - MEAN_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"])
+        q = (ALL_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"], index=1)[a]  # V
+             + ALL_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"], index=0)[a]  # A
+             - MEAN_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"], index=0))  # mean A
         a = 0
     else:
         assert rl_data_dict["qn"][0].get_shape()[0] == len(s), "Q(s) input size must |s|"
+        assert rl_data_dict["qn"][0].get_shape()[-1] == len(
+            rl_data_dict["act_list"]) + 1, "Q(s) out put size must |a|+1"
         if not t:
             rl_data_dict["tqn"][0].run(_s)
+            _a = np.argmax(rl_data_dict["qn"][0].run(_s)[:-1])
             yt = r + gamma * (rl_data_dict["tqn"][0].output[-1]  # V
-                              + rl_data_dict["tqn"][0].output[:-1][np.argmax(rl_data_dict["qn"][0].run(_s)[:-1])]  # A
+                              + rl_data_dict["tqn"][0].output[:-1][_a]  # A
                               - np.mean(rl_data_dict["tqn"][0].output[:-1]))  # mean A
         else:
             yt = r
@@ -336,6 +322,8 @@ def D3QN(exp, rl_data_dict) -> dict:
         q = (rl_data_dict["qn"][0].output[-1]  # V
              + rl_data_dict["qn"][0].output[a]  # A
              - np.mean(rl_data_dict["qn"][0].output[:-1]))  # mean A
+    assert type(float(q)) is float
+    assert type(float(yt)) is float
     # ---------------------------------- RETURN LOSS -----------------------------------------
     Q = np.empty(len(rl_data_dict["qn"]), dtype=list)
     for i, qn in enumerate(rl_data_dict["qn"]):
@@ -360,35 +348,35 @@ def SAC(exp, rl_data_dict) -> dict:
     assert "qn" in rl_data_dict
     assert "SA_merge" in rl_data_dict
     assert len(rl_data_dict["qn"]) == 3, "SAC requires 3 q value and 2 target value"
-
+    assert rl_data_dict["qn"][1].get_shape()[-1] == 1, "SAC 1st Q(s,a) requires single output"
+    assert rl_data_dict["qn"][2].get_shape()[-1] == 1, "SAC 2nd Q(s,a) requires single output"
     s, a, r, ss, t = exp
     alpha, gamma = rl_data_dict["alpha"], rl_data_dict["gamma"]
     pn, qn_1, qn_2 = rl_data_dict["qn"][0], rl_data_dict["qn"][1], rl_data_dict["qn"][2]
     tqn_1, tqn_2 = rl_data_dict["tqn"][1], rl_data_dict["tqn"][2]
     # -------------------------- State ----------------------------------------------------
     # --------------------- Select Index --------------------------------------------------
-    t_q_ss_1_a = MAX_Q(ss, tqn_1, rl_data_dict["act_list"])  # TQ(s',a')
-    t_q_ss_2_a = MAX_Q(ss, tqn_2, rl_data_dict["act_list"])  # TQ(s',a')
-    I = np.argmin([t_q_ss_1_a, t_q_ss_2_a])  # Index
-    q_i = [qn_1, qn_2][I]  # Q
-    tq_i = [tqn_1, tqn_2][I]  # target Q
+    t_q_ss_1_a = MAX_Q(ss, tqn_1, pn.run(ss))  # TQ(s',a')
+    t_q_ss_2_a = MAX_Q(ss, tqn_2, pn.run(ss))  # TQ(s',a')
+    I = int(np.argmin([t_q_ss_1_a, t_q_ss_2_a])) + 1  # Index
     # ----------------------Update Q value ------------------------------------------------
-    # ------ V_s_1 = Q'(ss,a) - a*log(pi(ss)) # Update for Critic Network
+    # ------ V_s_1 = Q'(ss,pi(ss)) - a*log(pi(ss)) # Update for Critic Network a' = pi(ss)
     # ------ Jq = (r + g * V_s_1) - Q(s,a)
-    v_ss = MAX_Q(ss, tq_i, rl_data_dict["act_list"]) - alpha * logp1_x(max(pn.run(ss)))
     if not t:
-        y_ss = (r + gamma * v_ss)
+        V = ALL_Q(s, rl_data_dict["qn"][I], pn.run(ss), index=0) - alpha * logp1_x(pn.run(ss))
+        Y_ss = (r + gamma * V)[a]
     else:
-        y_ss = r
-    q = MAX_Q(s, q_i, rl_data_dict["act_list"])
+        Y_ss = r
+    QY = rl_data_dict["qn"][I].run(np.append(s, a))
+    assert type(float(Y_ss)) is float
+    assert type(float(QY)) is float
     # ---------------------- Update policy -------------------------------------------------
-    original = rl_data_dict["act_list"].copy()
     # ------ Jp = Q( s, f(p(s)) ) - a*log( f(p(s)) )
-    re_parameterization = softmax(pn.run(s))
-    p_l = alpha * logp1_x(max(re_parameterization))  # a*log( f(p(s)) )
-    rl_data_dict["act_list"] = re_parameterization
-    q_s_rp = MAX_Q(s, q_i, rl_data_dict["act_list"])  # Q( s, f(p(s)) )
-    rl_data_dict["act_list"] = original
+    re_parameterization = re_parameterization_gaussian(s)
+    P = alpha * logp1_x(pn.run(s))[a]  # a*log( p(f(s)) )
+    Y_P = rl_data_dict["qn"][I].run(np.append(s, re_parameterization))  # Q( s, f(s) )
+    assert type(float(P)) is float
+    assert type(float(Y_P)) is float
     # ---------------------- Update alpha function ------------------------------------------
     rl_data_dict["alpha"] = 0.5
     # ---------------------------------- RETURN LOSS -----------------------------------------
@@ -396,11 +384,11 @@ def SAC(exp, rl_data_dict) -> dict:
     for i, qn in enumerate(rl_data_dict["qn"]):
         Q[i] = np.zeros(qn.get_shape()[-1])
     Y = Q.copy()
-    Q[I + 1] = q
-    Y[I + 1] = y_ss
-    Q[0][a] = p_l
-    Y[0][a] = q_s_rp
-    return {"Q": Q, "Y": Y, "E": shannon_entropy(p_l)}
+    Q[I] = Y_ss
+    Y[I] = QY
+    Q[0][a] = P
+    Y[0][a] = Y_P
+    return {"Q": Q, "Y": Y, "E": shannon_entropy(P)}
 
 
 # -------------------OPTIMIZATION-----------------------------
@@ -514,6 +502,8 @@ def RL_ACTION(s, rl_data_dict) -> int:
     assert "agent" in rl_data_dict, "agent is required"
     assert "act_list" in rl_data_dict, "act_list is required"
     agent = rl_data_dict["agent"]
+    if rl_data_dict["rl_model"] == SAC:
+        return int(np.argmax(agent.run(s)))
     act_list = rl_data_dict["act_list"]
     if 0 < rl_data_dict["epsilon"] and random.uniform(0, 1) < rl_data_dict["epsilon"]:
         return np.random.choice(act_list)
@@ -522,8 +512,11 @@ def RL_ACTION(s, rl_data_dict) -> int:
             assert rl_data_dict["agent"].get_shape()[0] == len(s) + 1, "Q(s,a) input size must |s| + 1"
             if rl_data_dict["rl_model"] is D2QN or D3QN:
                 assert rl_data_dict["agent"].get_shape()[-1] == 2, "Value-Advantage output size must 2 "
-                return ARGMAX_VA_Q(s, agent, act_list)
-            return ARG_MAXQ(s, agent, act_list)
+                q = (ALL_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"], index=1)  # V
+                     + ALL_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"], index=0)  # A
+                     - MEAN_Q(s, rl_data_dict["qn"][0], rl_data_dict["act_list"], index=0))  # mean A
+                return int(np.argmax(q))
+            return ARG_MAXQ(s, agent, act_list, index=0)
     assert rl_data_dict["agent"].get_shape()[0] == len(s), "Q(s) input size must |s|"
     return int(np.argmax(agent.run(s)))
 

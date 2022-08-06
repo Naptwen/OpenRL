@@ -16,7 +16,7 @@ def shannon_entropy(values):
     return -np.sum(values * np.log1p(values))
 
 
-def user_fn(values, gradient=False):
+def user_fn(values:np.ndarray, gradient=False):
     return_values = np.zeors(len(values))
     if gradient:
         for i, val in enumerate(values):
@@ -29,43 +29,43 @@ def user_fn(values, gradient=False):
     return return_values
 
 
-def linear_x(values=np.ndarray, gradient=False):
+def linear_x(values:np.ndarray, gradient=False):
     if not gradient:
         return values
     return np.ones(len(values))
 
 
-def logp1_x(values=np.ndarray, gradient=False):
+def logp1_x(values:np.ndarray, gradient=False):
     if not gradient:
         return np.log1p(values)
     return np.reciprocal(values + 1)
 
 
-def arctan(values, gradient=False):
+def arctan(values:np.ndarray, gradient=False):
     if gradient:
         return 1 / (1 + values ** 2)
     return np.arctan(values)
 
 
-def sigmoid(values, gradient=False):
+def sigmoid(values:np.ndarray, gradient=False):
     if gradient:
         return values * (1 - values)
     return 1 / (1 + np.exp(-values))
 
 
-def ReLU(values, gradient=False):
+def ReLU(values:np.ndarray, gradient=False):
     if gradient:
         return np.where(values > 0, 1, 0)
     return np.where(values > 0, values, 0)
 
 
-def parametricReLU(values, gradient=False, a=0.01):
+def parametricReLU(values:np.ndarray, gradient=False, a=0.01):
     if gradient:
         return np.where(values > 0, 1, a)
     return np.where(values > a * values, values, a * values)
 
 
-def leakReLU(values, gradient=False):
+def leakReLU(values:np.ndarray, gradient=False):
     if gradient:
         return np.where(values > 0, 1, 0.03)
     return np.where(values > 0.03 * values, values, 0.03 * values)
@@ -73,7 +73,7 @@ def leakReLU(values, gradient=False):
 
 # NORMALIZATION FUNCTIONS
 
-def znormal(values, gradient=False):
+def znormal(values:np.ndarray, gradient=False):
     if not gradient:
         if np.std(values) == 0:
             return np.ones(len(values))
@@ -81,7 +81,7 @@ def znormal(values, gradient=False):
     return (np.std(values)) * values + np.mean(values)
 
 
-def min_max_normal(values, gradient=False):
+def min_max_normal(values:np.ndarray, gradient=False):
     m, n = max(values), min(values)
     if not gradient:
         if m == n:
@@ -92,7 +92,7 @@ def min_max_normal(values, gradient=False):
     return np.full(len(values), 1 / (m - n))
 
 
-def bitsoftmax(values, gradient=False):
+def bitsoftmax(values:np.ndarray, gradient=False):
     f = np.exp(values - np.max(values))
     p = f / np.sum(f)
     if gradient:
@@ -101,7 +101,7 @@ def bitsoftmax(values, gradient=False):
     return p
 
 
-def softmax(values, gradient=False):
+def softmax(values:np.ndarray, gradient=False):
     f = np.exp(values - max(values))
     p = f / np.sum(f)
     if np.any(np.isnan(p)):
@@ -111,6 +111,16 @@ def softmax(values, gradient=False):
         return f * (1 - f)
     return p
 
+def re_parameterization_gaussian(values):
+    """
+    :param values: the input value
+    :type values: np.ndarray or list
+    """
+    mu = np.mean(values) # mean
+    delta = np.std(values) # standard deviation
+    e = np.random.uniform(0, 1)
+    z = mu + delta * e
+    return z
 
 # def logsoftmax(values, gradient=False):
 #     f = np.exp(values)
@@ -120,7 +130,7 @@ def softmax(values, gradient=False):
 #     return p
 
 
-def drop_Out(layer, drop_per):
+def drop_Out(layer:np.ndarray, drop_per):
     assert 0 <= drop_per < 1, "drop percentage must be between 0 and 1"
     mask = np.random.uniform(0, 1, layer.shape[0]) > drop_per
     return mask * layer.shape[0] / (1.0 - drop_per)
@@ -128,11 +138,11 @@ def drop_Out(layer, drop_per):
 
 # LOSS FUNCTIONS
 
-def SIMPLE(x, y):
+def SIMPLE(x:np.ndarray, y:np.ndarray):
     return x, y - x
 
 
-def MPE(x, y):
+def MPE(x:np.ndarray, y:np.ndarray):
     """
     Mean Absolute Percentage Error
     """
@@ -146,45 +156,45 @@ def MPE(x, y):
     return a, error
 
 
-def MSE(x, y):
+def MSE(x:np.ndarray, y:np.ndarray):
     """
     Mean Square Error
     """
     return 2 * (x - y), np.mean((y - x) ** 2)
 
 
-def MSE2(x, y):
+def MSE2(x:np.ndarray, y:np.ndarray):
     """
     Mean Square Error with power 2
     """
     return (x - y), np.sum((y - x) ** 2) / 2
 
 
-def RMSE(x, y):
+def RMSE(x:np.ndarray, y:np.ndarray):
     """
     Root Mean Squared Error
     """
     return -(y - x), np.sqrt(np.mean((y - x) ** 2))
 
 
-def HUBER(x, y):
+def HUBER(x:np.ndarray, y:np.ndarray):
     h = 1
     return np.where(np.abs(y - x) <= 1, x - y, h * np.sign(x - y)), \
            np.sum(np.where(np.abs(y - x) <= 1, 0.5 * (y - x) ** 2, h * np.abs(y - x) - 0.5 * h ** 2))
 
 
-def PSEUDO_HUBER(x, y):
+def PSEUDO_HUBER(x:np.ndarray, y:np.ndarray):
     a = np.abs(y - x) + 0.00000001
     f = a * sqrt(1 + x ** 2 / a ** 2)
     return x / f, np.sum(f)
 
 
 # https://arxiv.org/pdf/2108.12627.pdf
-def STRIC_HUBER(x, y):
+def STRIC_HUBER(x:np.ndarray, y:np.ndarray):
     pass
 
 
-def CROSS_ENTROPY(x=np.ndarray, y=np.ndarray):
+def CROSS_ENTROPY(x:np.ndarray, y:np.ndarray):
     """
     Args:
         x(np.ndarray): probability out value
@@ -198,7 +208,7 @@ def CROSS_ENTROPY(x=np.ndarray, y=np.ndarray):
     return g, np.sum(y * np.log1p(x))
 
 
-def JSD(x=np.ndarray, y=np.ndarray):
+def JSD(x:np.ndarray, y:np.ndarray):
     """
     Args:
         x(np.ndarray): probability out value
@@ -211,7 +221,7 @@ def JSD(x=np.ndarray, y=np.ndarray):
     return shannon_entropy(0.5 * (x + y)) - 0.5 * (shannon_entropy(y) + shannon_entropy(x))
 
 
-def KLD(x=np.ndarray, y=np.ndarray):
+def KLD(x:np.ndarray, y:np.ndarray):
     """
     Args:
         x(np.ndarray): probability out value
@@ -224,7 +234,7 @@ def KLD(x=np.ndarray, y=np.ndarray):
     return -np.sum(y * np.log1p(x / (y + 0.000000001)))
 
 
-def BINARY_CROSS(x, y):
+def BINARY_CROSS(x:np.ndarray, y:np.ndarray):
     """
     Binary Cross Entropy
     """
@@ -237,7 +247,7 @@ def BINARY_CROSS(x, y):
     ), -sum(y * np.log1p(x))
 
 
-def RELATIVE_ENTROPY(x, y):
+def RELATIVE_ENTROPY(x:np.ndarray, y:np.ndarray):
     """
     Relative Entropy Error
     """
