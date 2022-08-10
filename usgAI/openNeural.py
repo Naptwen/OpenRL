@@ -457,7 +457,7 @@ class openNeural:
                 self.__B_layer = deepcopy(copy_b_layer)
                 print(f"Layer {i} has error, learning dismissed: ", e)
 
-    def run(self, input_val, dropout_rate=0.0) -> ndarray:
+    def run(self, input_val, dropout_rate=0.0) -> np.ndarray:
         """
         Args:
             input_val(np.ndarray)
