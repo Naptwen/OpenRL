@@ -1,3 +1,5 @@
+from setuptools import setup
+
 setup(
   name = 'open_pyAI',
   version = '2.2.4',
