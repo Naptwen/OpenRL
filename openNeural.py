@@ -3,7 +3,6 @@ import sympy as sym
 from numpy import ndarray
 from sympy import sqrt, diff
 from colorama import Fore
-from opencl_algorithm import *
 from copy import deepcopy
 
 
