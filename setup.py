@@ -7,7 +7,7 @@ setup(
   url='https://github.com/Naptwen/Open_pyAI.git',
   autho='Useop Gim',
   license='GNU AFFERO (c) 2022 Useop Gim',
-  packages=['open_pyAI'],
+  packages=['usgAI'],
   zip_safe=False,
   install_requires=[
     'numpy==1.23.0',
