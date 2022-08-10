@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-  name = 'open_pyAI',
+  name = 'usgAI',
   version = '2.2.4',
-  description='open_pyAI pip installation',
+  description='usgAI pip installation',
   url='https://github.com/Naptwen/Open_pyAI.git',
   autho='Useop Gim',
   license='GNU AFFERO (c) 2022 Useop Gim',
