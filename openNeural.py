@@ -465,7 +465,6 @@ class openNeural:
             input_val(np.ndarray)
             dropout_rate(float):drop out rate
         """
-        assert len(input_val) == self.__Layer_shape[0], "the input size must be as same as input layer size"
         assert 0 <= dropout_rate <= 1, "drop out rate must between 0 and 1"
         self.__Z_layer[0:self.__Layer_shape[0]] = np.array(input_val)  # input
         self.__drop_Out_rate = dropout_rate

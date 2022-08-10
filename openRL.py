@@ -221,13 +221,16 @@ class openRL:
                 if self.RL_DATA["epsilon_decay_fn"] is not None:
                     self.RL_DATA["epsilon_decay_fn"](self.RL_DATA)
                 # ---------Info------------------
-                print(Fore.RESET, __ep, __it,
-                      Fore.LIGHTBLUE_EX, self.RL_DATA["qn"][0].run(s),
-                      Fore.LIGHTCYAN_EX, s, Fore.LIGHTYELLOW_EX, a, Fore.LIGHTYELLOW_EX, r,
-                      Fore.LIGHTCYAN_EX, ss, t, Fore.LIGHTGREEN_EX,
-                        Fore.LIGHTYELLOW_EX,
-                        f'TR : {self.RL_DATA["total_reward"]}',
-                      self.RL_DATA["epsilon"])
+                print(Fore.RESET,
+                    f'ep {__ep}/{self.RL_DATA["max_epoch"]}, iter{__it}/{self.RL_DATA["max_iter"]}',
+                    Fore.LIGHTBLUE_EX,
+                    f'out {self.RL_DATA["qn"][0].output}',
+                    Fore.LIGHTYELLOW_EX,
+                    f' s {s} a {a} r {r} s{ss}, t {t}',
+                    Fore.LIGHTGREEN_EX,
+                    f'Total reward : {self.RL_DATA["total_reward"]}',
+                    Fore.LIGHTBLACK_EX,
+                    f'epsilon : {self.RL_DATA["epsilon"]}')
                 # ---------Termination check -----------------
                 if t:
                     break

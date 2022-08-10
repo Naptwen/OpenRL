@@ -371,7 +371,7 @@ def SAC(exp, rl_data_dict) -> dict:
     assert type(float(Y_ss)) is float
     assert type(float(QY)) is float
     # ---------------------- Update policy -------------------------------------------------
-    # ------ Jp = Q( s, f(p(s)) ) - a*log( f(p(s)) )
+    # ------ Jp = Q( s, p(f(s)) ) - a*log( p(f(s)) )
     re_parameterization = re_parameterization_gaussian(s)
     P = alpha * logp1_x(pn.run(s))[a]  # a*log( p(f(s)) )
     Y_P = rl_data_dict["qn"][I].run(np.append(s, re_parameterization))  # Q( s, f(s) )
