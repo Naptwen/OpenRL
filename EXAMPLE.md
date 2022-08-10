@@ -22,7 +22,7 @@ if __name__ == '__main__':
         print(B.error)
     print('Hello DNN : ', time.time() - start, B.output)
 ```
-DDQN
+D3QN {
 ```python
 import time
 from matplotlib import pyplot as plt
