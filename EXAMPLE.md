@@ -29,6 +29,7 @@ from matplotlib import pyplot as plt
 import pygame
 from openRL import *
 
+
 def reward_policy(s, g=None) -> [float, bool]:
     """
     Args:
@@ -63,6 +64,7 @@ def reward_policy(s, g=None) -> [float, bool]:
             t = False
         return r, t
 
+
 def enviro(s, a) -> np.ndarray:
     assert 0 <= a <= 3
     ss = s.copy()
@@ -93,15 +95,14 @@ class DQN_TEST():
     def start_Q_learning(self):
         self.neural = openRL()
         self.neural.RL_SETTING(
-            action_fn=RL_E_G_ACTION,
-            rl_model=DDQN,
+            rl_model=D3QN,
             enviro_fn=enviro,
             reward_fn=reward_policy,
             act_list=[0, 1, 2],
-            max_epoch=5000,
+            max_epoch=200,
             max_iter=300,
-            replay_buffer_max_sz=64,
-            replay_sz=4,
+            replay_buffer_max_sz=32,
+            replay_sz=1,
             replay_trial=1,
             replay_opt=REPLAY_PRIORITIZATION,
             gamma=0.99,
@@ -109,16 +110,12 @@ class DQN_TEST():
             agent_update_interval=5,
             t_update_interval=10,
             t_update_rate=0.01,
-            epsilon_decay_fn = E_G_DECAY_BY_REWARD,
-            SA_merge = False) 
-        self.neural.CREATE_Q(
-            learning_rate=0.001,
-            dropout_rate=0.0,
-            loss_fun=HUBER,
-            learn_optima='NADAM',
-            q_layer=np.array([4, 8, 12, 3]),
-            q_activation_fn=np.array([linear_x, leakReLU, leakReLU, linear_x], dtype=object),
-            q_normalization=np.array([linear_x, znormal, znormal, linear_x], dtype=object))
+            epsilon_decay_fn=E_G_DECAY_BY_REWARD,
+            sa_merge=True)
+        self.neural.CREATE_Q(learning_rate=0.001, dropout_rate=0.0, loss_fun=HUBER, learn_optima='NADAM',
+                             q_layer=np.array([5, 8, 12, 2]),
+                             q_activation_fn=np.array([linear_x, leakReLU, leakReLU, linear_x], dtype=object),
+                             q_normalization=np.array([linear_x, znormal, znormal, softmax], dtype=object))
         self.neural.E_G_DECAY_SETTING()
         self.neural.RL_RUN(initial_state=np.array([0, 4, random.randint(0, 3), 0]),
                            terminate_reward_condition=20)
@@ -181,6 +178,7 @@ class PY_GAME():
         total_reward = 0
         FPS = 10
         running = True
+        self.neural.RL_DATA["epsilon"] = 0
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -200,7 +198,7 @@ class PY_GAME():
             # -------------REWARD----------------------
             reward, t = reward_policy(np.array([self.cx, self.cy, self.ball_x, self.ball_y]))
             # ------------ACTION-----------------------
-            act = RL_DIRECT_ACTION(s=np.array([self.cx, self.cy, self.ball_x, self.ball_y]), rl_data_dict=self.neural.RL_DATA)
+            act = RL_ACTION(s=[self.cx, self.cy, self.ball_x, self.ball_y], rl_data_dict=self.neural.RL_DATA)
             print(
                 Fore.LIGHTRED_EX,
                 total_reward,
@@ -232,6 +230,7 @@ if __name__ == '__main__':
     print('take time', time.time() - start)
     A.neural.RL_SAVE('Test__')
     B = PY_GAME()
+
 
 ```
 SAC
