@@ -1,6 +1,6 @@
 GNU AFFERO (C) Useop Gim 2022\
-This is c++ version Neural network algorithms
-Test algorithm
+This is c++ version Neural network algorithms\
+Test algorithm for DNN with softmax and KLD
 ```cpp
 #include "usgNeural.hpp"
 #include <stdio.h>
