@@ -102,11 +102,8 @@ def bitsoftmax(values:np.ndarray, gradient=False):
 def softmax(values:np.ndarray, gradient=False):
     f = np.exp(values - max(values))
     p = f / np.sum(f)
-    if np.any(np.isnan(p)):
-        print(values, f, p)
-        exit()
     if gradient:
-        return f * (1 - f)
+        return p * (1 - p)
     return p
 
 def re_parameterization_gaussian(values):
@@ -206,17 +203,17 @@ def CROSS_ENTROPY(x:np.ndarray, y:np.ndarray):
     return g, np.sum(y * np.log1p(x))
 
 
-def JSD(x:np.ndarray, y:np.ndarray):
-    """
-    Args:
-        x(np.ndarray): probability out value
-        y(np.ndarray): percentage right(target) value
-    """
-    assert (y <= 1).all()
-    assert (y >= 0).all()
-    assert (x <= 1).all()
-    assert (x >= 0).all()
-    return shannon_entropy(0.5 * (x + y)) - 0.5 * (shannon_entropy(y) + shannon_entropy(x))
+# def JSD(x:np.ndarray, y:np.ndarray):
+#     """
+#     Args:
+#         x(np.ndarray): probability out value
+#         y(np.ndarray): percentage right(target) value
+#     """
+#     assert (y <= 1).all()
+#     assert (y >= 0).all()
+#     assert (x <= 1).all()
+#     assert (x >= 0).all()
+#     return shannon_entropy(0.5 * (x + y)) - 0.5 * (shannon_entropy(y) + shannon_entropy(x))
 
 
 def KLD(x:np.ndarray, y:np.ndarray):
@@ -229,7 +226,7 @@ def KLD(x:np.ndarray, y:np.ndarray):
     assert (y >= 0).all()
     assert (x <= 1).all()
     assert (x >= 0).all()
-    return -np.sum(y * np.log1p(x / (y + 0.000000001)))
+    return x - y, np.sum(y * (np.log1p(y) - np.log1p(x)))
 
 
 def BINARY_CROSS(x:np.ndarray, y:np.ndarray):
@@ -394,7 +391,7 @@ class openNeural:
                     # AdamRMSP Weight
                     self.__MtW_layer[w_next:w_next + w_shape] = \
                         self.__beta_1 * self.__MtW_layer[w_next:w_next + w_shape] + (
-                                1 - self.__beta_1) * dE_dW  # pm + (1-p)g
+                                1 - self.__beta_1) * dE_dW  # pm + (1-p)g #affine space
                     self.__VtW_layer[w_next:w_next + w_shape] = \
                         self.__beta_2 * self.__VtW_layer[w_next:w_next + w_shape] + (
                                 1 - self.__beta_2) * dE_dW ** 2  # pv + (1-p)g
@@ -463,6 +460,7 @@ class openNeural:
             input_val(np.ndarray)
             dropout_rate(float):drop out rate
         """
+        assert len(input_val) == self.__Layer_shape[0]
         assert 0 <= dropout_rate <= 1, "drop out rate must between 0 and 1"
         self.__Z_layer[0:self.__Layer_shape[0]] = np.array(input_val)  # input
         self.__drop_Out_rate = dropout_rate
