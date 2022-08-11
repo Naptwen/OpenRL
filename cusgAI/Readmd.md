@@ -17,7 +17,7 @@ int main()
 	A.xavier_init();
 	vector<float> B = {1,2,3,41};
 	vector<float> C = { 0.4f, 0.1f, 0.5f };
-	A.learning_set(0, 0.001, 0, KL_DIVERGENCE, 100, NADAM);
+	A.learning_set(0, 0.01, 0, KL_DIVERGENCE, 100, NADAM);
 	while (A.error >= 0.001)
 	{
 		vector<float> output = A.run(B);
