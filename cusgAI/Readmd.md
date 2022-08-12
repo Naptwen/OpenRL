@@ -28,7 +28,7 @@ int main()
 	return 0;
 }
 ```
-DQN NO epsilon test
+DQN NO epsilon test (substitude the reward base as sharp reward)
 ```cpp
 #pragma once
 #include "usgRL.hpp"
