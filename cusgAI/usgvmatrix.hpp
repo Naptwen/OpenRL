@@ -162,10 +162,19 @@ template<typename K>
 K vecmax(const vector<K>& A)
 {
     K max = A[0];
-    for (int i = 1; i < A.size(); i++)
-        max = (A[i] > max) ? A[i] : max;
+    for (int i = 1; i < A.size(); i++) max = (A[i] > max) ? A[i] : max;
     return max;
 }
+
+//min
+template<typename K>
+K vecmin(const vector<K>& A)
+{
+    K min = A[0];
+    for (int i = 1; i < A.size(); i++) min = (A[i] < min) ? A[i] : min;
+    return min;
+}
+
 
 //abs
 template<typename K>
@@ -792,7 +801,7 @@ vector<vector<K>> Power_method(const vector<vector<K>>& A)
         else if (iter_error(p, x, k) == 0) break;
         x = p;
     }
-    printf("¥ë = %f\n", n);
+    printf("ãƒ« = %f\n", n);
     printf("\tv\n"); show_vector(x); printf("\n");
 }
 template<typename K>
@@ -814,7 +823,7 @@ vector<K> eigen_value(const vector<vector<K>>& A, bool show = false) {
     for (int i = 0; i < A_.size(); i++)
         eigenvalue[i] = A_[i][i];
     if (show) {
-        printf("\t¥ë\n");
+        printf("\tãƒ«\n");
         show_vector(eigenvalue); printf("\n");
     }
     return eigenvalue;
@@ -1184,21 +1193,21 @@ vector<vector<vector<K>>> EIGEN_DECOMPOSITION(const vector<vector<K>>& A, bool s
 
         throw out_of_range("[DECOMPOSITION] : it is not a square matrix!");
     }
-    vector<vector<K>> ¥Ë;
+    vector<vector<K>> ãƒ‹;
     vector<vector<K>> V;
     vector<K> zero(A.size(), 0);
-    vector<K> ¥ë = eigen_value(A, show);
+    vector<K> ãƒ« = eigen_value(A, show);
     bool zero_v = true;
     if (show)
     {
         printf("\tA\n"), show_vector(A);
     }
-    sort(¥ë.begin(), ¥ë.end(), greater<K>());
-    for (int i = 0; i < ¥ë.size(); i++)
+    sort(ãƒ«.begin(), ãƒ«.end(), greater<K>());
+    for (int i = 0; i < ãƒ«.size(); i++)
     {
-        ¥Ë = identity_matrix<K>(A.size());
-        ¥Ë = ¥Ë * ¥ë[i]; //to avoid real number problem
-        vector<K> v = MATRIX_SOLUTION(A - ¥Ë, zero);
+        ãƒ‹ = identity_matrix<K>(A.size());
+        ãƒ‹ = ãƒ‹ * ãƒ«[i]; //to avoid real number problem
+        vector<K> v = MATRIX_SOLUTION(A - ãƒ‹, zero);
         for (int i = 0; i < v.size(); i++)
             if (v[i] != 0) {
                 zero_v = false;
@@ -1206,19 +1215,19 @@ vector<vector<vector<K>>> EIGEN_DECOMPOSITION(const vector<vector<K>>& A, bool s
             }
         V.push_back(v);
     }
-    ¥Ë = identity_matrix<K>(¥Ë.size());
+    ãƒ‹ = identity_matrix<K>(ãƒ‹.size());
     for (int i = 0; i < A.size(); i++)
-        ¥Ë[i][i] = ¥ë[i];
+        ãƒ‹[i][i] = ãƒ«[i];
     V = vectorTranspose(V);
 
     if (show) {
-        printf("\t¥Ë\n"), show_vector(¥Ë);
+        printf("\tãƒ‹\n"), show_vector(ãƒ‹);
         printf("\tV\n"), show_vector(V);
     }
-    vector< vector< vector<K> > > V¥Ë;
-    V¥Ë.push_back(V);
-    V¥Ë.push_back(¥Ë);
-    return V¥Ë;
+    vector< vector< vector<K> > > Vãƒ‹;
+    Vãƒ‹.push_back(V);
+    Vãƒ‹.push_back(ãƒ‹);
+    return Vãƒ‹;
 }
 
 //--------2d vector user operator---------
