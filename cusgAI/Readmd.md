@@ -28,7 +28,7 @@ int main()
 	return 0;
 }
 ```
-DQN NO epsilon test (substitude the reward base as sharp reward)
+ Duealing PPO (not completed)
 ```cpp
 #pragma once
 #include "usgRL.hpp"
@@ -37,16 +37,12 @@ DQN NO epsilon test (substitude the reward base as sharp reward)
 float reward_function(const vector<float>& s)
 {
 	if (s[0] == s[2] && s[1] == s[3]) return 1;
-	else return -((s[0] - s[2]) * (s[0] - s[2]) + (s[1] - s[3]) * (s[1] - s[3]));
+	else return -sqrtf(((s[0] - s[2]) * (s[0] - s[2]) + (s[1] - s[3]) * (s[1] - s[3])));
 }
 
-bool enviro_function(const vector<float>& s, vector<float>& ss, vector<float>& act_list, int a)
+bool enviro_function(const vector<float>& s, vector<float>& ss, vector<float>& act_list, long long a)
 {
-
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<int> dis(0, 4);
-
+	uniform_int_distribution<int> dis(0, 4);
 	if( a >= 0 && a < 3)
 		ss[0] = s[0] + act_list[a];
 	else
@@ -65,8 +61,8 @@ bool enviro_function(const vector<float>& s, vector<float>& ss, vector<float>& a
 	}
 	else if (ss[0] == ss[2] && ss[1] == ss[3])
 	{
-		ss[2] = dis(gen);
-		ss[3] = dis(gen);
+		ss[2] = dis(rngmachine);
+		ss[3] = dis(rngmachine);
 		return true;
 	}
 
@@ -88,42 +84,54 @@ void draw(const vector<float>& s)
 	}
 }
 
-
 int main()
 {
-	// Neural network 
-	openNeural<float> A = openNeural<float>();
+	auto A = openNeural<float>();
 	A.add_layer(4, linear_x, linear_x);
-	A.add_layer(12, ReLU, znormal);
-	A.add_layer(6, ReLU, znormal);
-	A.add_layer(6, linear_x, linear_x);
-	A.generate_layer(); 
+	A.add_layer(12, leakReLU, znormal);
+	A.add_layer(6, leakReLU, znormal);
+	A.add_layer(6, softmax, linear_x);
+	A.generate_layer();
 	A.opt_reset();
 	A.xavier_init();
-	A.learning_set(MSE2);
+	A.learning_set(KL_DIVERGENCE);
 
-	openRL R(A, reward_function, enviro_function, {-1,0,1,-1,0,1});
+	auto B = openNeural<float>();
+	B.add_layer(5, linear_x, linear_x);
+	B.add_layer(36, leakReLU, znormal);
+	B.add_layer(2, linear_x, linear_x);
+	B.generate_layer();
+	B.opt_reset();
+	B.xavier_init();
+	B.learning_set(KL_DIVERGENCE);
+
+	auto R = openPPO<float>();
+	R.RL_ADD_AGENT(A);
+	R.RL_ADD_AGENT(B);
+	R.RL_REPLAY_SETTING(32, 12, 1, 10, 0.9f);
+	R.RL_PLAY_SETTING(enviro_function, reward_function,  { -1,0,1,-1,0,1 });
+	
 	vector<float> s = { 0,0, 3,3 };
 	vector<float> ss = { 0,0, 3, 3 };
-	vector<string> action_list = { "up","stop","down","left","stop","right" };
-	deque<EXP> exp_list;
+	vector<string> action_list = { "up","    stop","  down","  left","  stop","  right" };
 	int iter = 0;
 	while (iter++ < 10000)
 	{
-		EXP exp = R.RL_PLAY(s, ss, R.RL_ACTION(s));
+		EXP<float> exp = R.RL_PLAY(s);
 		system("cls");
 		printf("--------[%d]---------\n",iter);
 		draw(exp.s);
 		printf("--------[Q]---------\n");
-		show_vector(R.Q.run(s));
+		show_vector(action_list);
+		show_vector(R.__agents[0].run(s));
 		printf("--------[s]---------\n");
-		show_vector(exp.s);
+		show_vector<float>(exp.s);
 		printf("--------[a]---------\n");
 		printf("act : %s\n", action_list[exp.a].c_str());
 		printf("--------[r]---------\n");
 		printf("r : %f\n", exp.r);
 		printf("--------[ss]---------\n");
-		show_vector(exp.ss);
+		show_vector<float>(exp.ss);
 		printf("---------------------\n");
 	}
 	return 0;
