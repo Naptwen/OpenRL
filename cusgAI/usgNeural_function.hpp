@@ -114,6 +114,27 @@ vector<K> znormal(const vector<K>& A, bool gradient = false)
 	return C;
 }
 
+
+template<typename K>
+vector<K> min_max_normal(const vector<K>& A, bool gradient = false)
+{
+	vector<K> C(A);
+	if (gradient)
+		memset(&C[0], 1, C.size());
+	else
+	{
+		K max_val = vecmax(A);
+		K min_val = vecmin(A);
+		if(max_val == min_val)
+			memset(&C[0], 1, C.size());
+		else
+			for (int i = 0; i < A.size(); i++)
+				C[i] = A[i] - min_val / (max_val - min_val);
+	}
+	return C;
+}
+
+
 template<typename K>
 vector<K> softmax(const vector<K>& A, bool gradient = false)
 {

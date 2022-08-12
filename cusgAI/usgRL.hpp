@@ -79,6 +79,17 @@ public:
 		this->__update_rate = _update_rate;
 	}
 
+	vector<K> Q_S_W_A(openNeural<K>& agent, const vector<K>& __s, const vector<K>& _act_list)
+	{
+		vector<K> list_Y_by_a(_act_list.size());
+		for (int i = 0; i < _act_list.size(); i++)
+		{
+			vector<K> __sa = veclineup(__s, { K(i) });
+			list_Y_by_a[i] = agent.run(__sa)[0];
+		}
+		return list_Y_by_a;
+	}
+
 	virtual long long RL_ACTION(const vector<K>& s)=0;
 
 	virtual vector<int> REPLAY_SHUFFLE()=0;
@@ -141,8 +152,8 @@ class openDQN :public openRL<K>
 	virtual void RL_LEARN(vector<int> &mini_batch) final
 	{
 		// mini batch error accumulator
-		vector<K> average_Q(this->__agents[0].__neural_layer.layer_shape.back());
-		vector<K> average_Y(this->__t_agents[0].__neural_layer.layer_shape.back());
+		vector<K> average_Q(this->__agents[0].__neural_layer.layer_shape.back(), 0);
+		vector<K> average_Y(this->__t_agents[0].__neural_layer.layer_shape.back(), 0);
 		// mini batch EXP for reinforcment learning
 		for (int i = 0; i < mini_batch.size(); i++)
 			RL_VALUE(this->replay_buffer[mini_batch[i]], average_Q, average_Y);
@@ -169,15 +180,8 @@ class openDQN :public openRL<K>
 		}
 		else
 		{
-			vector<K> sa(replay.s);
-			vector<K> candidates_Y;
-			sa.push_back(replay.a);
-			for (int i = 0; i < this->__act_list.size(); i++)
-			{
-				vector<K> ssa(replay.ss);
-				sa.push_back(this->__act_list[i]);
-				candidates_Y.push_back(this->__t_agents[0].run(ssa)[0]);
-			}
+			vector<K> sa = veclineup(replay.s, { K(replay.a) });
+			vector<K> candidates_Y = this->Q_S_W_A(this->__agents[0], replay.ss, this->__act_list);
 			Q = this->__agents[0].run(sa)[0];
 			Y = replay.r + (1.0f - replay.t) * this->__discount_rate * (*max_element(candidates_Y.begin(), candidates_Y.end()));
 			mini_Q[0] += Q;
@@ -227,49 +231,36 @@ class openPPO :public openRL<K>
 
 	virtual void RL_LEARN(vector<int>& mini_batch)
 	{
+		vector<K> P_s(this->__agents[0].__neural_layer.layer_shape.back(), 0);
+		vector<K> Loss(this->__agents[0].__neural_layer.layer_shape.back(), 0);
+		vector<K> A(this->__agents[1].__neural_layer.layer_shape.back(), 0);
+		vector<K> A_p(this->__agents[1].__neural_layer.layer_shape.back(), 0);
 		// mini batch EXP for reinforcment learning
 		for (int i = 0; i < mini_batch.size(); i++)
-			RL_VALUE(this->replay_buffer[mini_batch[i]]);
+		{
+			EXP<K> replay = this->replay_buffer[mini_batch[i]];
+			K P = 0;
+			K Y = 0;
+			K epsilon = 0.2;
+			//A^(actor network)
+			vector<K> candidates = this->Q_S_W_A(this->__agents[1], replay.s, this->__act_list);
+			vector<K> sa = veclineup(replay.s, { K(replay.a) });
+			A = A + this->__agents[1].run(sa);
+			vector<K> A_up = { replay.r + this->__discount_rate * (A[1] + A[0] - vecsum(candidates) / candidates.size()), A[1] };
+			A_p = A_p + A_up; // V + Q(s,a) - mean(Q(s,a))
+			//policy (critic network)
+			K P_t = this->__agents[0].run(replay.s)[replay.a];
+			P_s[replay.a] += P_t;
+			P_t = P_t / this->__t_agents[0].run(replay.s)[replay.a];
+			//cliiping
+			if (A_p[0] >= 0) P_t = min(1 + epsilon, P_t);
+			else P_t = max(1 - epsilon, P_t);
+			Loss[replay.a] += P_t * A_p[0];
+		}
+		this->__agents[0].learning_start(P_s/K(mini_batch.size()), Loss/ K(mini_batch.size())); //update critic
+		this->__agents[1].learning_start(A/K(mini_batch.size()), A_p/K(mini_batch.size())); //update agent
 		for (int i = 0; i < mini_batch.size(); i++)
 			this->replay_buffer.pop_front();
-	}
-
-	 void RL_VALUE(const EXP<K>& replay)
-	{
-		assert(this->__discount_rate > 0);
-		assert(this->__agents.size() == 2);
-		assert(this->__agents[0].__loss_fn == KL_DIVERGENCE);
-		K P = 0;
-		K Y = 0;
-		K epsilon = 0.2;
-		//A^(actor network)
-		vector<K> candidates = ADVANTAGE_ALGORITHM(replay.ss, this->__act_list);
-		vector<K> sa(replay.s);
-		sa.push_back(replay.a);
-		vector<K> V = this->__agents[1].run(sa);
-		vector<K> A_p = { replay.r + this->__discount_rate * V[0] - vecsum(candidates) / candidates.size(), V[1] };
-		//policy (critic network)
-		vector<K> P_s = this->__agents[0].run(replay.s);
-		vector<K> Loss = P_s / this->__t_agents[0].run(replay.s);
-		//cliiping
-		K clipped_rate = Loss[replay.a];
-		if (A_p[0] >= 0) clipped_rate = min(1 + epsilon, clipped_rate);
-		else clipped_rate = max(1 - epsilon, clipped_rate);
-		Loss[vecargmax(Loss)] = clipped_rate * A_p[0];
-		this->__agents[0].learning_start(P_s, Loss); //update critic
-		this->__agents[1].learning_start(V , A_p); //update agent
-	}
-
-	vector<K> ADVANTAGE_ALGORITHM(const vector<K>& __s, const vector<K>& _act_list)
-	{
-		vector<K> list_Y_by_a(_act_list.size());
-		for (int i = 0; i < _act_list.size(); i++)
-		{
-			vector<K> __sa(__s);
-			__sa.push_back(i);
-			list_Y_by_a[i] = this->__agents[1].run(__sa)[0] + this->__agents[1].run(__sa)[1];
-		}
-		return list_Y_by_a;
 	}
 
 	virtual void RL_TRG_UPDATE()
