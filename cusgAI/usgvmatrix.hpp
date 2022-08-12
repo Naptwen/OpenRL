@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <cassert>
 #include <random>
+#include <time.h> 
 
 using namespace std;
 #define dot >>
@@ -23,6 +24,8 @@ struct matrixT {};
 const matrixT T{}; //transpose
 struct matrixP {};
 const matrixP p{}; //pesudo inverse
+
+static mt19937 rngmachine(time(NULL));
 
 //---------code-----------------------------
 
@@ -92,10 +95,8 @@ vector<K> randvec(float min, float max, long long int sz)
 {
     assert(min <= max);
     vector<K> v(sz, 0);
-    random_device rnd_device;
-    mt19937 mersenne_engine{ rnd_device() };
     uniform_real_distribution<float> dist{ min, max };
-    auto gen = [&dist, &mersenne_engine](){return dist(mersenne_engine);};
+    auto gen = [&dist](){return dist(rngmachine);};
     generate(v.begin(), v.end(), gen);
     return v;
 }
@@ -218,12 +219,12 @@ vector<K> vecarange(K start, const int size, const K step)
 }
 
 template<typename K>
-vector<K> vecslicer(const vector<K>& A, int start, int size)
+vector<K> vecslicer(const vector<K>& A, int start, int slice_size)
 {
     assert(start >= 0);
-    assert(size <= A.size());
-    assert(0 < size);
-    vector<K> B(&A[start], &A[start + size - 1] + 1);
+    assert(slice_size <= A.size());
+    assert(0 < slice_size);
+    vector<K> B(&A[start], &A[start + slice_size - 1] + 1);
     return B;
 }
 
