@@ -1,6 +1,6 @@
 GNU AFFERO (C) Useop Gim 2022\
 This is c++ version Neural network algorithms\
-This is test algorithm for DQN with greedy by sharp reward 
+This is test algorithm for DQN with greedy by sharp reward (not the epsilon greedy)
 ```cpp
 #pragma once
 #include "usgRL.hpp"
