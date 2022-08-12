@@ -149,6 +149,12 @@ vector<K> veclogp1(const vector<K>& A) {
     return C;
 }
 
+//delete the front ; don't use if the frequncy is high
+template<typename K>
+void pop(vector<K>& A)
+{
+    A.erase(A.begin());
+}
 
 //max
 template<typename K>
@@ -160,7 +166,27 @@ K vecmax(const vector<K>& A)
     return max;
 }
 
-//max
+//abs
+template<typename K>
+vector<K> vecabs(const vector<K>& A) {
+    vector<K> C(A);
+    for (int i = 0; i < A.size(); i++)
+        C[i] = (A[i] > 0) ? A[i] : -A[i];
+    return C;
+}
+
+
+//sum abs
+template<typename K>
+K vecsumabs(const vector<K>& A)
+{
+    K sum = 0;
+    for (int i = 0; i < A.size(); i++) sum += (A[i] > 0) ? A[i] : -A[i];
+    return sum;
+}
+
+
+//sum
 template<typename K>
 K vecsum(const vector<K>& A)
 {
@@ -169,9 +195,9 @@ K vecsum(const vector<K>& A)
     return sum;
 }
 
-//max int
+//argmax
 template<typename K>
-int vecmaxindex(const vector<K>& A)
+int vecargmax(const vector<K>& A)
 {
     K max = A[0];
     int index = 0;
@@ -183,6 +209,23 @@ int vecmaxindex(const vector<K>& A)
     return index;
 }
 
+template<typename K>
+vector<K> vecarange(K start, const int size, const K step)
+{
+    vector<K> A(size);
+    for (int i = 0; i < size; i++)
+        A[i] = start, start += step;
+}
+
+template<typename K>
+vector<K> vecslicer(const vector<K>& A, int start, int size)
+{
+    assert(start >= 0);
+    assert(size <= A.size());
+    assert(0 < size);
+    vector<K> B(&A[start], &A[start + size - 1] + 1);
+    return B;
+}
 
 //---------1d vector operator-----------
 
@@ -539,6 +582,7 @@ vector<vector<K>> operator cross (const vector<vector<K>>& A, const vector<vecto
     }
     return (A ^ T) * B;
 }
+
 //-------2d vector algorithm 2----------
 
 template<typename K>
