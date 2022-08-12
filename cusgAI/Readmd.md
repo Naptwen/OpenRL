@@ -1,34 +1,6 @@
 GNU AFFERO (C) Useop Gim 2022\
 This is c++ version Neural network algorithms\
-Test algorithm for DNN with softmax and KLD
-```cpp
-#include "usgNeural.hpp"
-#include <stdio.h>
-
-int main()
-{
-	openNeural<float> A = openNeural<float>();
-	A.add_layer(4, linear_x, linear_x);
-	A.add_layer(12, ReLU, znormal);
-	A.add_layer(6, ReLU, znormal);
-	A.add_layer(3, softmax, linear_x);
-	A.generate_layer(); 
-	A.opt_reset();
-	A.xavier_init();
-	vector<float> B = {1,2,3,41};
-	vector<float> C = { 0.4f, 0.1f, 0.5f };
-	A.learning_set(0, 0.01, 0, KL_DIVERGENCE, 100, NADAM);
-	while (A.error >= 0.001)
-	{
-		vector<float> output = A.run(B);
-		A.learning_starat(output, C);
-		show_vector(A.output);
-		printf("%.5f \n", A.error);
-	}
-	return 0;
-}
-```
- Duealing PPO (not completed)
+This is test algorithm for DQN with greedy by sharp reward 
 ```cpp
 #pragma once
 #include "usgRL.hpp"
@@ -51,13 +23,13 @@ bool enviro_function(const vector<float>& s, vector<float>& ss, vector<float>& a
 	{
 		ss[0] = 0;
 		ss[1] = 0;
-		return true;
+		return false;
 	}
 	if (ss[1] < 0 || ss[1] > 4)
 	{
 		ss[0] = 0;
 		ss[1] = 0;
-		return true;
+		return false;
 	}
 	else if (ss[0] == ss[2] && ss[1] == ss[3])
 	{
@@ -65,7 +37,6 @@ bool enviro_function(const vector<float>& s, vector<float>& ss, vector<float>& a
 		ss[3] = dis(rngmachine);
 		return true;
 	}
-
 	return false;
 }
 
@@ -90,30 +61,30 @@ int main()
 	A.add_layer(4, linear_x, linear_x);
 	A.add_layer(12, leakReLU, znormal);
 	A.add_layer(6, leakReLU, znormal);
-	A.add_layer(6, softmax, linear_x);
+	A.add_layer(5, linear_x, linear_x);
 	A.generate_layer();
 	A.opt_reset();
 	A.xavier_init();
-	A.learning_set(KL_DIVERGENCE);
+	A.learning_set(KL_DIVERGENCE, 0,0.2f);
 
 	auto B = openNeural<float>();
 	B.add_layer(5, linear_x, linear_x);
 	B.add_layer(36, leakReLU, znormal);
-	B.add_layer(2, linear_x, linear_x);
+	B.add_layer(2, linear_x, min_max_normal);
 	B.generate_layer();
 	B.opt_reset();
 	B.xavier_init();
-	B.learning_set(KL_DIVERGENCE);
+	B.learning_set(MSE2, 0, 0.2f);
 
-	auto R = openPPO<float>();
+	auto R = openDQN<float>();
 	R.RL_ADD_AGENT(A);
-	R.RL_ADD_AGENT(B);
-	R.RL_REPLAY_SETTING(32, 12, 1, 10, 0.9f);
-	R.RL_PLAY_SETTING(enviro_function, reward_function,  { -1,0,1,-1,0,1 });
+	//R.RL_ADD_AGENT(B);
+	R.RL_REPLAY_SETTING(32, 2, 1, 1, 0.01f);
+	R.RL_PLAY_SETTING(enviro_function, reward_function,  { -1,0,1,-1, 1 });
 	
 	vector<float> s = { 0,0, 3,3 };
 	vector<float> ss = { 0,0, 3, 3 };
-	vector<string> action_list = { "up","    stop","  down","  left","  stop","  right" };
+	vector<string> action_list = { "up","    stop","  down","  left","  right" };
 	int iter = 0;
 	while (iter++ < 10000)
 	{
@@ -121,9 +92,13 @@ int main()
 		system("cls");
 		printf("--------[%d]---------\n",iter);
 		draw(exp.s);
-		printf("--------[Q]---------\n");
+		printf("--------[QV]---------\n");
+		vector<float> sa = veclineup(s, {float(exp.a) });
+		//show_vector(R.__agents[].run(sa));
+		printf("--------[p]---------\n");
 		show_vector(action_list);
 		show_vector(R.__agents[0].run(s));
+		show_vector(R.__t_agents[0].run(s));
 		printf("--------[s]---------\n");
 		show_vector<float>(exp.s);
 		printf("--------[a]---------\n");
