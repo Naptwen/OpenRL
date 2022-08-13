@@ -327,14 +327,13 @@ class openSAC :public openRL<K>
 				Q_min = Q_2;
 				selection = 2;
 			}
-				
 			//------------------------Update Q------------------------ 
 			A_s[0] = replay.r + this->__discount_rate * (1 - replay.t) * Q_min - this->alpha * log1p(Policy_actions_at_ss[replay.a]);
 			Loss_A[0] = this->__agents[selection].run(veclineup<K>(replay.s, {K(replay.a)}))[0];
 			//------------------------Update Policy-------------------
 			K re_s = re_parameterization(replay.s);
-			P_s[replay.a] = this->alpha * veclogp1<K>(this->__agents[0].run(replay.s))[replay.a];
-			Loss_P[replay.a] = this->__agents[selection].run(veclineup<K>(replay.s, { K(re_s) }))[0];
+			Loss_P[replay.a]  = this->alpha * veclogp1<K>(this->__agents[0].run(replay.s))[replay.a];
+			P_s[replay.a] = this->__agents[selection].run(veclineup<K>(replay.s, { K(re_s) }))[0];
 			//------------------------Update this->alpha--------------------
 			this->alpha = -log(vecmax(this->__agents[0].run(replay.s))) - this->alpha * 0.01;
 			
