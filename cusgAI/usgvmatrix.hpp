@@ -106,6 +106,7 @@ template<typename K>
 vector<K> vecbdd(float min, float max, const vector<K> &A)
 {
     vector<K> B(A);
+#pragma omp for
     for (int i = 0; i < B.size(); i++)
         B[i] = (B[i] > max) ? max : (B[i] < min) ? min : B[i];
     return B;
@@ -115,6 +116,7 @@ vector<K> vecbdd(float min, float max, const vector<K> &A)
 template<typename K>
 vector<K> vecsqrt(const vector<K>& A) {
     vector<K> C(A);
+#pragma omp for
     for (int i = 0; i < A.size(); i++)
     {
         assert(A[i] >= 0);
@@ -127,6 +129,7 @@ vector<K> vecsqrt(const vector<K>& A) {
 template<typename K>
 vector<K> vecexp(const vector<K>& A) {
     vector<K> C(A);
+#pragma omp for
     for (int i = 0; i < A.size(); i++)
         C[i] = exp(A[i]);
     return C;
@@ -136,6 +139,7 @@ vector<K> vecexp(const vector<K>& A) {
 template<typename K>
 vector<K> veclog(const vector<K>& A) {
     vector<K> C(A);
+#pragma omp for
     for (int i = 0; i < A.size(); i++)
         C[i] = log(A[i]);
     return C;
@@ -145,8 +149,20 @@ vector<K> veclog(const vector<K>& A) {
 template<typename K>
 vector<K> veclogp1(const vector<K>& A) {
     vector<K> C(A);
+#pragma omp for
     for (int i = 0; i < A.size(); i++)
-        C[i] = log(A[i] + 1);
+        C[i] = log1p(A[i]);
+    return C;
+}
+
+
+// taking log for vector + 1
+template<typename K>
+vector<K> vecatan(const vector<K>& A) {
+    vector<K> C(A);
+#pragma omp for
+    for (int i = 0; i < A.size(); i++)
+        C[i] = atan(A[i]);
     return C;
 }
 
@@ -207,14 +223,17 @@ K vecsum(const vector<K>& A)
 
 //argmax
 template<typename K>
-int vecargmax(const vector<K>& A)
+long long vecargmax(const vector<K>& A)
 {
     K max = A[0];
     int index = 0;
     for (int i = 1; i < A.size(); i++) 
     {
-        max = (A[i] > max) ? A[i] : max;
-        index = i;
+        if (A[i] > max)
+        {
+            max = A[i];
+            index = i;
+        }
     }
     return index;
 }

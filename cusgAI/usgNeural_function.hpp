@@ -7,7 +7,7 @@
 
 //----__loss function---------
 
-//must the each sum of X and Y is 1
+
 template<typename K>
 vector<K> KL_DIVERGENCE(const vector<K>& X, const vector<K>& Y, bool gradient = false)
 {
@@ -41,6 +41,46 @@ vector<K> linear_x(const vector<K>& A, bool gradient = false)
 	else
 	{
 		vector<K> C(A);
+		return C;
+	}
+}
+
+
+template<typename K>
+vector<K> sigmoid_x(const vector<K>& A, bool gradient = false)
+{
+	if (gradient)
+	{
+		vector<K> C(A);
+#pragma omp for
+		for (int i = 0; i < A.size(); i++)
+			C[i] = exp(A[i]) / ((exp(A[i])+ 1) * (exp(A[i]) + 1));
+		return C;
+	}
+	else
+	{
+		vector<K> C(A);
+#pragma omp for
+		for (int i = 0; i < A.size(); i++)
+			C[i] = exp(A[i]) / (exp(A[i]) + 1);
+		return C;
+	}
+}
+
+template<typename K>
+vector<K> arctan_x(const vector<K>& A, bool gradient = false)
+{
+	if (gradient)
+	{
+		vector<K> C(A);
+#pragma omp for
+		for (int i = 0; i < A.size(); i++)
+			C[i] = 1/(A[i] * A[i] + 1);
+		return C;
+	}
+	else
+	{
+		vector<K> C = vecatan(A);
 		return C;
 	}
 }

@@ -53,9 +53,11 @@ public:
 	int __mini_sz = 2; 
 	int __q_update_fq = 2; 
 	int __t_update_fq = 5; 
-	float __discount_rate = 0.9f;
+	float __discount_rate = 0.99f;
 	float __update_rate = 0.8f;
 	int play_round = 0;
+	vector<K> LOSS_X;
+	vector<K> LOSS_Y;
 
 	void RL_ADD_AGENT(const openNeural<K>& Agent)
 	{
@@ -81,6 +83,7 @@ public:
 
 	vector<K> Q_S_W_A(openNeural<K>& agent, const vector<K>& __s, const vector<K>& _act_list)
 	{
+		assert(agent.__neural_layer.layer_shape.front() == __s.size() + 1);
 		vector<K> list_Y_by_a(_act_list.size());
 		for (int i = 0; i < _act_list.size(); i++)
 		{
@@ -132,11 +135,7 @@ class openDQN :public openRL<K>
 {
 	virtual long long RL_ACTION(const vector<K>& s)
 	{
-		this->__agents[0].run(s);
-		long long argmax = 
-			max_element(this->__agents[0].output.begin(), 
-						this->__agents[0].output.end())
-			- this->__agents[0].output.begin();
+		long long argmax = vecargmax(this->__agents[0].run(s));
 		return argmax;
 	}
 
@@ -181,7 +180,7 @@ class openDQN :public openRL<K>
 		else
 		{
 			vector<K> sa = veclineup(replay.s, { K(replay.a) });
-			vector<K> candidates_Y = this->Q_S_W_A(this->__agents[0], replay.ss, this->__act_list);
+			vector<K> candidates_Y = this->Q_S_W_A(this->__agents[0], replay.ss, this->__act_list, replay.t);
 			Q = this->__agents[0].run(sa)[0];
 			Y = replay.r + (1.0f - replay.t) * this->__discount_rate * (*max_element(candidates_Y.begin(), candidates_Y.end()));
 			mini_Q[0] += Q;
@@ -214,11 +213,7 @@ class openPPO :public openRL<K>
 {
 	virtual long long RL_ACTION(const vector<K>& s)
 	{
-		this->__agents[0].run(s);
-		long long argmax =
-			max_element(this->__agents[0].output.begin(),
-				this->__agents[0].output.end())
-			- this->__agents[0].output.begin();
+		long long argmax = vecargmax(this->__agents[0].run(s));
 		return argmax;
 	}
 
@@ -232,35 +227,39 @@ class openPPO :public openRL<K>
 	virtual void RL_LEARN(vector<int>& mini_batch)
 	{
 		vector<K> P_s(this->__agents[0].__neural_layer.layer_shape.back(), 0);
-		vector<K> Loss(this->__agents[0].__neural_layer.layer_shape.back(), 0);
-		vector<K> A(this->__agents[1].__neural_layer.layer_shape.back(), 0);
-		vector<K> A_p(this->__agents[1].__neural_layer.layer_shape.back(), 0);
+		vector<K> Loss_P(this->__agents[0].__neural_layer.layer_shape.back(), 0);
+		vector<K> A_s(this->__agents[1].__neural_layer.layer_shape.back(), 0);
+		vector<K> Loss_A(this->__agents[1].__neural_layer.layer_shape.back(), 0);
 		// mini batch EXP for reinforcment learning
 		for (int i = 0; i < mini_batch.size(); i++)
 		{
 			EXP<K> replay = this->replay_buffer[mini_batch[i]];
-			K P = 0;
-			K Y = 0;
-			K epsilon = 0.2;
-			//A^(actor network)
-			vector<K> candidates = this->Q_S_W_A(this->__agents[1], replay.s, this->__act_list);
-			vector<K> sa = veclineup(replay.s, { K(replay.a) });
-			A = A + this->__agents[1].run(sa);
-			vector<K> A_up = { replay.r + this->__discount_rate * (A[1] + A[0] - vecsum(candidates) / candidates.size()), A[1] };
-			A_p = A_p + A_up; // V + Q(s,a) - mean(Q(s,a))
-			//policy (critic network)
-			K P_t = this->__agents[0].run(replay.s)[replay.a];
-			P_s[replay.a] += P_t;
-			P_t = P_t / this->__t_agents[0].run(replay.s)[replay.a];
+			K e = 0.2;
+			K Vs = this->__agents[1].run( veclineup(replay.s, { K(replay.a) } ))[0];
+			K Vss = vecmax(this->Q_S_W_A(this->__agents[1], replay.ss, this->__act_list));
+			//critic
+			A_s[0] += Vs;
+			Loss_A[0] += replay.r + (1.0f - replay.t) * this->__discount_rate * Vss;
+			// GAE
+			K GAE = pow(this->__discount_rate * 0.85f, i) * (replay.r + (1.0f - replay.t) * (this->__discount_rate * Vss - Vs));
 			//cliiping
-			if (A_p[0] >= 0) P_t = min(1 + epsilon, P_t);
-			else P_t = max(1 - epsilon, P_t);
-			Loss[replay.a] += P_t * A_p[0];
+			K r = this->__agents[0].run(replay.s)[replay.a] / this->__t_agents[0].run(replay.s)[replay.a];
+			K clip = r;
+			if (GAE >= 0) clip = min(1 + e, r);
+			else clip = max(1 - e, r);
+			K L_clip = min(r * GAE, clip * GAE);
+			//VF sqaure error
+			K L_VF = 0.5 * (Vss - Vs) * (Vss - Vs);
+			//S entropy bonus
+			//K S = -0.01 * (r * log1p(r));
+			//actor
+			P_s[replay.a] += this->__agents[0].run(replay.s)[replay.a] - this->__agents[0].run(replay.ss)[replay.a];
+			Loss_P[replay.a] += L_clip - L_VF;
 		}
-		this->__agents[0].learning_start(P_s/K(mini_batch.size()), Loss/ K(mini_batch.size())); //update critic
-		this->__agents[1].learning_start(A/K(mini_batch.size()), A_p/K(mini_batch.size())); //update agent
-		for (int i = 0; i < mini_batch.size(); i++)
-			this->replay_buffer.pop_front();
+		this->LOSS_X = P_s;
+		this->LOSS_Y = Loss_P;
+		this->__agents[0].learning_start(P_s/K(mini_batch.size()), Loss_P/K(mini_batch.size())); //update actor
+		this->__agents[1].learning_start(A_s/K(mini_batch.size()), Loss_A/K(mini_batch.size())); //update critic
 	}
 
 	virtual void RL_TRG_UPDATE()
@@ -274,19 +273,11 @@ class openPPO :public openRL<K>
 			this->__t_agents[0].__neural_layer.b_layer =
 				this->__update_rate * this->__agents[0].__neural_layer.b_layer
 				+ (1 - this->__update_rate) * this->__t_agents[0].__neural_layer.b_layer;
-			this->__t_agents[1].__neural_layer.w_layer =
-				this->__update_rate * this->__agents[1].__neural_layer.w_layer
-				+ (1 - this->__update_rate) * this->__t_agents[1].__neural_layer.w_layer;
-			this->__t_agents[1].__neural_layer.b_layer =
-				this->__update_rate * this->__agents[1].__neural_layer.b_layer
-				+ (1 - this->__update_rate) * this->__t_agents[1].__neural_layer.b_layer;
 		}
 		else
 		{
 			this->__t_agents[0].__neural_layer.w_layer = this->__agents[0].__neural_layer.w_layer;
 			this->__t_agents[0].__neural_layer.b_layer = this->__agents[0].__neural_layer.b_layer;
-			this->__t_agents[1].__neural_layer.w_layer = this->__agents[1].__neural_layer.w_layer;
-			this->__t_agents[1].__neural_layer.b_layer = this->__agents[1].__neural_layer.b_layer;
 		}
 	}
 };

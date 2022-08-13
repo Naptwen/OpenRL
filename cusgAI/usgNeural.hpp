@@ -4,6 +4,7 @@
 //GNU License
 #pragma once
 #include "usgNeural_function.hpp"
+#include <fstream>
 #define NONE 0
 #define ADAM 1
 #define NADAM 2
@@ -67,6 +68,32 @@ public:
 	float beta_2 = 0.999f;
 	float zero_preventer = 0.0000001f;
 	K error = 999999999999;
+
+	void file_save(string file)
+	{
+		ofstream os(file.c_str(), ios::binary);
+		int w_sz = this->__neural_layer.w_layer.size();
+		int b_sz = this->__neural_layer.b_layer.size();
+		os.write((const char*)&w_sz, 4);
+		os.write((const char*)&b_sz, 4);
+		os.write((const char*)&this->__neural_layer.w_layer[0], w_sz * sizeof(K));
+		os.write((const char*)&this->__neural_layer.b_layer[0], b_sz * sizeof(K));
+		os.close();
+	}
+
+	void file_load(string file)
+	{
+		ifstream is(file.c_str(), ios::binary);
+		int w_sz = 0;
+		int b_sz = 0;
+		is.read((char*)&w_sz, 4);
+		is.read((char*)&b_sz, 4);
+		this->__neural_layer.w_layer.resize(w_sz);
+		this->__neural_layer.b_layer.resize(b_sz);
+		is.read((char*)&this->__neural_layer.w_layer[0], w_sz * sizeof(K));
+		is.read((char*)&this->__neural_layer.b_layer[0], b_sz * sizeof(K));
+		is.close();
+	}
 
 	void deepcopy(const openNeural& B)
 	{
@@ -285,6 +312,7 @@ public:
 				printf("Nan, inf catch leaning dismissed");
 				this->__neural_layer.w_layer = copy_w;
 				this->__neural_layer.b_layer = copy_b;
+				exit(3);
 				break;
 			}
 		}
