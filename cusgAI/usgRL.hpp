@@ -322,17 +322,13 @@ class openSAC :public openRL<K>
 			int selection = 1;
 			K Q_min = vecmin<K>(this->Q_S_W_A(this->__t_agents[1], replay.ss, Policy_actions_at_ss));
 			K Q_2 = vecmin<K>(this->Q_S_W_A(this->__t_agents[2], replay.ss, Policy_actions_at_ss));
-			if (Q_min > Q_2)
-			{
-				Q_min = Q_2;
-				selection = 2;
-			}
+			(Q_min > Q_2)?Q_min = Q_2:selection = 2;
 			//------------------------Update Q------------------------ 
-			A_s[0] = replay.r + this->__discount_rate * (1 - replay.t) * Q_min - this->alpha * log1p(Policy_actions_at_ss[replay.a]);
+			A_s[0] = replay.r + this->__discount_rate * (1 - replay.t) * (Q_min - this->alpha * log(Policy_actions_at_ss[replay.a]));
 			Loss_A[0] = this->__agents[selection].run(veclineup<K>(replay.s, {K(replay.a)}))[0];
 			//------------------------Update Policy-------------------
-			K re_s = re_parameterization(this->__agents[0].run(replay.s));
-			Loss_P[replay.a]  = this->alpha * re_s;
+			K re_s = re_parameterization(replay.s);
+			Loss_P[replay.a]  = this->alpha * log(re_s);
 			P_s[replay.a] = this->__agents[selection].run(veclineup<K>(replay.s, { K(re_s) }))[0];
 			//------------------------Update this->alpha--------------------
 			this->alpha = -log(vecmax(this->__agents[0].run(replay.s))) - this->alpha * 0.01;
@@ -342,34 +338,19 @@ class openSAC :public openRL<K>
 			this->LOSS_Y = Loss_P;
 			this->__agents[0].learning_start(P_s, Loss_P);
 			this->__agents[selection].learning_start(A_s, Loss_A);
+			//------------------------UPDATE TARGET---------------------
+			this->__t_agents[selection].__neural_layer.w_layer =
+				this->__update_rate * this->__agents[selection].__neural_layer.w_layer
+				+ (1 - this->__update_rate) * this->__t_agents[selection].__neural_layer.w_layer;
+			this->__t_agents[selection].__neural_layer.b_layer =
+				this->__update_rate * this->__agents[selection].__neural_layer.b_layer
+				+ (1 - this->__update_rate) * this->__t_agents[selection].__neural_layer.b_layer;
 		}
 	}
 
 	virtual void RL_TRG_UPDATE()
 	{
-		assert(this->__update_rate > 0.0f);
-		if (this->__update_rate != 1.0f)
-		{
-			this->__t_agents[1].__neural_layer.w_layer =
-				this->__update_rate * this->__agents[1].__neural_layer.w_layer
-				+ (1 - this->__update_rate) * this->__t_agents[1].__neural_layer.w_layer;
-			this->__t_agents[1].__neural_layer.b_layer =
-				this->__update_rate * this->__agents[1].__neural_layer.b_layer
-				+ (1 - this->__update_rate) * this->__t_agents[1].__neural_layer.b_layer;
-			this->__t_agents[2].__neural_layer.w_layer =
-				this->__update_rate * this->__agents[2].__neural_layer.w_layer
-				+ (1 - this->__update_rate) * this->__t_agents[2].__neural_layer.w_layer;
-			this->__t_agents[2].__neural_layer.b_layer =
-				this->__update_rate * this->__agents[2].__neural_layer.b_layer
-				+ (1 - this->__update_rate) * this->__t_agents[2].__neural_layer.b_layer;
-		}
-		else
-		{
-			this->__t_agents[1].__neural_layer.w_layer = this->__agents[1].__neural_layer.w_layer;
-			this->__t_agents[1].__neural_layer.b_layer = this->__agents[1].__neural_layer.b_layer;
-			this->__t_agents[2].__neural_layer.w_layer = this->__agents[2].__neural_layer.w_layer;
-			this->__t_agents[2].__neural_layer.b_layer = this->__agents[2].__neural_layer.b_layer;
-		}
+		
 	}
 };
 
