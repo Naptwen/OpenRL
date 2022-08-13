@@ -55,6 +55,7 @@ public:
 	int __t_update_fq = 5; 
 	float __discount_rate = 0.99f;
 	float __update_rate = 0.8f;
+	float alpha = 0.9f;
 	int play_round = 0;
 	vector<K> LOSS_X;
 	vector<K> LOSS_Y;
@@ -87,7 +88,7 @@ public:
 		vector<K> list_Y_by_a(_act_list.size());
 		for (int i = 0; i < _act_list.size(); i++)
 		{
-			vector<K> __sa = veclineup(__s, { K(i) });
+			vector<K> __sa = veclineup(__s, { K(_act_list[i])});
 			list_Y_by_a[i] = agent.run(__sa)[0];
 		}
 		return list_Y_by_a;
@@ -122,7 +123,7 @@ public:
 			vector<int> index_list = REPLAY_SHUFFLE();
 			// mini batch slicer
 			vector<int> mini_batch = vecslicer(index_list, 0, this->__mini_sz);
-			RL_LEARN(mini_batch);
+			RL_LEARN(mini_batch); 
 			// target softmax-update
 			if (this->play_round % this->__t_update_fq == 0) RL_TRG_UPDATE();
 		}
@@ -273,12 +274,108 @@ class openPPO :public openRL<K>
 			this->__t_agents[0].__neural_layer.b_layer =
 				this->__update_rate * this->__agents[0].__neural_layer.b_layer
 				+ (1 - this->__update_rate) * this->__t_agents[0].__neural_layer.b_layer;
+			this->__t_agents[1].__neural_layer.w_layer =
+				this->__update_rate * this->__agents[1].__neural_layer.w_layer
+				+ (1 - this->__update_rate) * this->__t_agents[1].__neural_layer.w_layer;
+			this->__t_agents[1].__neural_layer.b_layer =
+				this->__update_rate * this->__agents[1].__neural_layer.b_layer
+				+ (1 - this->__update_rate) * this->__t_agents[1].__neural_layer.b_layer;
 		}
 		else
 		{
 			this->__t_agents[0].__neural_layer.w_layer = this->__agents[0].__neural_layer.w_layer;
 			this->__t_agents[0].__neural_layer.b_layer = this->__agents[0].__neural_layer.b_layer;
+			this->__t_agents[1].__neural_layer.w_layer = this->__agents[1].__neural_layer.w_layer;
+			this->__t_agents[1].__neural_layer.b_layer = this->__agents[1].__neural_layer.b_layer;
 		}
 	}
 };
+
+template <typename K>
+class openSAC :public openRL<K>
+{
+	virtual long long RL_ACTION(const vector<K>& s)
+	{
+		long long argmax = vecargmax(this->__agents[0].run(s));
+		return argmax;
+	}
+
+	virtual vector<int> REPLAY_SHUFFLE()
+	{
+		vector<int> index_list(this->replay_buffer.size());
+		iota(index_list.begin(), index_list.end(), 0);
+		return index_list;
+	}
+
+	virtual void RL_LEARN(vector<int>& mini_batch)
+	{
+		// mini batch EXP for reinforcment learning
+		for (int i = 0; i < mini_batch.size(); i++)
+		{
+			vector<K> P_s(this->__agents[0].__neural_layer.layer_shape.back(), 0);
+			vector<K> Loss_P(this->__agents[0].__neural_layer.layer_shape.back(), 0);
+			vector<K> A_s(this->__agents[1].__neural_layer.layer_shape.back(), 0);
+			vector<K> Loss_A(this->__agents[1].__neural_layer.layer_shape.back(), 0);
+			EXP<K> replay = this->replay_buffer[mini_batch[i]];
+			//------------------------Select Q-----------------------
+			vector<K> Policy_actions_at_ss = this->__agents[0].run(replay.ss);
+			int selection = 1;
+			if (vecmax<K>(this->Q_S_W_A(this->__agents[1], replay.ss, Policy_actions_at_ss)) <=
+				vecmax<K>(this->Q_S_W_A(this->__agents[2], replay.ss, Policy_actions_at_ss)))
+				selection = 2;
+			//------------------------Update Q------------------------
+			vector<K> V = this->Q_S_W_A(this->__agents[selection], replay.ss, Policy_actions_at_ss); 
+			Loss_A[0] = replay.r + this->__discount_rate * (1 - replay.t) * V[replay.a] - this->alpha * log1p(Policy_actions_at_ss[replay.a]);
+			A_s[0] = this->__agents[selection].run( veclineup<K>(replay.s, { K(replay.a) }))[0];
+			//------------------------Update Policy-------------------
+			K re_s = re_parameterization(replay.s);
+			P_s[replay.a] = this->alpha * veclogp1<K>(this->__agents[0].run(replay.s))[replay.a];
+			Loss_P[replay.a] = this->__agents[selection].run(veclineup<K>(replay.s, { K(re_s) }))[0];
+			//------------------------Update this->alpha--------------------
+			this->alpha = -log(vecmax(this->__agents[0].run(replay.s))) - this->alpha * 0.01;
+			
+			//------------------------Sthocastic update---------------
+			this->LOSS_X = P_s;
+			this->LOSS_Y = Loss_P;
+			this->__agents[0].learning_start(P_s, Loss_P);
+			this->__agents[selection].learning_start(A_s, Loss_A);
+		}
+	}
+
+	virtual void RL_TRG_UPDATE()
+	{
+		assert(this->__update_rate > 0.0f);
+		if (this->__update_rate != 1.0f)
+		{
+			this->__t_agents[0].__neural_layer.w_layer =
+				this->__update_rate * this->__agents[0].__neural_layer.w_layer
+				+ (1 - this->__update_rate) * this->__t_agents[0].__neural_layer.w_layer;
+			this->__t_agents[0].__neural_layer.b_layer =
+				this->__update_rate * this->__agents[0].__neural_layer.b_layer
+				+ (1 - this->__update_rate) * this->__t_agents[0].__neural_layer.b_layer;
+			this->__t_agents[1].__neural_layer.w_layer =
+				this->__update_rate * this->__agents[1].__neural_layer.w_layer
+				+ (1 - this->__update_rate) * this->__t_agents[1].__neural_layer.w_layer;
+			this->__t_agents[1].__neural_layer.b_layer =
+				this->__update_rate * this->__agents[1].__neural_layer.b_layer
+				+ (1 - this->__update_rate) * this->__t_agents[1].__neural_layer.b_layer;
+			this->__t_agents[2].__neural_layer.w_layer =
+				this->__update_rate * this->__agents[2].__neural_layer.w_layer
+				+ (1 - this->__update_rate) * this->__t_agents[2].__neural_layer.w_layer;
+			this->__t_agents[2].__neural_layer.b_layer =
+				this->__update_rate * this->__agents[2].__neural_layer.b_layer
+				+ (1 - this->__update_rate) * this->__t_agents[2].__neural_layer.b_layer;
+		}
+		else
+		{
+			this->__t_agents[0].__neural_layer.w_layer = this->__agents[0].__neural_layer.w_layer;
+			this->__t_agents[0].__neural_layer.b_layer = this->__agents[0].__neural_layer.b_layer;
+			this->__t_agents[1].__neural_layer.w_layer = this->__agents[1].__neural_layer.w_layer;
+			this->__t_agents[1].__neural_layer.b_layer = this->__agents[1].__neural_layer.b_layer;
+			this->__t_agents[2].__neural_layer.w_layer = this->__agents[2].__neural_layer.w_layer;
+			this->__t_agents[2].__neural_layer.b_layer = this->__agents[2].__neural_layer.b_layer;
+		}
+	}
+};
+
 #endif

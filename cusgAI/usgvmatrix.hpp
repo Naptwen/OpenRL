@@ -95,7 +95,7 @@ vector<K> randvec(float min, float max, long long int sz)
 {
     assert(min <= max);
     vector<K> v(sz, 0);
-    uniform_real_distribution<float> dist{ min, max };
+    uniform_real_distribution<K> dist{ min, max };
     auto gen = [&dist](){return dist(rngmachine);};
     generate(v.begin(), v.end(), gen);
     return v;
@@ -219,6 +219,16 @@ K vecsum(const vector<K>& A)
     K sum = 0;
     for (int i = 0; i < A.size(); i++) sum += A[i];
     return sum;
+}
+
+template<typename K>
+K vecvar(const vector<K>& A)
+{
+    K sum = 0.0;
+    K avg = vecsum<K>(A) / A.size();
+    for (int i = 0; i < A.size(); i++)
+        sum += pow(A[i] - avg, 2);
+    return sum / (A.size() - 1);
 }
 
 //argmax

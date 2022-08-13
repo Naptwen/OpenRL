@@ -185,4 +185,17 @@ vector<K> softmax(const vector<K>& A, bool gradient = false)
 		return C * (1.0f - C); //1 - 1
 	return C;
 }
+
+//-----parameter optimization------------
+
+template<typename K>
+K re_parameterization(const vector<K>& A)
+{
+	K avg = vecsum<K>(A) / A.size();
+	K std = sqrt(vecvar<K>(A));
+	uniform_real_distribution<K> dist(0, 1);
+	K e = dist(rngmachine);
+	return avg + std * e;
+}
+
 #endif
