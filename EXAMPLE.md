@@ -1,4 +1,4 @@
-GNU AFFERO (C) 2022 Useop Gim.
+GNU AFFERO (C) 2022 Useop Gim.\
 C++ SAC version
 ```cpp
 #pragma once
