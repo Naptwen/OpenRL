@@ -8,4 +8,5 @@ GNU AFFERO GPL (c) Useop Gim 2022\
 
 # cusgAI v1.0.0 --alpha 
 ```C++ version CLI intergration program for creating and tranning machine learning```
-``linux and window os are tested```
+
+```linux and window os are tested```
