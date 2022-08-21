@@ -7,6 +7,6 @@ GNU AFFERO GPL (c) Useop Gim 2022\
 ``Python Pure source Algorithm``
 
 # cusgAI v1.0.0 --alpha 
-```C++ version CLI intergration program for creating and tranning machine learning```
+```C++ version CLI integration program for creating and training machine learning```
 
-```linux and window os are tested```
+```Linux and window os are ```
