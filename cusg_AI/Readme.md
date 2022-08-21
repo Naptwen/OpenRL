@@ -1,6 +1,8 @@
 Copy Right (c) 2022 Useop Gim\
 GNU AFFERO GPL v3.0\
 
+## The inside the reward is following shapr reward system (distance base reward)
+
 This program is for Command line Interface machine learning program.\
 This program is made in Cmaker and tested in windows and linux.\
 This program follows the GNU license.
