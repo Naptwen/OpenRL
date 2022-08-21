@@ -3,9 +3,9 @@ GNU AFFERO GPL v3.0\
 
 This program is for Command line Interface machine learning program.\
 This program is made in Cmaker and tested in windows and linux.\
-This program follows the GNU license.\
+This program follows the GNU license.
 
- v 1.0.0-alpah has unpredictable and hidden eorros might be.\
+ v 1.0.0-alpah has unpredictable and catastorpical bugs might be.
  
  How to use?
  ```
