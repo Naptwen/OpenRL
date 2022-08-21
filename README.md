@@ -10,3 +10,7 @@ GNU AFFERO GPL (c) Useop Gim 2022\
 ```C++ version CLI integration program for creating and training machine learning```
 
 ```Linux and window os are ```
+1. current patch some bugs and creating user interface for creating and testing.\
+2. for future work linux and window socket network for functional data interface for multiple neural network merging system.\
+3. Using java script intergrate with andorid also.\
+Tip for 2D or 3D space matrix calcualtion, using m_dimentional function slice the CNN style. 
