@@ -1,0 +1,102 @@
+{
+    "episode_1":[{ 
+        "state_setting" : {
+            "ini":[0,0,3,3]
+        },
+        "reward_setting": {
+            "state":[3,3,3,3]
+        }
+    } ],
+    "episode_2":[{
+        "state_setting" : {
+            "ini":[0,0,2,4]
+        },
+        "reward_setting": {
+            "state":[2,4,2,4]
+        }
+    } ],
+    "episode_3":[{
+        "state_setting" : {
+            "ini":[0,0,4,2]
+        },
+        "reward_setting": {
+            "state":[4,2,4,2]
+        }
+    } ],
+    "episode_4":[{
+        "state_setting" : {
+            "ini":[0,0,1,3]
+        },
+        "reward_setting": {
+            "state":[1,3,1,3]
+        }
+    } ],
+    "episode_5":[{
+        "state_setting" : {
+            "ini":[0,0,2,3]
+        },
+        "reward_setting": {
+            "state":[2,3,2,3]
+        }
+    } ],
+    "episode_6":[{
+        "state_setting" : {
+            "ini":[0,0,3,1]
+        },
+        "reward_setting": {
+            "state":[3,1,3,1]
+        }
+    } ],
+    "episode_7":[{
+        "state_setting" : {
+            "ini":[0,0,2,1]
+        },
+        "reward_setting": {
+            "state":[2,1,2,1]
+        }
+    } ],
+    "episode_8":[{
+        "state_setting" : {
+            "ini":[0,0,4,1]
+        },
+        "reward_setting": {
+            "state":[4,1,4,1]
+        }
+    } ],
+    "episode_9":[{
+        "state_setting" : {
+            "ini":[0,0,1,1]
+        },
+        "reward_setting": {
+            "state":[1,1,1,1]
+        }
+    } ],
+    "episode_10":[{
+        "state_setting" : {
+            "ini":[0,0,0,4]
+        },
+        "reward_setting": {
+            "state":[0,4,0,4]
+        }
+    } ],
+    "root":[{
+        "state_setting" : {
+            "lbd":[-1,-1,-1,-1],
+            "ubd":[5,5,5,5],
+            "ini":[0,0,3,3],
+            "ter":[-2,-2,-2,-2]
+        },
+        "action_setting" : {
+            "up":[-1,0,0,0],
+            "down":[1,0,0,0],
+            "left":[0,-1,0,0],
+            "right":[0,1,0,0],
+            "stop":[0,0,0,0]
+        },
+        "reward_setting": {
+            "termination":[true],
+            "reward":[1]
+        }
+    }]
+
+}
