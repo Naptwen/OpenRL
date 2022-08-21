@@ -15,3 +15,5 @@ This program follows the GNU license.\
  $./usg_AI.exe --how2use
  ```
 given example json file is a just a format style the extension name can be anything.
+
+Other question please see my wiki page https://github.com/Naptwen/usgAI/wiki/usg_AI-CLI-program
