@@ -23,10 +23,7 @@ But, WITHOUT ANY WARRANTY without even the implied warranty of MERCHANTABILITY o
 See the GNU General Public License and Affero license for more details
 
 # SPECIAL PROVISION 
-To prevent and make users take responsibility, for the uncontrollable and unpredictable dangers in the future, a
-special provision for using this program for responsibility.
-This library is restricted about any purpose that breaks the Laws of Robotic 
-including intentness, negligence, and recklessness also restricted and users take responsibility.
+To prevent and make users take responsibility, for the uncontrollable and unpredictable dangers in the future, a special provision for using this program for responsibility. This library is restricted from any purpose that breaks the Laws of Robotic including intentness, negligence, and recklessness also restricted and users take responsibility.
 
 ___________________________________________________________________________________________________
 GNU AFFERO GENERAL PUBLIC LICENSE
