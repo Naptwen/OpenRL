@@ -22,7 +22,7 @@ as published by the Free Software Foundation. <http://www.gnu.org/licenses/>
 But, WITHOUT ANY WARRANTY without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 See the GNU General Public License and Affero license for more details
 
-#SPECIAL PROVISION 
+# SPECIAL PROVISION 
 To prevent and make users take responsibility, for the uncontrollable and unpredictable dangers in the future, a
 special provision for using this program for responsibility.
 This library is restricted about any purpose that breaks the Laws of Robotic 
