@@ -15,4 +15,4 @@ GNU AFFERO GPL (c) Useop Gim 2022\
 1. This is machine learning program tool
 2. This includes editor for creating basic strucutre for neural network, CNN, RL model, Enviroment rule.
 3. Base on created file, you can run the reinforcement machine learning.\
-Any question write down the discussion page.
+Fo any question please leave message in discussion page.
