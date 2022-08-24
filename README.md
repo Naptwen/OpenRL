@@ -6,12 +6,13 @@ GNU AFFERO GPL (c) Useop Gim 2022\
 # usgAI v2.2.4
 ``Python Pure source Algorithm``
 
-# cusgAI v1.0.0 --alpha 
-```C++ version CLI integration program for creating and training machine learning```
 
+# cusgAI v1.1.3 --alpha 
+![image](https://user-images.githubusercontent.com/47798805/186541001-7764c74e-1e72-4b7a-a04c-9bed6c1cc40a.png)
+
+```C++ version CLI ```
 ```Linux and window os ```
-1. current patch some bugs and creating user interface for easily using.
-2. for future work linux and window socket network for functional data interface for multiple neural network merging system.
-3. Using java script intergrate with andorid also.
-Tip for 2D or 3D space matrix calcualtion, using m_dimentional function slice the CNN style. 
-4. Fix some bug and add new feature for CNN for image hooking
+1. This is machine learning program tool\
+2. This includes editor for creating basic strucutre for neural network, CNN, RL model, Enviroment rule.\
+3. Base on created file, you can run the reinforcement machine learning.\
+Any question write down the discussion page.
