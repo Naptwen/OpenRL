@@ -16,3 +16,10 @@ GNU AFFERO GPL (c) Useop Gim 2022\
 2. This includes editor for creating basic strucutre for neural network, CNN, RL model, Enviroment rule.
 3. Base on created file, you can run the reinforcement machine learning.\
 Fo any question please leave message in discussion page.
+
+One hot run example\
+```./usg_AI.exe --run r example_model.txt example_enviro.txt 30000 example_result.txt```\
+Extra setting for console\
+The graphical algorithm for console interface takes a lot of time for running program\
+So I made setting for showing only small interface while it is running\
+```./usg_AI.exe --setting short``` it only show the iteration/max iteration and episode/max episode
