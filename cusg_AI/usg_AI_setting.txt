@@ -1,0 +1,3 @@
+show=[False]
+gpgpu=[True]
+network=[True]

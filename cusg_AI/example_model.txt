@@ -3,7 +3,7 @@
 		"model_name":["PPO"],
 		"discount_rate":[0.99],
 		"update_rate":[0.01],
-		"replay_size":[24],
+		"replay_size":[8],
 		"minibatch_size":[4],
 		"value_update_frequency":[1],
 		"target_update_frequency":[2]
@@ -37,7 +37,7 @@
 		"out_size":[3]
 	}
 ,	"CNN":{
-		"input":[3,6],
+		"input":[6,3],
 		"order_0":["SOBEL_X"],
 		"order_1":["PADDING"],
 		"order_2":["AVG_POOLING"],
@@ -72,7 +72,7 @@
 		"out_size":[3]
 	}
 ,	"CNN":{
-		"input":[3,6],
+		"input":[6,3],
 		"order_0":["SOBEL_X"],
 		"order_1":["PADDING"],
 		"order_2":["AVG_POOLING"],
@@ -107,7 +107,7 @@
 		"out_size":[3]
 	}
 ,	"CNN":{
-		"input":[3,6],
+		"input":[6,3],
 		"order_0":["SOBEL_X"],
 		"order_1":["PADDING"],
 		"order_2":["AVG_POOLING"],
