@@ -1,3 +1,4 @@
 show=[False]
-gpgpu=[True]
-network=[True]
+multi=[True]
+gpgpu=[False]
+network=[False]
