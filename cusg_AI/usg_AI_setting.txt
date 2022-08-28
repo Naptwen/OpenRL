@@ -1,4 +1,4 @@
 show=[False]
 multi=[True]
-gpgpu=[False]
+gpgpu=[True]
 network=[False]
