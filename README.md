@@ -7,7 +7,7 @@ GNU AFFERO GPL (c) Useop Gim 2022\
 ``Python Pure source Algorithm``
 
 
-# cusgAI v1.2.0 --alpha 
+# cusgAI v2.0.0 --alpha 
 ![image](https://user-images.githubusercontent.com/47798805/186541001-7764c74e-1e72-4b7a-a04c-9bed6c1cc40a.png)
 
 ```C++ version CLI ```
@@ -15,7 +15,7 @@ GNU AFFERO GPL (c) Useop Gim 2022\
 1. This is machine learning program tool
 2. This includes editor for creating basic strucutre for neural network, CNN, RL model, Enviroment rule.
 3. Base on created file, you can run the reinforcement machine learning.\
-4. v1.2.0 has new feature for parallel threading
+4. You can run the multi threading and also GPGPU (opencl) together
 Fo any question please leave message in discussion page.
 
 One hot run example\
