@@ -1,0 +1,9 @@
+	"CNN":{
+		"input":[6,3],
+		"order_0":["SOBEL_X"],
+		"order_1":["PADDING"],
+		"order_2":["EDGE"],
+		"order_3":["PADDING"],
+		"order_4":["MAX_POOLING"],
+		"out_size":[3]
+	}
