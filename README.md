@@ -7,7 +7,7 @@ GNU AFFERO GPL (c) Useop Gim 2022\
 ``Python Pure source Algorithm``
 
 
-# cusgAI v2.0.2 --alpha 
+# cusgAI v2.1.0 --alpha 
 ![image](https://user-images.githubusercontent.com/47798805/186541001-7764c74e-1e72-4b7a-a04c-9bed6c1cc40a.png)
 
 ```C++ version CLI ```
@@ -18,7 +18,10 @@ GNU AFFERO GPL (c) Useop Gim 2022\
 4. You can run the multi threading and also GPGPU (opencl) together
 Fo any question please leave message in discussion page.
 5. Add base64 decoding encoding and reduce the save file size for speed up the loading bigfile of neural network
+6. Update and Fix for OpenCL algorithm now speed is increase dramatically.\
 One hot run example\
 ```./usg_AI.exe --setting short```\
 ```./usg_AI.exe --setting multion```\
-```./usg_AI.exe --run r example_model.txt example_enviro.txt 30000 example_result.txt```\
+```./usg_AI.exe --setting gpuon```\
+```./usg_AI.exe --run r example_model.txt example_enviro.txt 300000 example_result.txt```
+
