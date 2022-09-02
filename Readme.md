@@ -87,6 +87,7 @@ https://github.com/Naptwen/usgAI
 </details>
 </PRE>
 </BODY>
+<body>
 <details>Tree
    <summary># API Hirechy</summary>
    <ul class="menu">
@@ -153,5 +154,5 @@ https://github.com/Naptwen/usgAI
 
 
 </details>
-
+</body>
 </HTML>
