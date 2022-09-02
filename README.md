@@ -1,5 +1,9 @@
 # usgAI
-GNU AFFERO GPL (c) Useop Gim 2022\
+GNU AFFERO GPL (c) Useop Gim 2022
+
+# Install
+Download the usg_AI.exe file (NSIS file).
+Install the program.
 
 # usgAI v2.2.0 --alpha 
 It is integration program for machine learning
