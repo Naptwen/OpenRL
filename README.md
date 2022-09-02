@@ -3,13 +3,18 @@ GNU AFFERO GPL (c) Useop Gim 2022\
 
 [![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FNaptwen%2FOpen_pyAI&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
 
-# usgAI v2.2.4
+# usgAI-python v2.2.4
 ``Python Pure source Algorithm``
+I stop using this 
 
+# usgAI v2.2.0 --alpha 
+It is integration program for machine learning
 
-# cusgAI v2.1.0 --alpha 
-![image](https://user-images.githubusercontent.com/47798805/186541001-7764c74e-1e72-4b7a-a04c-9bed6c1cc40a.png)
+# GUI version
+```double click the exe file```
+On the way by using OpenGL, OpenCV (Linux, Window), Metalic (apple) and OpenGLES(Android)
 
+# CLI version
 ```C++ version CLI ```
 ```Linux and window os ```
 1. This is machine learning program tool
