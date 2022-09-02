@@ -2,13 +2,13 @@
 GNU AFFERO GPL (c) Useop Gim 2022
 
 # Install
-- Download the usg_AI.exe file (NSIS file).\
+- Download the usg_AI.exe file (NSIS file).
 - Or download the 7Z file.
 
 # usgAI v2.2.0 --alpha 
 It is integration program for machine learning
 
-# GUI version
+# GUI version (NOT WORKING)
 ```double click the exe file```
 On the way by using OpenGL, OpenCV (Linux, Window), Metal (apple) and OpenGLES(Android)
 
