@@ -9,8 +9,7 @@ It is integration program for machine learning
 On the way by using OpenGL, OpenCV (Linux, Window), Metal (apple) and OpenGLES(Android)
 
 # CLI version
-```C++ version CLI ```
-```Linux and window os ```
+```using terminal run the file```
 1. This is machine learning program tool
 2. This includes editor for creating basic strucutre for neural network, CNN, RL model, Enviroment rule.
 3. Base on created file, you can run the reinforcement machine learning.\
