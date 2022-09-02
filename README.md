@@ -12,7 +12,7 @@ It is integration program for machine learning
 
 # GUI version
 ```double click the exe file```
-On the way by using OpenGL, OpenCV (Linux, Window), Metalic (apple) and OpenGLES(Android)
+On the way by using OpenGL, OpenCV (Linux, Window), Metal (apple) and OpenGLES(Android)
 
 # CLI version
 ```C++ version CLI ```
