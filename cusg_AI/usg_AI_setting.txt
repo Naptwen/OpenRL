@@ -1,4 +1,0 @@
-show=[False]
-multi=[True]
-gpgpu=[True]
-network=[False]
