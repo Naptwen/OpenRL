@@ -8,7 +8,7 @@
 <BODY>
    <PRE>
 Copy Right (c) 2022 Useop Gim
-Affero GNU GPL v3 license 
+Affero GNU GPL v3 license
 https://github.com/Naptwen/usgAI
 <details>
 <summary># Comment</summary>
@@ -51,10 +51,10 @@ https://github.com/Naptwen/usgAI
 <summary># REFERENCE FOR BASE 64 SOURCE CODE</summary>
 
    base64.cpp and base64.h
-   
+
    base64 encoding and decoding with C++.
    More information at
-     https://renenyffenegger.ch/notes/development/Base64/Encoding-and-decoding-base-64-with-cpp
+     <https://renenyffenegger.ch/notes/development/Base64/Encoding-and-decoding-base-64-with-cpp>
 
    Version: 2.rc.08 (release candidate)
 
@@ -87,70 +87,99 @@ https://github.com/Naptwen/usgAI
 </details>
 </PRE>
 </BODY>
-<BLOCKQUOTE>
-<summary># PATCH NOTE 2.3</summary>
-<PRE>
+<details>
+   <summary># PATCH NOTE 2.3</summary>
+   <PRE>
 Sep 03, 2022.
 1. Fix : Edit the PPO algorithm for paraller multiplication
 2. New : Construct GUI for OpenGL with GLFW and GLEW
 3. New : Reading Screen as Video for using CNN algorithm
 4. Future : Trying to change OpenGLES for application
 </PRE>
-</BLOCKQUOTE>
-<BLOCKQUOTE>
+</details>
+<BODY>
 <details>Tree
-<BLOCKQUOTE>
-The mouse over text explains what is the function of header file and some header file is directly linked to the original code source website
-</BLOCKQUOTE>
-   <summary># API Hirechy</summary>
-   <ul class="menu">
-      <li>
-         <a href="#"><span title="This is the main program">main.cpp</span></a>
-         <ul class="submenu">
-            <li><a href="#"><span title="This is for connection GUI">usg_Khronos.hpp</span></a></li>
+      <BLOCKQUOTE>
+         The mouse over text explains what is the function of header file and some header file is directly linked to the
+         original code source website
+      </BLOCKQUOTE>
+      <summary># API Hirechy</summary>
+      <ul class="menu">
+         <li>
+            <a href="https://github.com/Naptwen/usgAI"><span title="This is the main program">main.cpp</span></a>
             <ul class="submenu">
-               <li><a href="#"><span title="This is for graphic and UI object">usg_OpenGL.hpp</span></span></a></li>
+               <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for connection GUI">usg_Khronos.hpp</span></a></li>
                <ul class="submenu">
-                  <li><a href="#"><span title="This is for image and video">usg_OpenCV.hpp</span></a></li>
+                  <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for graphic and UI object">usg_OpenGL.hpp</span></span></a></li>
                   <ul class="submenu">
-                     <li><a href="#"><span title="This is for fragment shader for 3d object">shader.frag</span></li>
-                     <li><a href="#"><span title="This is for vertices shader for 3d object">shader.vert</span></li>
-                     <li><a href="https://www.glfw.org/"><button title="This is for easy making OpenGL window">glfw3.h</button></li>
-                     <li><a href="http://glew.sourceforge.net/"><button title="This is for easy making VAO for OpenGL">glew.h</button></li>
-                     <li><a href="https://opencv.org/"><button title="This is for loading image">imgcode.h</button></li>
-                     <li><a href="https://opencv.org/"><button title="This is for loading video">video.h</button></li>
+                     <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for image and video">usg_OpenCV.hpp</span></a></li>
+                     <ul class="submenu">
+                        <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for fragment shader for 3d object">shader.frag</span></li>
+                        <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for vertices shader for 3d object">shader.vert</span></li>
+                        <li><a href="https://www.glfw.org/"><button
+                                 title="This is for easy making OpenGL window">glfw3.h</button></li>
+                        <li><a href="http://glew.sourceforge.net/"><button
+                                 title="This is for easy making VAO for OpenGL">glew.h</button></li>
+                        <li><a href="https://opencv.org/"><button title="This is for loading image">imgcode.h</button>
+                        </li>
+                        <li><a href="https://opencv.org/"><button title="This is for loading video">video.h</button>
+                        </li>
+                     </ul>
                   </ul>
                </ul>
-            </ul>
-            <li><a href="#"><span title="This is for console user interface">usg_CLI.hpp</span></a></li>
-            <ul class="submenu">
-               <li><a href="#"><span title="This is for console interface for AI">usg_CLI_RL.hpp</span></a></li>
+               <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for console user interface">usg_CLI.hpp</span></a></li>
                <ul class="submenu">
-                  <li><a href="#"><span title="This is for running AI program">usg_RL_AI.hpp</span></a></li>
+                  <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for console interface for AI">usg_CLI_RL.hpp</span></a></li>
                   <ul class="submenu">
-                     <li><a href="#"><span title="This is for multi threading agents">usg_RL_hivemind.hpp</span></a></li>
+                     <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for running AI program">usg_RL_AI.hpp</span></a></li>
                      <ul class="submenu">
-                        <li><a href="#"><span title="This is for setting rule and enviroment">usg_RL_rule_book.hpp</span></a></li>
+                        <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for multi threading agents">usg_RL_hivemind.hpp</span></a>
+                        </li>
                         <ul class="submenu">
-                           <li><a href="#"><span title="This is for RL model algorithm">usg_RL_model.hpp</span></a></li>
+                           <li><a href="https://github.com/Naptwen/usgAI"><span
+                                    title="This is for setting rule and enviroment">usg_RL_rule_book.hpp</span></a></li>
                            <ul class="submenu">
-                              <li><a href="#"><span title="This is for Neurla network algorithm">usg_Neural.hpp</span></a></li>
+                              <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for RL model algorithm">usg_RL_model.hpp</span></a>
+                              </li>
                               <ul class="submenu">
-                                 <li><a href="#"><span title="This is for Neurla network functions">usg_Neural_function.hpp</span></a></li>
+                                 <li><a href="https://github.com/Naptwen/usgAI"><span
+                                          title="This is for Neurla network algorithm">usg_Neural.hpp</span></a></li>
                                  <ul class="submenu">
-                                    <li><a href="#"><span title="This is for CNN network algorithm">usg_CNN.hpp</span></a></li>
+                                    <li><a href="https://github.com/Naptwen/usgAI"><span
+                                             title="This is for Neurla network functions">usg_Neural_function.hpp</span></a>
+                                    </li>
                                     <ul class="submenu">
-                                       <li><a href="#"><span title="This is for CNN network functions">usg_CNN_function.hpp</span></a></li>
+                                       <li><a href="https://github.com/Naptwen/usgAI"><span
+                                                title="This is for CNN network algorithm">usg_CNN.hpp</span></a></li>
                                        <ul class="submenu">
-                                          <li><a href="#"><span title="This is for some convenient functinos">usg_etc_algorithm.hpp</span></a></li>
+                                          <li><a href="https://github.com/Naptwen/usgAI"><span
+                                                   title="This is for CNN network functions">usg_CNN_function.hpp</span></a>
+                                          </li>
                                           <ul class="submenu">
-                                             <li><a href="https://renenyffenegger.ch/notes/development/Base64/Encoding-and-decoding-base-64-with-cpp"><button title="This is to reduce file size and communicate through network ">base_64.h</button></a></li>
-                                             <li><a href="#"><span title="This is for intersection between GPGPU and CPU">usg_vmatrix_Merge.hpp</span></a></li>
+                                             <li><a href="https://github.com/Naptwen/usgAI"><span
+                                                      title="This is for some convenient functinos">usg_etc_algorithm.hpp</span></a>
+                                             </li>
                                              <ul class="submenu">
-                                                <li><a href="#"><span title="This is for matrix calculation algorithm base on standard vector container">usg_vmatrix.hpp</span></a></li>
-                                                <li><a href="#"><span title="This is for OpenCL gpgpu kernel interchange algorithm">usg_OpenCL.hpp</span></a></li>
+                                                <li><a
+                                                      href="https://renenyffenegger.ch/notes/development/Base64/Encoding-and-decoding-base-64-with-cpp"><button
+                                                         title="This is to reduce file size and communicate through network ">base_64.h</button></a>
+                                                </li>
+                                                <li><a href="https://github.com/Naptwen/usgAI"><span
+                                                         title="This is for intersection between GPGPU and CPU">usg_vmatrix_Merge.hpp</span></a>
+                                                </li>
                                                 <ul class="submenu">
-                                                   <li><a href="https://www.khronos.org/opencl/"><button title="This is for OpenCL">CL.h</button></a></li></ul>
+                                                   <li><a href="https://github.com/Naptwen/usgAI"><span
+                                                            title="This is for matrix calculation algorithm base on standard vector container">usg_vmatrix.hpp</span></a>
+                                                   </li>
+                                                   <li><a href="https://github.com/Naptwen/usgAI"><span
+                                                            title="This is for OpenCL gpgpu kernel interchange algorithm">usg_OpenCL.hpp</span></a>
+                                                   </li>
+                                                   <ul class="submenu">
+                                                      <li><a href="https://www.khronos.org/opencl/"><button
+                                                               title="This is for OpenCL">CL.h</button></a></li>
+                                                   </ul>
+                                                </ul>
+                                             </ul>
                                           </ul>
                                        </ul>
                                     </ul>
@@ -162,9 +191,7 @@ The mouse over text explains what is the function of header file and some header
                   </ul>
                </ul>
             </ul>
-         </ul>
       </ul>
-   </ul>
-</details>
-</BLOCKQUOTE>
+   </details>
+</BODY>
 </HTML>
