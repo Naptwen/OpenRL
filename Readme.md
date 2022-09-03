@@ -1,3 +1,6 @@
+# Test GUI interface example
+![image](https://user-images.githubusercontent.com/47798805/188290654-9c4a8ca7-25f6-41f9-a52a-ea513c49e92e.png)
+
 <!DOCTYPE HTML>
 <HTML>
 
@@ -85,14 +88,9 @@ https://github.com/Naptwen/usgAI
    The core part of OpenCL, OpenGL, OpenCV are following Khronos license
    https://www.khronos.org/legal/Khronos_Apache_2.0_CLA
 </details>
-</details>
-<details>
-<summary> Minimumrequirement </summary>
-<p> Above C++11, OpenGL 2.0, OpenCV 2.0, OpenCL 3.0 (for GPGPU)</p> 
-<p> Include file in bin glfw3.dll, glew.dll and opencv_world460d.dll. (These are in install file and zip also)</p> 
 </PRE>
 </BODY>
-<details>
+<BLOCKQUOTE>
    <summary># PATCH NOTE 2.3</summary>
    <PRE>
 Sep 03, 2022.
@@ -101,9 +99,9 @@ Sep 03, 2022.
 3. New : Reading Screen as Video for using CNN algorithm
 4. Future : Trying to change OpenGLES for application
 </PRE>
-</details>
-<BODY>
-<details>Tree
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+   <details>Tree
       <BLOCKQUOTE>
          The mouse over text explains what is the function of header file and some header file is directly linked to the
          original code source website
@@ -117,6 +115,11 @@ Sep 03, 2022.
                <ul class="submenu">
                   <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for graphic and UI object">usg_OpenGL.hpp</span></span></a></li>
                   <ul class="submenu">
+                     <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for text buffer on graphic interface">usg_FreeType.hpp</span></a></li>
+                     <ul class="submenu">
+                        <li><a href="http://freetype.org/"><button title="This is for free type API">ft2build.h</button>
+                        </li>
+                     </ul>
                      <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for image and video">usg_OpenCV.hpp</span></a></li>
                      <ul class="submenu">
                         <li><a href="https://github.com/Naptwen/usgAI"><span title="This is for fragment shader for 3d object">shader.frag</span></li>
@@ -198,5 +201,6 @@ Sep 03, 2022.
             </ul>
       </ul>
    </details>
-</BODY>
+</BLOCKQUOTE>
+
 </HTML>
