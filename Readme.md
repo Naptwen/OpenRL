@@ -87,8 +87,21 @@ https://github.com/Naptwen/usgAI
 </details>
 </PRE>
 </BODY>
-<body>
+<BLOCKQUOTE>
+<summary># PATCH NOTE 2.3</summary>
+<PRE>
+Sep 03, 2022.
+1. Fix : Edit the PPO algorithm for paraller multiplication
+2. New : Construct GUI for OpenGL with GLFW and GLEW
+3. New : Reading Screen as Video for using CNN algorithm
+4. Future : Trying to change OpenGLES for application
+</PRE>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
 <details>Tree
+<BLOCKQUOTE>
+The hovered text explains what is the function of header file and some header file is directly linked to the original code source website
+</BLOCKQUOTE>
    <summary># API Hirechy</summary>
    <ul class="menu">
       <li>
@@ -134,8 +147,8 @@ https://github.com/Naptwen/usgAI
                                              <li><a href="https://renenyffenegger.ch/notes/development/Base64/Encoding-and-decoding-base-64-with-cpp"><button title="This is to reduce file size and communicate through network ">base_64.h</button></a></li>
                                              <li><a href="#"><button title="This is for intersection between GPGPU and CPU">usg_vmatrix_Merge.hpp</button></a></li>
                                              <ul class="submenu">
-                                                <li><a href="#"><button title="This is for matrix calculation algorithm base on standard vector container">uusg_vmatrix.hpp</button></a></li>
-                                                <li><a href="#"><button title="This is for OpenCL gpgpu kernel interchange algorithm">uusg_OpenCL.hpp</button></a></li>
+                                                <li><a href="#"><button title="This is for matrix calculation algorithm base on standard vector container">usg_vmatrix.hpp</button></a></li>
+                                                <li><a href="#"><button title="This is for OpenCL gpgpu kernel interchange algorithm">usg_OpenCL.hpp</button></a></li>
                                                 <ul class="submenu">
                                                    <li><a href="#"><button title="This is for OpenCL">CL.h</button></a></li></ul>
                                           </ul>
@@ -150,9 +163,8 @@ https://github.com/Naptwen/usgAI
                </ul>
             </ul>
          </ul>
+      </ul>
    </ul>
-
-
 </details>
-</body>
+</BLOCKQUOTE>
 </HTML>
