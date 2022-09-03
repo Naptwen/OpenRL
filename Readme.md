@@ -85,6 +85,11 @@ https://github.com/Naptwen/usgAI
    The core part of OpenCL, OpenGL, OpenCV are following Khronos license
    https://www.khronos.org/legal/Khronos_Apache_2.0_CLA
 </details>
+</details>
+<details>
+<summary> Minimumrequirement </summary>
+<p> Above C++11, OpenGL 2.0, OpenCV 2.0, OpenCL 3.0 (for GPGPU)</p> 
+<p> Include file in bin glfw3.dll, glew.dll and opencv_world460d.dll. (These are in install file and zip also)</p> 
 </PRE>
 </BODY>
 <details>
