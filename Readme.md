@@ -1,5 +1,5 @@
 # Test GUI interface example
-![image](https://user-images.githubusercontent.com/47798805/188299866-e405cbc5-c9a2-426e-8938-09d6641ed060.png)
+![image](https://user-images.githubusercontent.com/47798805/188301159-20bcf292-d75d-4382-a0b0-2674392ff704.png)
 <!DOCTYPE HTML>
 <HTML>
 
