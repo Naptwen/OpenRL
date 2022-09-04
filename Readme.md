@@ -1,5 +1,9 @@
 # Test GUI interface example
-![image](https://user-images.githubusercontent.com/47798805/188301159-20bcf292-d75d-4382-a0b0-2674392ff704.png)
+![image](https://user-images.githubusercontent.com/47798805/188313919-d9f222c6-cde2-4b60-ae1e-b362756e0b83.png)
+![image](https://user-images.githubusercontent.com/47798805/188313931-9dc58e76-2b5c-4586-b505-df2ed0f1438c.png)
+![image](https://user-images.githubusercontent.com/47798805/188313936-06e9d9ab-bb69-4ef1-aff1-e77d0dfaebea.png)
+
+
 <!DOCTYPE HTML>
 <HTML>
 
@@ -92,6 +96,12 @@ https://github.com/Naptwen/usgAI
 <BLOCKQUOTE>
    <summary># PATCH NOTE 2.3</summary>
    <PRE>
+Sep 04, 2022.
+1. Fix : When display pixel image that were flipped, using matrix transfer fixed it.
+2. New : Output text in GUI system by FreeType libraray
+3. New : GUI level text input and the object structure of integration GUI interface algorithm.
+4. New : File I/O system by GUI for Model algorithm and Neural network algorithm
+5. Feature : Tyring to read the video buffer and automatically creating CNN for neural net
 Sep 03, 2022.
 1. Fix : Edit the PPO algorithm for paraller multiplication
 2. New : Construct GUI for OpenGL with GLFW and GLEW
