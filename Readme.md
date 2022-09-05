@@ -1,5 +1,5 @@
 # Test for visualization code Machine learning algorithm hirechy
-![image](https://user-images.githubusercontent.com/47798805/188382340-eee39004-11c7-4e5d-b184-fa2a2fec63f5.png)
+![image](https://user-images.githubusercontent.com/47798805/188390978-d0af0fdf-5415-479a-b0b5-9019f55b5e9d.png)
 
 ![image](https://user-images.githubusercontent.com/47798805/188350555-2660ac23-bbd1-4f07-a165-709a3340b3bb.png)
 ![image](https://user-images.githubusercontent.com/47798805/188350568-dfe416b1-c704-49e8-a2fd-49f500f80e20.png)
