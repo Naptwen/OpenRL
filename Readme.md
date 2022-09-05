@@ -1,4 +1,3 @@
-GUI Version
 ![image](https://user-images.githubusercontent.com/47798805/188350555-2660ac23-bbd1-4f07-a165-709a3340b3bb.png)
 ![image](https://user-images.githubusercontent.com/47798805/188350568-dfe416b1-c704-49e8-a2fd-49f500f80e20.png)
 ![image](https://user-images.githubusercontent.com/47798805/188350588-c5f11598-2628-4a91-978e-f35f25f24e63.png)
