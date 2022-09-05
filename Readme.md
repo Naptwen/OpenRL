@@ -1,4 +1,4 @@
-# Test for visualization code Machine learning algorithm hirechy
+# Test for visualization code Machine learning algorithm node connections
 ![image](https://user-images.githubusercontent.com/47798805/188390978-d0af0fdf-5415-479a-b0b5-9019f55b5e9d.png)
 
 ![image](https://user-images.githubusercontent.com/47798805/188350555-2660ac23-bbd1-4f07-a165-709a3340b3bb.png)
