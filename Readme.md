@@ -1,7 +1,8 @@
-# Test GUI interface example
-![image](https://user-images.githubusercontent.com/47798805/188313919-d9f222c6-cde2-4b60-ae1e-b362756e0b83.png)
-![image](https://user-images.githubusercontent.com/47798805/188313931-9dc58e76-2b5c-4586-b505-df2ed0f1438c.png)
-![image](https://user-images.githubusercontent.com/47798805/188313936-06e9d9ab-bb69-4ef1-aff1-e77d0dfaebea.png)
+GUI Version
+![image](https://user-images.githubusercontent.com/47798805/188350555-2660ac23-bbd1-4f07-a165-709a3340b3bb.png)
+![image](https://user-images.githubusercontent.com/47798805/188350568-dfe416b1-c704-49e8-a2fd-49f500f80e20.png)
+![image](https://user-images.githubusercontent.com/47798805/188350588-c5f11598-2628-4a91-978e-f35f25f24e63.png)
+![image](https://user-images.githubusercontent.com/47798805/188350610-71cecf87-c685-492d-997f-bc4205329ee7.png)
 
 
 <!DOCTYPE HTML>
@@ -96,6 +97,11 @@ https://github.com/Naptwen/usgAI
 <BLOCKQUOTE>
    <summary># PATCH NOTE 2.3</summary>
    <PRE>
+Sep 05, 2022.
+1. Edit : Change UI
+2. Fix : Font bug fix
+3. New : CNN and Model creating
+4. Feauture : Visualizing AI creating
 Sep 04, 2022.
 1. Fix : When display pixel image that were flipped, using matrix transfer fixed it.
 2. New : Output text in GUI system by FreeType libraray
@@ -106,7 +112,7 @@ Sep 03, 2022.
 1. Fix : Edit the PPO algorithm for paraller multiplication
 2. New : Construct GUI for OpenGL with GLFW and GLEW
 3. New : Reading Screen as Video for using CNN algorithm
-4. Future : Trying to change OpenGLES for application
+4. Feauture : Trying to change OpenGLES for application
 </PRE>
 </BLOCKQUOTE>
 <BLOCKQUOTE>
