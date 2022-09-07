@@ -1,0 +1,11 @@
+[{
+	"Model":{
+		"model_name":["PPO"],
+		"discount_rate":[0.99],
+		"update_rate":[0.01],
+		"replay_size":[32],
+		"minibatch_size":[32],
+		"value_update_frequency":[1],
+		"target_update_frequency":[3]
+	}
+}]
