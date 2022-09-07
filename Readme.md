@@ -1,10 +1,9 @@
-# Test for visualization code Machine learning algorithm node connections
-![image](https://user-images.githubusercontent.com/47798805/188520862-afb57218-3b11-4625-a99e-827f314ccd58.png)
-
-![image](https://user-images.githubusercontent.com/47798805/188350555-2660ac23-bbd1-4f07-a165-709a3340b3bb.png)
-![image](https://user-images.githubusercontent.com/47798805/188350568-dfe416b1-c704-49e8-a2fd-49f500f80e20.png)
-![image](https://user-images.githubusercontent.com/47798805/188350588-c5f11598-2628-4a91-978e-f35f25f24e63.png)
-![image](https://user-images.githubusercontent.com/47798805/188350610-71cecf87-c685-492d-997f-bc4205329ee7.png)
+Main menu
+![image](https://user-images.githubusercontent.com/47798805/188802731-86ca879e-ce75-48d6-870e-83a1f2edcff0.png)
+Visualization code for algorithm
+![image](https://user-images.githubusercontent.com/47798805/188802833-47d4d2b4-b4b0-46a9-afa8-757291e1f188.png)
+Using OpenCV  cropping displayer and connect it to CNN
+![image](https://user-images.githubusercontent.com/47798805/188803135-79e7c4cd-a939-4f0e-bcbb-ef568e1e263e.png)
 
 
 <!DOCTYPE HTML>
@@ -99,6 +98,11 @@ https://github.com/Naptwen/usgAI
 <BLOCKQUOTE>
    <summary># PATCH NOTE 2.3</summary>
    <PRE>
+Sep 07, 2022.
+1. New : Visualizing Algorithms.
+2. New : Capture the screen and cropping inside OpenGL (only for winodw now).
+3. New : Model running by captured screen.
+4. Feature : Learning algorithm applying algorithm and multi thread.
 Sep 05, 2022.
 1. Edit : Change UI
 2. Fix : Font bug fix
