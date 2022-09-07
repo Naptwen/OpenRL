@@ -99,6 +99,11 @@ https://github.com/Naptwen/usgAI
    <summary># PATCH NOTE 2.3</summary>
    <PRE>
 Sep 07, 2022.
+1. Edit : Visualizing Algorithms with Enviroments
+2. Edit : Change run menu to enviroment and add actions
+3. New : loading by tree file which includes cnn, dnn, model, enviro
+4. Feature : Looking forward how to make generlizing the reward
+Sep 07, 2022.
 1. New : Visualizing Algorithms.
 2. New : Capture the screen and cropping inside OpenGL (only for winodw now).
 3. New : Model running by captured screen.
