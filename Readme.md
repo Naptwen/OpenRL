@@ -16,7 +16,7 @@ void(std::vector<float> &state, unsigned float &reward, bool &termination)
 
 6. Create Enviroments
 7. Create Tree
-8. run it from the command CLI as ./usg_AI.exe --run -t [your tree name]
+8. run it from the command CLI as ./usg_AI.exe --run -t [your tree name] [max iteration] [result save file name]
 
 Example by given test files
 1. Required the tree.txt, enviro.txt, ppo.txt, dnn1.txt, dnn2.txt, cnn1.txt
