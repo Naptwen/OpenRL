@@ -169,6 +169,10 @@ https://github.com/Naptwen/usgAI
 <BLOCKQUOTE>
    <summary># PATCH NOTE 2.3</summary>
    <PRE>
+Sep 10, 2022.
+1. New : Applying shared lib of reward and enviro function for runtime.
+2. New : RNN model (dynamical shapes)
+3. Feature : operation tree to prepare LSTM
 Sep 07, 2022.
 1. Edit : Visualizing Algorithms with Enviroments
 2. Edit : Change run menu to enviroment and add actions
