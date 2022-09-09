@@ -3,10 +3,10 @@ How 2 Use
 
 ![image](https://user-images.githubusercontent.com/47798805/189315179-2202bd0b-881c-4ec2-a7b9-6f89562606a7.png)
 
-1. Create CNN
-3. Create DNN
-4. Create Model
-5. Coding reward function and action function then make it as shared library
+1. Create CNN (the layer types are in https://github.com/Naptwen/usgAI/wiki/usg_AI-3-version)
+3. Create DNN (the function types are in https://github.com/Naptwen/usgAI/wiki/usg_AI-3-version)
+4. Create Model (the model types are in https://github.com/Naptwen/usgAI/wiki/usg_AI-3-version)
+5. Coding reward function and action function then make it as shared library (if you don't know how to do see extrafn.cpp file)
 
 ** action function should be formed as c++
 ```c++ 
