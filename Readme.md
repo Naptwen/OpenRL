@@ -3,10 +3,20 @@ How 2 Use
 1. Create CNN
 2. Create DNN
 3. Create Model
-4. Create reward function and action function
-5. Create Enviroments
-6. Create Tree
-7. run it from the command CLI as ./usg_AI.exe --run -t [your tree name]
+4. Create reward function and action function then make it as shared library\
+
+** action function should be formed as c++
+```c++ 
+void(unsigned int &action)
+```
+** reward function should be formed as c++
+```c++ 
+void(std::vector<float> &state, unsigned float &reward, bool &termination)
+```
+
+6. Create Enviroments
+7. Create Tree
+8. run it from the command CLI as ./usg_AI.exe --run -t [your tree name]
 
 Example by given test files
 1. Required the tree.txt, enviro.txt, ppo.txt, dnn1.txt, dnn2.txt, cnn1.txt
@@ -23,7 +33,7 @@ Example by given test files
 7. Save the file name as enviro.txt\
 ![image](https://user-images.githubusercontent.com/47798805/189295634-f04103a5-0e75-4c64-8dd9-81d92b7571c4.png)
 8. run the game.py\
-![image](https://user-images.githubusercontent.com/47798805/189296096-5c15cbd7-31cc-4de9-80c8-fbe6a9166885.png)
+![image](https://user-images.githubusercontent.com/47798805/189303660-78756217-b02b-49de-9a49-7feb0bb71e7e.png)
 8. open the command(terminal) Then typing ./usg_AI.exe  --run -t tree.txt 100,000 result.txt\
 9. Wait 100,000 times then the neural network will be saved in result.txt
 <!DOCTYPE HTML>
