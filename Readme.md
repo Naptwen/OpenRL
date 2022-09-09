@@ -3,7 +3,7 @@ How 2 Use
 1. Create CNN
 2. Create DNN
 3. Create Model
-4. Create reward function and action function then make it as shared library\
+4. Create reward function and action function then make it as shared library
 
 ** action function should be formed as c++
 ```c++ 
