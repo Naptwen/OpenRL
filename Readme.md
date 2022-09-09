@@ -27,7 +27,7 @@ Example\
 Above shows 3 channel CNN
 
 9. run it from the command CLI as ./usg_AI.exe --run T [your tree name] [max iteration] [result save file name]
-
+____
 Example by given test files
 1. Required the tree.txt, enviro.txt, ppo.txt, dnn1.txt, dnn2.txt, cnn1.txt
 2. Run the game that I made game.py 
@@ -46,6 +46,7 @@ Example by given test files
 ![image](https://user-images.githubusercontent.com/47798805/189303660-78756217-b02b-49de-9a49-7feb0bb71e7e.png)
 8. open the command(terminal) Then typing ./usg_AI.exe  --run -t tree.txt 100,000 result.txt\
 9. Wait 100,000 times then the neural network will be saved in result.txt
+___
 <!DOCTYPE HTML>
 <HTML>
 
