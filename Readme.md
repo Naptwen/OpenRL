@@ -1,11 +1,31 @@
-Main menu\
-![image](https://user-images.githubusercontent.com/47798805/188802731-86ca879e-ce75-48d6-870e-83a1f2edcff0.png)\
-Visualization code for algorithm\
-![image](https://user-images.githubusercontent.com/47798805/188802833-47d4d2b4-b4b0-46a9-afa8-757291e1f188.png)\
-Using OpenCV  cropping displayer and connect it to CNN\
-![image](https://user-images.githubusercontent.com/47798805/188803135-79e7c4cd-a939-4f0e-bcbb-ef568e1e263e.png)
+V2.4.0
+How 2 Use
+1. Create CNN
+2. Create DNN
+3. Create Model
+4. Create reward function and action function
+5. Create Enviroments
+6. Create Tree
+7. run it from the command CLI as ./usg_AI.exe --run -t [your tree name]
 
-
+Example by given test files
+1. Required the tree.txt, enviro.txt, ppo.txt, dnn1.txt, dnn2.txt, cnn1.txt
+2. Run the game that I made game.py 
+3. Double click usg_AI.exe
+![image](https://user-images.githubusercontent.com/47798805/189294569-09153fad-02a8-4388-8e1f-939ea571651e.png)
+4. click the ENVIRO CREATE
+![image](https://user-images.githubusercontent.com/47798805/189294825-21826d04-15de-4b70-9c15-71704fa92825.png)
+5. click the SET ACTION then typing
+"extrafn.dll, rewardfn,  actionfn"
+![image](https://user-images.githubusercontent.com/47798805/189295184-662e2147-f96a-4a34-b4c2-5b53e5e6e72b.png)
+6. click the Display then cropping the area that you will run the game.py screen
+![image](https://user-images.githubusercontent.com/47798805/189295506-adffecb2-5c4d-4f99-a867-17ee9ba00cb0.png)
+7. Save the file name as enviro.txt
+![image](https://user-images.githubusercontent.com/47798805/189295634-f04103a5-0e75-4c64-8dd9-81d92b7571c4.png)
+8. run the game.py
+![image](https://user-images.githubusercontent.com/47798805/189296096-5c15cbd7-31cc-4de9-80c8-fbe6a9166885.png)
+8. open the command(terminal) Then typing ./usg_AI.exe  --run -t tree.txt 100,000 result.txt
+9. Wait 100,000 times then the neural network will be saved in result.txt
 <!DOCTYPE HTML>
 <HTML>
 
