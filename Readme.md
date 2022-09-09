@@ -50,6 +50,33 @@ Example by given test files
 ![image](https://user-images.githubusercontent.com/47798805/189303660-78756217-b02b-49de-9a49-7feb0bb71e7e.png)
 9. Wait 100,000 times then the neural network will be saved in result.txt
 ___
+How 2 make Tree
+1. only one enviro is allowed, only one model is allowed\
+2. click the add\
+![image](https://user-images.githubusercontent.com/47798805/189348929-d0ded836-ef3b-45ab-9254-db9c7615ff93.png)
+3. Then click empty node then click again the right mouse button\
+![image](https://user-images.githubusercontent.com/47798805/189349097-6cadd424-b34f-4259-b499-59f9c3bfefbc.png)
+4. Then write the name of file that you already made such as cnn, dnn, model, enviro\
+![image](https://user-images.githubusercontent.com/47798805/189349263-cadee30d-909b-4ad6-8246-42e73b09e7d4.png)
+5. Then click the block then click the empty space, it will be moved in there\
+![image](https://user-images.githubusercontent.com/47798805/189349369-c857972e-58a6-48d8-af54-aeed030aa9d6.png)
+6. Add another\
+![image](https://user-images.githubusercontent.com/47798805/189349417-fdff35b8-bbce-4cc1-bed9-dfe02a361f69.png)
+7. click the node that you made then click another node\
+![image](https://user-images.githubusercontent.com/47798805/189349545-c539919e-c730-45b2-b2cd-10526df11dd2.png)
+8. You can see the connection from empty to test.txt the direction is from empty to test.txt\
+![image](https://user-images.githubusercontent.com/47798805/189349638-72551619-0c4f-4676-8a56-0d15964bbddc.png)
+9. Make shape that you want\
+![image](https://user-images.githubusercontent.com/47798805/189349731-d60d7e87-a454-44c2-88bb-7e0f2812b13d.png)\
+![image](https://user-images.githubusercontent.com/47798805/189349799-0f677458-f5d7-485f-9fda-bc467cb2a003.png)
+10. If you want to disconnect the node direction double click the node that you want to disconnect\
+![image](https://user-images.githubusercontent.com/47798805/189349901-ba52b86a-3486-4cd5-8f65-a951861670ee.png)
+11. If you want to delete the node click the node then press the Delete key\
+![image](https://user-images.githubusercontent.com/47798805/189349988-d71c1e17-672e-4164-b25a-74757ac92366.png)
+12. If you want to save the node click the node then click the save button\
+![image](https://user-images.githubusercontent.com/47798805/189350105-d46bfff8-c142-46bd-8f24-e66797110905.png)
+
+___
 <!DOCTYPE HTML>
 <HTML>
 
