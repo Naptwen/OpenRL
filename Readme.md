@@ -1,9 +1,12 @@
 usg_AI V3.0.0 --alpha
 How 2 Use
+
+![image](https://user-images.githubusercontent.com/47798805/189315179-2202bd0b-881c-4ec2-a7b9-6f89562606a7.png)
+
 1. Create CNN
 3. Create DNN
 4. Create Model
-5. Create reward function and action function then make it as shared library
+5. Coding reward function and action function then make it as shared library
 
 ** action function should be formed as c++
 ```c++ 
@@ -17,7 +20,11 @@ void(std::vector<float> &state, unsigned float &reward, bool &termination)
 6. Create Enviroments
 7. Create Tree\
 ** The number of connecting CNN to DNN should be match with the channels that you want to extract from the OpenCV\
-** 1 CNN means Gray channel, 3 CNN means RGB channel, 4 CNN means RGBA channel, others are not allowed
+** 1 CNN means Gray channel, 3 CNN means RGB channel, 4 CNN means RGBA channel, others are not allowed\
+Example\
+![image](https://user-images.githubusercontent.com/47798805/189314807-ea7ec250-bebd-483f-9d62-8864596d45f8.png)
+
+Above shows 3 channel CNN
 
 9. run it from the command CLI as ./usg_AI.exe --run T [your tree name] [max iteration] [result save file name]
 
