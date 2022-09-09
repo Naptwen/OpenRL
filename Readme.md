@@ -31,20 +31,20 @@ ____
 Example by given test files
 1. Required the tree.txt, enviro.txt, ppo.txt, dnn1.txt, dnn2.txt, cnn1.txt
 2. Run the game that I made game.py 
-3. Double click usg_AI.exe\
-![image](https://user-images.githubusercontent.com/47798805/189294569-09153fad-02a8-4388-8e1f-939ea571651e.png)
+3. Double click usg_AI.exe
 4. click the ENVIRO CREATE\
-![image](https://user-images.githubusercontent.com/47798805/189294825-21826d04-15de-4b70-9c15-71704fa92825.png)
+![image](https://user-images.githubusercontent.com/47798805/189294569-09153fad-02a8-4388-8e1f-939ea571651e.png)
 5. click the SET ACTION then typing
 "extrafn.dll, rewardfn,  actionfn"\
-![image](https://user-images.githubusercontent.com/47798805/189295184-662e2147-f96a-4a34-b4c2-5b53e5e6e72b.png)
+![image](https://user-images.githubusercontent.com/47798805/189294825-21826d04-15de-4b70-9c15-71704fa92825.png)
 6. click the Display then cropping the area that you will run the game.py screen\
-![image](https://user-images.githubusercontent.com/47798805/189295506-adffecb2-5c4d-4f99-a867-17ee9ba00cb0.png)
+![image](https://user-images.githubusercontent.com/47798805/189295184-662e2147-f96a-4a34-b4c2-5b53e5e6e72b.png)
 7. Save the file name as enviro.txt\
-![image](https://user-images.githubusercontent.com/47798805/189295634-f04103a5-0e75-4c64-8dd9-81d92b7571c4.png)
+![image](https://user-images.githubusercontent.com/47798805/189295506-adffecb2-5c4d-4f99-a867-17ee9ba00cb0.png)
 8. run the game.py\
-![image](https://user-images.githubusercontent.com/47798805/189303660-78756217-b02b-49de-9a49-7feb0bb71e7e.png)
+![image](https://user-images.githubusercontent.com/47798805/189295634-f04103a5-0e75-4c64-8dd9-81d92b7571c4.png)
 8. open the command(terminal) Then typing ./usg_AI.exe  --run -t tree.txt 100,000 result.txt\
+![image](https://user-images.githubusercontent.com/47798805/189303660-78756217-b02b-49de-9a49-7feb0bb71e7e.png)
 9. Wait 100,000 times then the neural network will be saved in result.txt
 ___
 <!DOCTYPE HTML>
