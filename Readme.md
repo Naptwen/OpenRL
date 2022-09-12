@@ -1,4 +1,6 @@
-# usg_AI V3.0.0 --alpha
+# usg_AI V4.0.0 --alpha
+![image](https://user-images.githubusercontent.com/47798805/189568951-30b7e928-f923-4857-a15a-a3a4c3b83c45.png)
+
 Requirement\
 Above OpenCV 2.0 , Above OpenGL 3.0, Above OpenCL 2.0, Above C++ 11, Window 64x
 
