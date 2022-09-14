@@ -97,6 +97,11 @@ https://github.com/Naptwen/usgAI
 <BLOCKQUOTE>
    <summary># PATCH NOTE 2.3</summary>
    <PRE>
+Sep 15, 2022.
+1. New : Seperate functions (state, reward, action) and enviroments
+2. New : Coloring the each node by its type
+3. New : Change a lot for objective coding
+4. New : More easy tree structure
 Sep 10, 2022.
 1. New : Applying shared lib of reward and enviro function for runtime.
 2. New : RNN model (dynamical shapes)
