@@ -63,3 +63,14 @@
 
 5. We consider 3 channel and the final result of channel is sum of 3 different channels\
 ![image](https://user-images.githubusercontent.com/47798805/190235519-daa04d59-090b-4589-86b3-901e3dbdc06f.png)
+
+# BUG
+1. Wrong load file name will make bug
+2. Wrong file type will make bug
+3. If can't click anything, ENTER the Keyboard
+4. Wrong format of tree design, especially for ppo, dqn, sac, makes bug and fatal error
+5. For basic RL model the enviroments must have 
+    1. one operation child node, 
+    2. one action function
+    3. one reward function
+    4. one model child node
