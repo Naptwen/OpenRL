@@ -48,17 +48,18 @@
 ```cd game```, ``` pytho game.py```, ```cd ..```, then move the pygame window on the right top of displayer ``` usg_AI.exe --run t ./save/tree.txt 500 ./save/result.txt``` 
 
 # EXAMPLE
-Load the ./save/tree.txt
+* Load the ./save/tree.txt\
+![image](https://user-images.githubusercontent.com/47798805/190236111-721fd667-371e-47a8-b85c-b8f55691e022.png)
 ![image](https://user-images.githubusercontent.com/47798805/190234850-647130c8-e3bf-4bbe-9c85-08b5416a7f59.png)
 
-1. The enviroments node must be unique.
+1. The enviroments node must be unique\
 ![image](https://user-images.githubusercontent.com/47798805/190235059-33b62fd2-0acd-40d0-a774-9e753219ba29.png)
 
-3. Our model is PPO so we need two different neural network.
+3. Our model is PPO so we need two different neural network\
 ![image](https://user-images.githubusercontent.com/47798805/190235139-fe3fb6df-f104-4df6-9acc-8f29c9342f3f.png)
 
-4. We need reward function and action function
+4. We need reward function and action function\
 ![image](https://user-images.githubusercontent.com/47798805/190235327-de22208f-40b7-482c-b76e-37587617f36f.png)
 
-5. We consider 3 channel and the final result of channel is sum of 3 different channels
+5. We consider 3 channel and the final result of channel is sum of 3 different channels\
 ![image](https://user-images.githubusercontent.com/47798805/190235519-daa04d59-090b-4589-86b3-901e3dbdc06f.png)
