@@ -27,7 +27,7 @@
 ![image](https://user-images.githubusercontent.com/47798805/190233034-055c513d-43a4-4a25-b4f6-a85bc9ac7e7e.png)
 ### If the name of the node is p or x then it is automatically changed as the operation block + and x
 ![image](https://user-images.githubusercontent.com/47798805/190233707-280f3656-7bdb-4128-8f4a-22851b03216d.png)
-
+- operation block means the output of operation block is the smae as all input values by operations + or x
 
 ## Mouse left click : move the location of clicked node or connect the node from clicked node to the last clicked node
 ![image](https://user-images.githubusercontent.com/47798805/190233183-9b5fc21d-ee81-4852-a9dd-93e8f2aedf9a.png)
