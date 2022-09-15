@@ -50,9 +50,9 @@
 * ```Mouse right click``` : Edit the name of the node (if the file name is exist the color of the node is automatically changed)\
 ![image](https://user-images.githubusercontent.com/47798805/190232978-ac57445c-8449-4433-b00b-b23c8493e939.png)\
 ![image](https://user-images.githubusercontent.com/47798805/190233034-055c513d-43a4-4a25-b4f6-a85bc9ac7e7e.png)\
-### If the name of the node is p or x then it is automatically changed as the operation block + and x
+### If the name of the node is p or x then it is automatically changed as the operation block + or x
 ![image](https://user-images.githubusercontent.com/47798805/190233707-280f3656-7bdb-4128-8f4a-22851b03216d.png)\
-- operation block means the output of operation block is the smae as all input values by operations + or x\
+```operation block means its output is obtained from its child blocks by operations + or x```\
 * ```Mouse left click``` : move the location of clicked node or connect the node from clicked node to the last clicked node\
 ![image](https://user-images.githubusercontent.com/47798805/190233183-9b5fc21d-ee81-4852-a9dd-93e8f2aedf9a.png)\
 ![image](https://user-images.githubusercontent.com/47798805/190233330-22a94dc7-bbdd-4560-9b2a-6d571d197b2e.png)
