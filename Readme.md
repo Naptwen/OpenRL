@@ -1,4 +1,4 @@
-# usg_AI V4.0.0 --alpha
+# usg_AI V4.1.0 --alpha
 ![image](https://user-images.githubusercontent.com/47798805/190229981-1137d096-741c-40d2-ae3d-65b95fcdb25d.png)
 
 Requirement\
@@ -102,6 +102,7 @@ Sep 15, 2022.
 2. New : Coloring the each node by its type
 3. New : Change a lot for objective coding
 4. New : More easy tree structure
+5. New : Multi threading for the running program
 Sep 10, 2022.
 1. New : Applying shared lib of reward and enviro function for runtime.
 2. New : RNN model (dynamical shapes)
