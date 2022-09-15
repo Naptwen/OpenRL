@@ -64,13 +64,13 @@
 *```LOAD```: load tree file
 
 ## RUN TREE
-![image](https://user-images.githubusercontent.com/47798805/190443352-11dbd7b2-4f76-454e-b4ba-cfb602d19a22.png)
+![image](https://user-images.githubusercontent.com/47798805/190443352-11dbd7b2-4f76-454e-b4ba-cfb602d19a22.png)\
 *```SET```: It is for setting the running information, [tree path],[max iteration],[save path] (cooma seperate)
 *```RUN```: It is for running the RL model. If the multi of setting file is true, multiple model can be running
 
 ## SETTING FILE
 * The file name must "usg_AI_setting.txt"
-* ![image](https://user-images.githubusercontent.com/47798805/190444254-b3fc4171-fa2b-40f8-8216-c62acc5bf76c.png)
+* ![image](https://user-images.githubusercontent.com/47798805/190444254-b3fc4171-fa2b-40f8-8216-c62acc5bf76c.png)\
 * ```show``` : It is not working for version 4.x.x (it will be used for neural network working visualization)
 * ```multi```: It is for multiple thread running model
 * ```gpgpu```: It is for gpgpu (openCL) version calculation
