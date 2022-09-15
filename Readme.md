@@ -6,7 +6,50 @@ EXAMPLE FOR TEST FILE
 
 Requirement\
 Above OpenCV 2.0 , Above OpenGL 3.0, Above OpenCL 2.0, Above C++ 11, Window 64x
-
+___
+<BLOCKQUOTE>
+   <summary># PATCH NOTE 4.1.1</summary>
+   <PRE>
+Sep 16, 2022.
+1. Fix : Fixing the bug for tree node connections
+2. New : If the children are the same generation, the most left child has priority
+Sep 15, 2022.
+1. New : Seperate functions (state, reward, action) and enviroments
+2. New : Coloring the each node by its type
+3. New : Change a lot for objective coding
+4. New : More easy tree structure
+5. New : Multi threading for the running program
+Sep 10, 2022.
+1. New : Applying shared lib of reward and enviro function for runtime.
+2. New : RNN model (dynamical shapes)
+3. Feature : operation tree to prepare LSTM
+Sep 07, 2022.
+1. Edit : Visualizing Algorithms with Enviroments
+2. Edit : Change run menu to enviroment and add actions
+3. New : loading by tree file which includes cnn, dnn, model, enviro
+4. Feature : Looking forward how to make generlizing the reward
+Sep 07, 2022.
+1. New : Visualizing Algorithms.
+2. New : Capture the screen and cropping inside OpenGL (only for winodw now).
+3. New : Model running by captured screen.
+4. Feature : Learning algorithm applying algorithm and multi thread.
+Sep 05, 2022.
+1. Edit : Change UI
+2. Fix : Font bug fix
+3. New : CNN and Model creating
+4. Feauture : Visualizing AI creating
+Sep 04, 2022.
+1. Fix : When display pixel image that were flipped, using matrix transfer fixed it.
+2. New : Output text in GUI system by FreeType libraray
+3. New : GUI level text input and the object structure of integration GUI interface algorithm.
+4. New : File I/O system by GUI for Model algorithm and Neural network algorithm
+5. Feature : Tyring to read the video buffer and automatically creating CNN for neural net
+Sep 03, 2022.
+1. Fix : Edit the PPO algorithm for paraller multiplication
+2. New : Construct GUI for OpenGL with GLFW and GLEW
+3. New : Reading Screen as Video for using CNN algorithm
+4. Feauture : Trying to change OpenGLES for application
+</PRE>
 ___
 <!DOCTYPE HTML>
 <HTML>
@@ -97,46 +140,7 @@ https://github.com/Naptwen/usgAI
 </details>
 </PRE>
 </BODY>
-<BLOCKQUOTE>
-   <summary># PATCH NOTE 2.3</summary>
-   <PRE>
-Sep 15, 2022.
-1. New : Seperate functions (state, reward, action) and enviroments
-2. New : Coloring the each node by its type
-3. New : Change a lot for objective coding
-4. New : More easy tree structure
-5. New : Multi threading for the running program
-Sep 10, 2022.
-1. New : Applying shared lib of reward and enviro function for runtime.
-2. New : RNN model (dynamical shapes)
-3. Feature : operation tree to prepare LSTM
-Sep 07, 2022.
-1. Edit : Visualizing Algorithms with Enviroments
-2. Edit : Change run menu to enviroment and add actions
-3. New : loading by tree file which includes cnn, dnn, model, enviro
-4. Feature : Looking forward how to make generlizing the reward
-Sep 07, 2022.
-1. New : Visualizing Algorithms.
-2. New : Capture the screen and cropping inside OpenGL (only for winodw now).
-3. New : Model running by captured screen.
-4. Feature : Learning algorithm applying algorithm and multi thread.
-Sep 05, 2022.
-1. Edit : Change UI
-2. Fix : Font bug fix
-3. New : CNN and Model creating
-4. Feauture : Visualizing AI creating
-Sep 04, 2022.
-1. Fix : When display pixel image that were flipped, using matrix transfer fixed it.
-2. New : Output text in GUI system by FreeType libraray
-3. New : GUI level text input and the object structure of integration GUI interface algorithm.
-4. New : File I/O system by GUI for Model algorithm and Neural network algorithm
-5. Feature : Tyring to read the video buffer and automatically creating CNN for neural net
-Sep 03, 2022.
-1. Fix : Edit the PPO algorithm for paraller multiplication
-2. New : Construct GUI for OpenGL with GLFW and GLEW
-3. New : Reading Screen as Video for using CNN algorithm
-4. Feauture : Trying to change OpenGLES for application
-</PRE>
+
 </BLOCKQUOTE>
 <BLOCKQUOTE>
    <details>Tree
