@@ -1,75 +1,98 @@
 # How 2 Use
-![image](https://user-images.githubusercontent.com/47798805/190232100-e8a566fc-2725-4257-a1e1-286b591351b3.png)
+![image](https://user-images.githubusercontent.com/47798805/190436865-5213804b-73ab-42c1-8b3a-ac9076e09ce9.png)
+* ```CNN CREATE```: It is for making CNN layer
+* ```NEURAL CREATE```: It is for making DNN layer
+* ```MODEL CREATE```: It is for making Reinforcement Learning model layer
+* ```ENVIRO CRREATE```: It is for cropping the display area and loading shared libs
+* ```VISUAL CREATE```: It is for creating visualization tree constructure 
 
 ## 1. Create CNN
-![image](https://user-images.githubusercontent.com/47798805/190232129-35245ce5-5238-421c-bde3-535dde7fd8f8.png)
-
+![image](https://user-images.githubusercontent.com/47798805/190437471-860010bc-8619-478b-aa30-4b0fd9e3dcda.png)
+* ```HEIGHT SIZE```: It is for height size for CNN layer
+* ```NEURAL CREATE```: It is for width size for CNN layer
+* ```LAYER TYPE```: It is for CNN layer models 
+* ![image](https://user-images.githubusercontent.com/47798805/190437302-ab5af6c1-0b37-4e7d-a59b-62955ebc8bbe.png)
+* ```PUSH```: It is for add layer in CNN
+* ```POP```: It is for delete the last layer from the CNN
 ## 2. Create DNN
-![image](https://user-images.githubusercontent.com/47798805/190232174-a5fda96d-ff48-4fd8-a4c2-e01593a9521a.png)
-
+![image](https://user-images.githubusercontent.com/47798805/190438261-81dfc32a-d7e7-4a66-9c01-dec4fb4d5fec.png)
+* ```LAYER INPUT```: It is for setting the single layer size
+* ```LAYER ACT F```: It is for setting activation function for the single layer
+* ```LAYER NOR F```: It is for setting batch normalization function for the single layer
+* ![image](https://user-images.githubusercontent.com/47798805/190438901-30d899ff-406b-4c8f-82d0-2ce13cb7e0e1.png)
+* ```PUSH```: It is for add layer into the dnn layer
+* ```POP```: It is for delete the last layer from the dnn layer
+* ```LOSS F```:It is for setting the loss(cost) function for the dnn layer
+* ![image](https://user-images.githubusercontent.com/47798805/190439656-ca2a5fbf-3f43-41a3-964a-29730f61c3e2.png)
+* ```LEARN RATE```: It is for setting learning rate for the dnn layer
+* ```DROP RATE```: It is for setting drop rate for the dnn layer
+* ```OPT RESET```: It is for setting the optimization reset frequency for the dnn layer
 ## 3. Create Model
-![image](https://user-images.githubusercontent.com/47798805/190232269-bbd67d99-8dc7-411c-b805-667d28674fe1.png)
-
-## 4. Load shared library function (v4.0.0 is only work for window now)
-![image](https://user-images.githubusercontent.com/47798805/190232299-17d8ba99-674a-4031-a747-efac628267ea.png)
-
-## 5. Cropping the display of area
-![image](https://user-images.githubusercontent.com/47798805/190232373-b55eef4b-b9df-46f6-9e34-531f727fbeef.png)
-
-## 6. Create Tree
+![image](https://user-images.githubusercontent.com/47798805/190440292-e84f6dfc-d3d3-4709-889b-c4a529dade9f.png)
+* ```REPLAY SIZE``` : It is for setting the replay buffer size
+* ```MINI SIZE```: It is for setting the mini batch size
+* ```UPDATE FREQUENCY```: It is for setting the agent update frequency 
+* ```TARGET UPDATE```: It is for setting the target agent update frequency
+* ```DICCOUNT RATE```: It is for the discount rate
+* ```TRG UP RATE```: It is for target agent update rate (soft update rate)
+* ```MODEL TYPE```: It is for setting the reinforcement model type
+* ![image](https://user-images.githubusercontent.com/47798805/190441134-153bb629-842a-4727-b769-8c3947ef9d03.png)
+## 4. Create Enviroments
+![image](https://user-images.githubusercontent.com/47798805/190441288-c26545ba-c0c1-49bc-953d-943b0e59d876.png)
+* ```DISPLAY``` : It is for showing the screen to crop the scrreen, it must be on
+* ```CROP``` : It is for cropping the screen
+* ```SHARE LIB``` : It is for setting shared library, [PATH],[STATE],[REWARD],[ACTION] with comma seperate
+* ```SAVE xxx``` : It is for save the each shared library functions
+## 5. Create Tree
 ![image](https://user-images.githubusercontent.com/47798805/190232413-d561f63d-c8ca-4916-ac33-563461c5ad5d.png)
 
-## Add : add a new node
+* ```Add``` : add a new node
 ![image](https://user-images.githubusercontent.com/47798805/190232934-965f71bb-0226-4f27-8398-79992f0dde0f.png)
 
-## Mouse right click : Edit the name of the node (if the file name is exist the color of the node is automatically changed)
+* ```Mouse right click``` : Edit the name of the node (if the file name is exist the color of the node is automatically changed)
 ![image](https://user-images.githubusercontent.com/47798805/190232978-ac57445c-8449-4433-b00b-b23c8493e939.png)
 ![image](https://user-images.githubusercontent.com/47798805/190233034-055c513d-43a4-4a25-b4f6-a85bc9ac7e7e.png)
 ### If the name of the node is p or x then it is automatically changed as the operation block + and x
 ![image](https://user-images.githubusercontent.com/47798805/190233707-280f3656-7bdb-4128-8f4a-22851b03216d.png)
 - operation block means the output of operation block is the smae as all input values by operations + or x
 
-## Mouse left click : move the location of clicked node or connect the node from clicked node to the last clicked node
+* ```Mouse left click``` : move the location of clicked node or connect the node from clicked node to the last clicked node
 ![image](https://user-images.githubusercontent.com/47798805/190233183-9b5fc21d-ee81-4852-a9dd-93e8f2aedf9a.png)
 ![image](https://user-images.githubusercontent.com/47798805/190233330-22a94dc7-bbdd-4560-9b2a-6d571d197b2e.png)
 
-## Mouse left double click : disconnect all of its connection
+* ```Mouse left double click``` : disconnect all of its connection
 ![image](https://user-images.githubusercontent.com/47798805/190234104-870381ec-f87e-4c7f-9524-02e690044069.png)
 ![image](https://user-images.githubusercontent.com/47798805/190234132-7b0b547c-5d7b-4703-98ce-47d17bf420a0.png)
 
-## Delete Key : delete the block
+* ```Delete key```: delete the block
 ![image](https://user-images.githubusercontent.com/47798805/190234189-57dbe3a7-6878-47cb-a3cd-4ba70635a3fc.png)
 
-## Save : After the click the node then save its all children
-## Load : load the tree file
+*```LOAD```: load tree file
 
-## 7. open terminal then ``` usg_AI.exe ---run t [tree name] [max iteration] [save file name]```
-## EX. open terminal then move to the path that you installed 
-```cd game```, ``` pytho game.py```, ```cd ..```, then move the pygame window on the right top of displayer ``` usg_AI.exe --run t ./save/tree.txt 500 ./save/result.txt``` 
+## RUN TREE
+![image](https://user-images.githubusercontent.com/47798805/190443352-11dbd7b2-4f76-454e-b4ba-cfb602d19a22.png)
+*```SET```: It is for setting the running information, [tree path],[max iteration],[save path] (cooma seperate)
+*```RUN```: It is for running the RL model. If the multi of setting file is true, multiple model can be running
 
-# EXAMPLE
-* Load the ./save/tree.txt\
-![image](https://user-images.githubusercontent.com/47798805/190236111-721fd667-371e-47a8-b85c-b8f55691e022.png)
-![image](https://user-images.githubusercontent.com/47798805/190234850-647130c8-e3bf-4bbe-9c85-08b5416a7f59.png)
+## SETTING FILE
+* The file name must "usg_AI_setting.txt"
+* ![image](https://user-images.githubusercontent.com/47798805/190444254-b3fc4171-fa2b-40f8-8216-c62acc5bf76c.png)
+* ```show``` : It is not working for version 4.x.x (it will be used for neural network working visualization)
+* ```multi```: It is for multiple thread running model
+* ```gpgpu```: It is for gpgpu (openCL) version calculation
+* ```network```: It is not working for version 4.x.x (it will be used for the TCP/IP multiple socket network)
+* ```verbose```: It is for showing detail of running the program
 
-1. The enviroments node must be unique\
-![image](https://user-images.githubusercontent.com/47798805/190235059-33b62fd2-0acd-40d0-a774-9e753219ba29.png)
-
-3. Our model is PPO so we need two different neural network\
-![image](https://user-images.githubusercontent.com/47798805/190235139-fe3fb6df-f104-4df6-9acc-8f29c9342f3f.png)
-
-4. We need reward function and action function\
-![image](https://user-images.githubusercontent.com/47798805/190235327-de22208f-40b7-482c-b76e-37587617f36f.png)
-
-5. We consider 3 channel and the final result of channel is sum of 3 different channels\
-![image](https://user-images.githubusercontent.com/47798805/190235519-daa04d59-090b-4589-86b3-901e3dbdc06f.png)
-
+## Console Interface
+* Using terminal then run with ```--help``` option
+___
 # BUG
 1. Wrong load file name will make bug
 2. Wrong file type will make bug
 3. If can't click anything, ENTER the Keyboard
 4. Wrong format of tree design, especially for ppo, dqn, sac, makes bug and fatal error
-5. For basic RL model the enviroments must have 
+5. When disconnect the node somtimes it shows un expeected runtime error please resatart the program
+6. For basic RL model the enviroments must have 
     1. one operation child node, 
     2. one action function
     3. one reward function
