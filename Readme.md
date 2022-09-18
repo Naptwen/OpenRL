@@ -1,3 +1,8 @@
+# usg_AI v5.0.0 --alpah
+![image](https://user-images.githubusercontent.com/47798805/190901789-e04d09cb-2583-4dd5-ab6d-6eac09ac5b5c.png)
+* New : Change algorithms 
+* New : Change from tree structure to Direection graph CFS 
+
 # usg_AI V4.1.0 --alpha
 EXAMPLE FOR TEST FILE
 ![test](https://user-images.githubusercontent.com/47798805/190431307-d868c26a-527d-422d-b327-13a777429779.gif)
