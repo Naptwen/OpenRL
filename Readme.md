@@ -1,7 +1,8 @@
 # usg_AI v5.0.0 --alpah
 ![image](https://user-images.githubusercontent.com/47798805/190901789-e04d09cb-2583-4dd5-ab6d-6eac09ac5b5c.png)
 * New : Change algorithms 
-* New : Change from tree structure to Direection graph CFS 
+* New : Change from tree structure to Direction graph CFS 
+* New : Change almost of all code structure and GUI menu also
 
 # usg_AI V4.1.0 --alpha
 EXAMPLE FOR TEST FILE
