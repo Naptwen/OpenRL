@@ -1,3 +1,15 @@
+# Qucik Test
+Run the ptyhon program game.py then move the window at left top corner of screen\
+Then edit the eyeR,G,B ini file as\
+"displayinfo":[0,0,400,400,96,96,1] for eyeR\
+"displayinfo":[0,0,400,400,96,96,2] for eyeG\
+"displayinfo":[0,0,400,400,96,96,3] for eyeB
+Then double click the usg_AI.exe file then click the RUN GRAPH button\
+Then click the SET button then type save/test.txt,100,result.txt\
+Click the pygame window\
+Waiting until 100 times iteration of machine learning\
+Confirm the _0_result.txt and _1_result.txt file is created
+
 # usg_AI v5.0.1 --alpah
 ![image](https://user-images.githubusercontent.com/47798805/191221253-0410825b-0c3f-496a-95f5-956bc43d0f5c.png)
 * New : Change algorithms 
