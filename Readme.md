@@ -3,12 +3,13 @@
 * New : Change algorithms 
 * New : Change from tree structure to Direction graph CFG
 * New : Change almost of all code structure and GUI menu also
-I remove the other gui instead making cfg graph and running program\
-because the gui system is unncessary if you use the text edit file and it is enought to create various model using console interface.\
+
+I removed the other GUI, only left making CFG graph and running the program\
+because the GUI system is unnecessary if you use the text edit file and it is enough to create various models or just use the console interface.\
 I totally changed a lot of the code and algorithm to make the program more general and increase the speed.\
-The most important part is change the tree stucture to graph flow graph CFG.\
+The most important part is to change the tree structure to graph flow graph CFG.\
 The most taking time part was the shared library parts.\
-Thus if you really want to apply the program, don't use the example shared library (my example are just super simple code part).
+Thus if you really want to apply for the program, don't use the example shared library (my example are just super simple code parts).
 
 # usg_AI V4.1.0 --alpha
 EXAMPLE FOR TEST FILE
