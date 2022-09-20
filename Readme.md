@@ -25,6 +25,7 @@ Sep 20, 2022.
 1. New : Change the algorithm as CFG graph
 2. New : Writting user guide. 
 3. Fix : Some creating bugs.
+4. Edit : Linux working shared library file (not fully checked)
 Sep 16, 2022.
 1. Fix : Fixing the bug for tree node connections
 2. New : If the children are the same generation, the most left child has priority
