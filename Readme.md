@@ -1,8 +1,12 @@
-# usg_AI v5.0.0 --alpah
-![image](https://user-images.githubusercontent.com/47798805/191050702-e2a6887d-d63d-42b3-8b10-4f1fa0340fcd.png)
+# usg_AI v5.0.1 --alpah
+![image](https://user-images.githubusercontent.com/47798805/191221253-0410825b-0c3f-496a-95f5-956bc43d0f5c.png)
 * New : Change algorithms 
 * New : Change from tree structure to Direction graph CFG
 * New : Change almost of all code structure and GUI menu also
+I remove the other gui instead making cfg graph and running program
+because the gui system is unncessary if you use the text edit file and it is enought to create various model using console interface.
+I totally changed a lot of the code and algorithm to make the program more general and increase the speed.
+So version V4 and V5 are working so differently.
 
 # usg_AI V4.1.0 --alpha
 EXAMPLE FOR TEST FILE
