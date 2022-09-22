@@ -1,4 +1,4 @@
-$ usg_AI v5.0.2 --alpha
+# usg_AI v5.0.2 --alpha
 * Remove : ow the reward, state active block are removed.
 * New : The shared library is now more generlized, you can use the visual graph flow control for others 
 
