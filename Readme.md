@@ -13,7 +13,7 @@
 # Q&A
 
 Why test is so slow?\
-It is not the algorithm problem it is problem for the sharead library dll file.\
+It is not the algorithm problem it is problem for the extrafn sharead library dll file.\
 I wrote very simple shared lib file for just testing the game, so don't use the test dll file for real problem it is just for testing programe.\
 As referencing the form of the extrafn.cpp resource file make you own reward, action, state functions.\
 As giving a tip, most take time part is OpenCV part and Keyboard input part, if you directly get those data from you own program, the speed dramatically increase.
