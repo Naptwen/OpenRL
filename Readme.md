@@ -1,3 +1,37 @@
+# Quick PPO reinforcement Test
+1. Install the program
+2. open game.py then place at the left top corner
+3. open usg_AI.exe
+4. click the RUN GRAPH
+5. click the SET then type save/test.txt, 100, result.txt
+6. click the pygame window then wait
+7. wait 100 times the test iteration (average 10000 times requires but only for test)
+8. after fininsh, check the save file _0_result.txt and _1_result.txt file exists.
+9. if you want to test for game, click the SET then type save/simul.txt, 100, none
+10. click the pygame window then wait
+
+# Q&A
+
+Why test is so slow?\
+It is not the algorithm problem it is problem for the sharead library dll file.\
+I wrote very simple shared lib file for just testing the game, so don't use the test dll file for real problem it is just for testing programe.\
+As referencing the form of the extrafn.cpp resource file make you own reward, action, state functions.\
+As giving a tip, most take time part is OpenCV part and Keyboard input part, if you directly get those data from you own program, the speed dramatically increase.
+
+Only Json file format allowed?\
+No!, I just wrote the file format as json, it is not required. you can change the extension name anything but plase kepp the format.\
+Another tip Neural Network weight and bias valuse are base on base64 by Nyffenegger rene.nyffenegger@adp-gmbh.ch.\
+Please see his homepage if you have question or interseted in webformating.
+
+Program unexpectibly shutdown what can I do?
+If you don't have idea please open the termina than type 'usg_AI --setting verboseon'\
+It shows very detail of the algorithm process. 
+
+On GUI, block doesn't mode and can't click!\
+Press Enter twice.
+
+
+
 # usg_AI v5.0.2 --alpha
 ![image](https://user-images.githubusercontent.com/47798805/191875624-2a9d79f6-f3ee-4493-865b-07026a5f3a76.png)\
 New 5.0.2 version totally different with 5.0.1 version, I am re writing user guide plse see the new version 
