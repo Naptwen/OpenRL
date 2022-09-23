@@ -25,7 +25,7 @@ Please see his homepage if you have question or interseted in webformating.
 
 ## Program unexpectibly shutdown what can I do?
 If you don't have idea please open the termina than type 'usg_AI --setting verboseon'\
-It shows very detail of the algorithm process. 
+It shows very detail of the algorithm process. asc font please as it show colored
 
 ## On GUI, block doesn't move and can't click!
 Press Enter twice.
