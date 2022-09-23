@@ -55,7 +55,7 @@ ___
    <PRE>
 Sep 24, 2022.
 I am preparing for new version v6.x.x it is more focus on providing various algorithm
-(if you just want to algorithm please see the my past neural network algorithm in python version)
+(if you just want to algorithm please see my past neural network algorithm in python version)
 1. New : preparing the v5.1.x version it will includes new cost functions
 (Cross Entropy, Binary cross entropy, Relative entropy, RMSE, HUBER, Pesudo Huber)
 2. New : New reinforcement model DDQN, D2QN, D3QN, (merged type also), A2C and A3C (using the constructed thread algorithm)
