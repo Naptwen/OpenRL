@@ -1,4 +1,5 @@
 ## 5.0.1 and 5.0.2 versiona are totally different please reference the new user guide please!
+## Hot fix, change the console interface display text
 
 # Quick PPO reinforcement Test
 1. Install the program
