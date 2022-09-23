@@ -36,7 +36,7 @@ Press Enter twice.
 Yes you can make not only Machine learning algorithm but also any thing that using the FUNC shared library block.\
 Only if you keep the format of it, the input and output are working as the same as others.\
 Here is the another example for making button click macro by GUI *not machine learning, just a macro program using OpenCV then moving keybord step by step\
-![image](https://user-images.githubusercontent.com/47798805/191879092-74e79235-569a-4da9-a285-1991f2165fde.png)
+![image](https://user-images.githubusercontent.com/47798805/191979230-c539d224-b142-48e9-9cc0-01e32bab6ebf.png)
 
 
 # usg_AI v5.0.2 --alpha
