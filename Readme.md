@@ -30,7 +30,7 @@ It shows very detail of the algorithm process. asc font please as it show colore
 ## On GUI, block doesn't move and can't click!
 Press Enter twice.
 
-## Can I use the graphical method for other progrma?
+## Can I use the graphical method for other program?
 Yes you can make not only Machine learning algorithm but also any thing that using the FUNC shared library block.\
 Only if you keep the format of it, the input and output are working as the same as others.\
 Here is the another example for making button click macro by GUI *not machine learning, just a macro program using OpenCV then moving keybord step by step\
