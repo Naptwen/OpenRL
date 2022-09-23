@@ -12,25 +12,25 @@
 
 # Q&A
 
-Why test is so slow?\
+## Why test is so slow?
 It is not the algorithm problem it is problem for the extrafn sharead library dll file.\
-I wrote very simple shared lib file for just testing the game, so don't use the test dll file for real problem it is just for testing programe.\
+I wrote very simple shared lib file for just checking and testing small game, so don't use the test dll file for real problem it is just for testing programe.\
 As referencing the form of the extrafn.cpp resource file make you own reward, action, state functions.\
 As giving a tip, most take time part is OpenCV part and Keyboard input part, if you directly get those data from you own program, the speed dramatically increase.
 
-Only Json file format allowed?\
+## Only Json file format allowed?
 No!, I just wrote the file format as json, it is not required. you can change the extension name anything but plase kepp the format.\
 Another tip Neural Network weight and bias valuse are base on base64 by Nyffenegger rene.nyffenegger@adp-gmbh.ch.\
 Please see his homepage if you have question or interseted in webformating.
 
-Program unexpectibly shutdown what can I do?\
+## Program unexpectibly shutdown what can I do?
 If you don't have idea please open the termina than type 'usg_AI --setting verboseon'\
 It shows very detail of the algorithm process. 
 
-On GUI, block doesn't move and can't click!\
+## On GUI, block doesn't move and can't click!
 Press Enter twice.
 
-Can I use the graphical method for other progrma?\
+## Can I use the graphical method for other progrma?
 Yes you can make not only Machine learning algorithm but also any thing that using the FUNC shared library block.\
 Only if you keep the format of it, the input and output are working as the same as others.\
 Here is the another example for making button click macro by GUI *not machine learning, just a macro program using OpenCV then moving keybord step by step\
