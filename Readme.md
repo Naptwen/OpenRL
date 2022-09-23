@@ -1,5 +1,4 @@
 ## 5.0.1 and 5.0.2 versiona are totally different please reference the new user guide please!
-## Hot fix, change the console interface display text
 
 # Quick PPO reinforcement Test
 1. Install the program
@@ -45,6 +44,8 @@ Open terminal then type "usg_AI.exe --create [type]" or see wiki page I wrote
 # usg_AI v5.0.2 --alpha
 ![image](https://user-images.githubusercontent.com/47798805/191875624-2a9d79f6-f3ee-4493-865b-07026a5f3a76.png)\
 New 5.0.2 version totally different with 5.0.1 version, I am re writing user guide plse see the new version 
+
+## Hot fix, change the console interface display text and shape for node graph for test file (program algorithm doesn't change)
 ___
 <BLOCKQUOTE>
    <summary># PATCH NOTE 4.1.1</summary>
