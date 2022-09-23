@@ -1,3 +1,5 @@
+## 5.0.1 and 5.0.2 versiona are totally different please reference the new user guide please!
+
 # Quick PPO reinforcement Test
 1. Install the program
 2. open game.py then place at the left top corner
