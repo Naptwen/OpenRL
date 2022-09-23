@@ -27,7 +27,7 @@ Program unexpectibly shutdown what can I do?\
 If you don't have idea please open the termina than type 'usg_AI --setting verboseon'\
 It shows very detail of the algorithm process. 
 
-On GUI, block doesn't mode and can't click!\
+On GUI, block doesn't move and can't click!\
 Press Enter twice.
 
 Can I use the graphical method for other progrma?\
