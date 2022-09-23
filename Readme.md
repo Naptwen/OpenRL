@@ -53,6 +53,14 @@ ___
 <BLOCKQUOTE>
    <summary># PATCH NOTE 4.1.1</summary>
    <PRE>
+Sep 24, 2022.
+I am preparing for new version v6.x.x it is more focus on providing various algorithm
+(if you just want to algorithm please see the my past neural network algorithm in python version)
+1. New : preparing the v5.1.x version it will includes new cost functions
+(Cross Entropy, Binary cross entropy, Relative entropy, RMSE, HUBER, Pesudo Huber)
+2. New : New reinforcement model DDQN, D2QN, D3QN, (merged type also), A2C and A3C (using the constructed thread algorithm)
+3. New : New RNN (LSTM is created by connection of graph blocks from model RNN)
+4. New : Reinforcement learning optimization PER (Prioritized experiance replay buffer)
 Sep 23, 2022.
 1. New : Change the flow algorithm now you can save all connected nodes.
 2. New : Now the model node be the child of the process, and process control all of connected nodes.
