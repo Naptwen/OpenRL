@@ -19,7 +19,7 @@ As referencing the form of the extrafn.cpp resource file make your own reward, a
 As giving a tip, most take time part is OpenCV part and Keyboard input part, if you directly get those data from your own program, the speed dramatically increase.
 
 ## Only Json file format allowed?
-No!, I just wrote the file format as json, it is not required. you can change the extension name anything but plase kepp the format.\
+No!, I just wrote the file format as json, it is not required. you can change the extension name anything but plase keep the format.\
 Another tip Neural Network weight and bias valuse are base on base64 by Nyffenegger rene.nyffenegger@adp-gmbh.ch.\
 Please see his homepage if you have question or interseted in webformating.
 
