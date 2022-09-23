@@ -38,7 +38,7 @@ Only if you keep the format of it, the input and output are working as the same 
 Here is the another example for making button click macro by GUI *not machine learning, just a macro program using OpenCV then moving keybord step by step\
 
 ## Where I can see the format?
-Open terminal then type "usg_AI.exe --create [type]" or see wiki page I wrote
+Open terminal then type "usg_AI.exe --create [type]" or see user guid for 5.0.2 version
 
 # usg_AI v5.0.2 --alpha
 ![image](https://user-images.githubusercontent.com/47798805/191979230-c539d224-b142-48e9-9cc0-01e32bab6ebf.png)\
