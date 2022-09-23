@@ -14,9 +14,9 @@
 
 ## Why test is so slow?
 It is not the algorithm problem it is problem for the extrafn sharead library dll file.\
-I wrote very simple shared lib file for just checking and testing small game, so don't use the test dll file for real problem it is just for testing programe.\
-As referencing the form of the extrafn.cpp resource file make you own reward, action, state functions.\
-As giving a tip, most take time part is OpenCV part and Keyboard input part, if you directly get those data from you own program, the speed dramatically increase.
+I wrote a very simple shared lib file for just checking and testing small games, so don't use the test dll file for the real problems it is just for testing the program.\
+As referencing the form of the extrafn.cpp resource file make your own reward, action, and state functions.\
+As giving a tip, most take time part is OpenCV part and Keyboard input part, if you directly get those data from your own program, the speed dramatically increase.
 
 ## Only Json file format allowed?
 No!, I just wrote the file format as json, it is not required. you can change the extension name anything but plase kepp the format.\
