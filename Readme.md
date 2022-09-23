@@ -1,37 +1,14 @@
-# usg_AI v5.1.0 --alpha
-![image](https://user-images.githubusercontent.com/47798805/191849321-5218f7f2-2ff4-4d5c-993e-2480e86c5b56.png)
-* New : now all connected blocks are save, load and running
-* New : for connected dynamical graph, many algorihtms are changed
-* Fix : some bug 
-
-# usg_AI v5.0.2 --alpha
-* Remove : Now the reward, state active block are removed.
-* New : The shared library is now more generlized, you can use the visual graph flow control for other program.
-
-
-# usg_AI v5.0.1 --alpah
-![image](https://user-images.githubusercontent.com/47798805/191221253-0410825b-0c3f-496a-95f5-956bc43d0f5c.png)
-* New : Change algorithms 
-* New : Change from tree structure to Direction graph CFG
-* New : Change almost of all code structure and GUI menu also
-
-I removed the other GUI, only left making CFG graph and running the program\
-because the GUI system is unnecessary if you use the text edit file and it is enough to create various models or just use the console interface.\
-I totally changed a lot of the code and algorithm to make the program more general and increase the speed.\
-The most important part is to change the tree structure to graph flow graph CFG.\
-The most taking time part was the shared library parts.\
-Thus if you really want to apply for the program, don't use the example shared library (my example are just super simple code parts).
-
-# usg_AI V4.1.0 --alpha
-EXAMPLE FOR TEST FILE
-![test](https://user-images.githubusercontent.com/47798805/190431307-d868c26a-527d-422d-b327-13a777429779.gif)
-
-Requirement\
-Above OpenCV 2.0 , Above OpenGL 3.0, Above OpenCL 2.0, Above C++ 11, Window 64x
+# usg_AI v5.2.0 --alpha
+![image](https://user-images.githubusercontent.com/47798805/191875624-2a9d79f6-f3ee-4493-865b-07026a5f3a76.png)
+New 5.2 version totally different with 5.0.1 version, I am re writing user guide plse see the new version 
 ___
 <BLOCKQUOTE>
    <summary># PATCH NOTE 4.1.1</summary>
    <PRE>
+Sep 23, 2022.
+1. New : Change the flow algorithm now you can save all connected nodes.
+2. New : Now the model node be the child of the process, and process control all of connected nodes.
+3. New : Now all the connected nodes are reference values by chain methods (speed and memory capacity is increase)
 Sep 20, 2022.
 1. New : Change the algorithm as CFG graph
 2. New : Writting user guide. 
