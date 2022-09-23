@@ -1,5 +1,5 @@
-# usg_AI v5.2.0 --alpha
-![image](https://user-images.githubusercontent.com/47798805/191875624-2a9d79f6-f3ee-4493-865b-07026a5f3a76.png)
+# usg_AI v5.0.2 --alpha
+![image](https://user-images.githubusercontent.com/47798805/191875624-2a9d79f6-f3ee-4493-865b-07026a5f3a76.png)\
 New 5.2 version totally different with 5.0.1 version, I am re writing user guide plse see the new version 
 ___
 <BLOCKQUOTE>
