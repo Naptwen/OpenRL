@@ -1,4 +1,4 @@
-# Upadte! v5.0.3! \
+# Upadte! v5.0.3! 
 New function for cosst funciton ,(Huber and Cross)\
 New Model for reinforcement DDQN D2QN D3QN\
 Now, for generlizing the DQN model, doesn't use the discrete action for output for DQN style\
