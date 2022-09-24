@@ -5,16 +5,16 @@ Now, for generlizing the DQN model, doesn't use the discrete action for output f
 It means all of the action should be output continouse\
 In other words, the output layer for the DQN is 1 and for the target DQN has input as sizeof state  + 1 (the addtional input layer size is used for the measuring the action value of output value from the DQN)\
 ex) 
-- DQN
+- DQN\
 Agent Q [inputsize = state size][output size = 1]\
 Target Q [inputsize = state size][output size = 1]
-- DDQN
+- DDQN\
 Agent Q [inputsize = state size][output size = 1]\
 Target Q [inputsize = state size + 1][output size = 1]
-- D2QN
+- D2QN\
 Agent Q [inputsize = state size][output size = 2]\
 Target Q [inputsize = state size][output size = 2]
-- D3QN
+- D3QN\
 Agent Q [inputsize = state size][output size = 2]\
 Target Q [inputsize = state size + 1][output size = 2]
 
