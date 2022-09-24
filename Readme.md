@@ -10,7 +10,7 @@ Agent Q1 [inputsize = state size][output size = 1]\
 Target Q [inputsize = state size + 1][output size = 1]
 
 - D2QN & D3QN\
-Agent Q1 [inputsize = state size][output size = 1]\
+Agent Q1 [inputsize = state size][output size = 2]\
 Target Q [inputsize = state size + 1][output size = 2]
 
 # For future V5.1.0!
