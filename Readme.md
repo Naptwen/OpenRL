@@ -4,6 +4,18 @@ New Model for reinforcement DDQN D2QN D3QN\
 Now, for generlizing the DQN model, doesn't use the discrete action for output for DQN style\
 It means all of the action should be output continouse\
 In other words, the output layer for the DQN is 1 and for the target DQN has input as sizeof state  + 1 (the addtional input layer size is used for the measuring the action value of output value from the DQN)
+ex) \
+- DQN & DDQN\
+Agent Q1 [inputsize = state size][output size = 1]\
+Target Q [inputsize = state size + 1][output size = 1]
+
+- D2QN & D3QN\
+Agent Q1 [inputsize = state size][output size = 1]\
+Target Q [inputsize = state size + 1][output size = 2]
+
+# For future V5.1.0!
+1. New : RNN! 
+2. New : GNN!
 
 ## 5.0.1 and 5.0.2 versiona are totally different please reference the new user guide please!
 
