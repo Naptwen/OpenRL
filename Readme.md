@@ -3,7 +3,7 @@ New function for cosst funciton ,(Huber and Cross)\
 New Model for reinforcement DDQN D2QN D3QN\
 Now, for generlizing the DQN model, doesn't use the discrete action for output for DQN style\
 It means all of the action should be output continouse\
-In other words, the output layer for the DQN is 1 and for the target DQN has input as sizeof state  + 1 (the addtional input layer size is used for the measuring the action value of output value from the DQN)
+In other words, the output layer for the DQN is 1 and for the target DQN has input as sizeof state  + 1 (the addtional input layer size is used for the measuring the action value of output value from the DQN)\
 ex) \
 - DQN & DDQN\
 Agent Q1 [inputsize = state size][output size = 1]\
