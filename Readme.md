@@ -1,7 +1,7 @@
 # Update! v5.0.4!
 Hot fix : the dll file vector push_back was wrong algorithm it should have to dist = {} instead dist.push (please fix yourself! or download dll that I fixed)
 New : Now remove algorithm overlapping so the speed of the flow graphc is increase
-
+New : Now all input and output are pointer chain (speed is increase)
 # Upadte! v5.0.3! 
 New function for cosst funciton ,(Huber and Cross)\
 New Model for reinforcement DDQN D2QN D3QN\
