@@ -3,7 +3,7 @@
 ## PPO
 ![image](https://user-images.githubusercontent.com/47798805/192146860-daf28060-fef6-4694-b67b-342b355a9577.png)
 ## RNN
-![image](https://user-images.githubusercontent.com/47798805/192146864-06ff1f46-f91e-433f-be48-6dc771a4309a.png)\
+![image](https://user-images.githubusercontent.com/47798805/192146918-4572633c-6cd3-46f9-8517-f6d5db40c0f6.png)\
 New : back blcock, out block\
 New : Order of process flow char is changed gneralized
 
