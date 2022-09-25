@@ -1,8 +1,8 @@
 # v 6.0.0
 ![image](https://user-images.githubusercontent.com/47798805/192142238-bc5ac1b4-665a-4732-884f-13be0755614e.png)
-New : back blcock
 ![image](https://user-images.githubusercontent.com/47798805/192142292-4779712a-d53c-4216-9a65-7095423b7dbc.png)
-New : RNN 
+New : back blcock, out block
+New : Order of process flow char is changed gneralized
 
 # Update! v5.0.4!
 Hot fix : the dll file vector push_back was wrong algorithm it should have to dist = {} instead dist.push (please fix yourself! or download dll that I fixed)\
