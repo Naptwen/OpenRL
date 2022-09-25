@@ -1,4 +1,5 @@
 # v 6.0.0
+### checking bug now tomorrow release
 ## PPO
 ![image](https://user-images.githubusercontent.com/47798805/192142238-bc5ac1b4-665a-4732-884f-13be0755614e.png)
 ## RNN
