@@ -3,9 +3,10 @@
 ## PPO
 ![image](https://user-images.githubusercontent.com/47798805/192146860-daf28060-fef6-4694-b67b-342b355a9577.png)
 ## RNN
-![image](https://user-images.githubusercontent.com/47798805/192146918-4572633c-6cd3-46f9-8517-f6d5db40c0f6.png)\
-New : back blcock, out block\
+![image](https://user-images.githubusercontent.com/47798805/192253684-bcaa3060-6af6-41c1-8433-572f0803f63d.png)\
+New : back block, out block, stop block\
 New : Order of process flow char is changed gneralized
+New : Order of the process now can do the recursive
 
 # Update! v5.0.4!
 Hot fix : the dll file vector push_back was wrong algorithm it should have to dist = {} instead dist.push (please fix yourself! or download dll that I fixed)\
