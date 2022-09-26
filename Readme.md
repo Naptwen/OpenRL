@@ -5,7 +5,7 @@
 ## RNN
 ![image](https://user-images.githubusercontent.com/47798805/192253684-bcaa3060-6af6-41c1-8433-572f0803f63d.png)\
 New : back block, out block, stop block\
-New : Order of process flow char is changed gneralized
+New : Order of process flow char is changed gneralized\
 New : Order of the process now can do the recursive
 
 # Update! v5.0.4!
