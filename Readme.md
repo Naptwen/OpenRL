@@ -1,43 +1,9 @@
-# v 6.0.0
-### checking bug now tomorrow release
+# v 6.0.0 --alpha
 ## PPO
 ![image](https://user-images.githubusercontent.com/47798805/192146860-daf28060-fef6-4694-b67b-342b355a9577.png)
 ## RNN
 ![image](https://user-images.githubusercontent.com/47798805/192253684-bcaa3060-6af6-41c1-8433-572f0803f63d.png)\
-New : back block, out block, stop block\
-New : Order of process flow char is changed gneralized\
-New : Order of the process now can do the recursive
 
-# Update! v5.0.4!
-Hot fix : the dll file vector push_back was wrong algorithm it should have to dist = {} instead dist.push (please fix yourself! or download dll that I fixed)\
-New : Now remove algorithm overlapping so the speed of the flow graphc is increase\
-New : Now all input and output are pointer chain (speed is increase)
-
-# Upadte! v5.0.3! 
-New function for cosst funciton ,(Huber and Cross)\
-New Model for reinforcement DDQN D2QN D3QN\
-Now, for generlizing the DQN model, doesn't use the discrete action for output for DQN style\
-It means all of the action should be continouse output\
-In other words, the output layer for the DQN is 1 and for the target DQN has input as sizeof state  + 1 (the addtional input layer size is used for the measuring the action value of output value from the DQN)\
-ex) 
-- DQN\
-Agent Q [inputsize = state size][output size = 1]\
-Target Q [inputsize = state size][output size = 1]
-- DDQN\
-Agent Q [inputsize = state size][output size = 1]\
-Target Q [inputsize = state size + 1][output size = 1]
-- D2QN\
-Agent Q [inputsize = state size][output size = 2]\
-Target Q [inputsize = state size][output size = 2]
-- D3QN\
-Agent Q [inputsize = state size][output size = 2]\
-Target Q [inputsize = state size + 1][output size = 2]
-
-# For future V5.1.0!
-1. New : RNN! 
-2. New : GNN!
-
-## 5.0.1 and 5.0.2 versiona are totally different please reference the new user guide please!
 
 # Quick PPO reinforcement Test
 1. Install the program
@@ -92,6 +58,35 @@ ___
 <BLOCKQUOTE>
    <summary># PATCH NOTE 4.1.1</summary>
    <PRE>
+Sep 26, 2022
+# Update! v6.0.0!
+New : back block, out block, stop block
+New : Order of process flow char is changed gneralized
+New : Order of the process now can do the recursive
+# Update! v5.0.4!
+Hot fix : the dll file vector push_back was wrong algorithm it should have to dist = {} instead dist.push (please fix yourself! or download dll that I fixed)
+New : Now remove algorithm overlapping so the speed of the flow graphc is increase
+New : Now all input and output are pointer chain (speed is increase)
+ex) 
+- DQN\
+Agent Q [inputsize = state size][output size = 1]
+Target Q [inputsize = state size][output size = 1]
+- DDQN\
+Agent Q [inputsize = state size][output size = 1]
+Target Q [inputsize = state size + 1][output size = 1]
+- D2QN\
+Agent Q [inputsize = state size][output size = 2]
+Target Q [inputsize = state size][output size = 2]
+- D3QN\
+Agent Q [inputsize = state size][output size = 2]
+Target Q [inputsize = state size + 1][output size = 2]
+Sep 25, 2022.
+# Upadte! v5.0.3! 
+New function for cosst funciton ,(Huber and Cross)
+New Model for reinforcement DDQN D2QN D3QN
+Now, for generlizing the DQN model, doesn't use the discrete action for output for DQN style
+It means all of the action should be continouse output
+In other words, the output layer for the DQN is 1 and for the target DQN has input as sizeof state  + 1 (the addtional input layer size is used for the measuring the action value of output value from the DQN)
 Sep 24, 2022.
 I am preparing for new version v6.x.x it is more focus on providing various algorithm
 (if you just want to algorithm please see my past neural network algorithm in python version)
