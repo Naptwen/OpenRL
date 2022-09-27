@@ -1,3 +1,5 @@
+# v 6.0.1 --alpha
+# New : multi thread for the Control flow Graphc Process (./usg_AI.exe --setting multion)
 # v 6.0.0 --alpha
 Hot fix
 ## PPO
