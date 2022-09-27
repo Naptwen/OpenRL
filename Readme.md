@@ -45,17 +45,7 @@ Here is the another example for making button click macro by GUI *not machine le
 
 ## Where I can see the format?
 Open terminal then type "usg_AI.exe --create [type]" or see user guid for 5.0.2 version
-
-# usg_AI v5.0.2 --alpha
-![image](https://user-images.githubusercontent.com/47798805/191979230-c539d224-b142-48e9-9cc0-01e32bab6ebf.png)\
-New 5.0.2 version totally different with 5.0.1 version, I am re writing user guide plse see the new version 
-5.0.1 version base on the DFS BFS searching child node tree but 5.0.2 version is base on connected hirehcy node\
-Connected hirehcy node algorithm save not only children but also all connected parents! \
-And 5.0.1 version was based on the copy data for next node but 5.0.2 version directly substitude the data in next node\
-Through this algorithm change the speed of prgram is increased!\
-
-## Hot fix, change the console interface display text and shape for node graph for test file (program algorithm doesn't change)
-___
+__
 <BLOCKQUOTE>
    <summary># PATCH NOTE 4.1.1</summary>
    <PRE>
