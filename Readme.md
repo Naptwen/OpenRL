@@ -1,4 +1,5 @@
 # v 6.0.1 --alpha
+Hot fix
 ## PPO
 ![image](https://user-images.githubusercontent.com/47798805/192146860-daf28060-fef6-4694-b67b-342b355a9577.png)
 ## RNN
