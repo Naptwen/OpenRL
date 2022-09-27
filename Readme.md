@@ -1,4 +1,4 @@
-# v 6.0.0 --alpha
+# v 6.0.1 --alpha
 ## PPO
 ![image](https://user-images.githubusercontent.com/47798805/192146860-daf28060-fef6-4694-b67b-342b355a9577.png)
 ## RNN
@@ -58,6 +58,9 @@ ___
 <BLOCKQUOTE>
    <summary># PATCH NOTE 4.1.1</summary>
    <PRE>
+Sep 27, 2022
+# Hot Fix!
+Edit : Fix the problem of the flow graph order is not fully reflecting the node input value when the overlap of the hierarchy based on the right-hand side
 Sep 26, 2022
 # Update! v6.0.0!
 New : back block, out block, stop block
