@@ -1,3 +1,9 @@
+# v 6.0.2 --alpha
+## I am researching the SSL (self-supervised learning) now.
+I found the model which relates to improving the model for data optimization is SSL
+It is easy to construct by using usg_AI 6.0.1 
+Suggesting the recognize image data by SSL instead of using CNN for reinforcement learning.
+
 # v 6.0.1 --alpha
 # New : multi thread for the Control flow Graphc Process (./usg_AI.exe --setting multion)
 # v 6.0.0 --alpha
