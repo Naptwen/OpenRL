@@ -1,3 +1,6 @@
+# v 6.0.3 --alpha
+Quantization deep learning model.
+
 # v 6.0.2 --alpha
 ## I am researching the SSL (self-supervised learning) now.
 I found the model which relates to improving the model for data optimization is SSL
