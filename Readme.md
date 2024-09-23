@@ -1,61 +1,45 @@
-# v 6.0.3 --alpha
-Quantization deep learning model.
+/*
+ * DEPRECATION NOTICE
+ * ------------------
+ * This project has been deprecated since 2022.
+ * Developing a custom C++ with CUDA neural network is no longer necessary.
+ * 
+ * Please consider using modern, well-maintained deep learning frameworks
+ * for your neural network needs.
+ */
 
-# v 6.0.2 --alpha
-## I am researching the SSL (self-supervised learning) now.
-I found the model which relates to improving the model for data optimization is SSL
-It is easy to construct by using usg_AI 6.0.1 
-Suggesting the recognize image data by SSL instead of using CNN for reinforcement learning.
+~~# v 6.0.3 --alpha
+~~Quantization deep learning model.
 
-# v 6.0.1 --alpha
-# New : multi thread for the Control flow Graphc Process (./usg_AI.exe --setting multion)
-# v 6.0.0 --alpha
-Hot fix
-## PPO
-![image](https://user-images.githubusercontent.com/47798805/192146860-daf28060-fef6-4694-b67b-342b355a9577.png)
-## RNN
-![image](https://user-images.githubusercontent.com/47798805/192253684-bcaa3060-6af6-41c1-8433-572f0803f63d.png)\
+~~# v 6.0.2 --alpha
+~~## I am researching the SSL (self-supervised learning) now.
+~~I found the model which relates to improving the model for data optimization is SSL
+~~It is easy to construct by using usg_AI 6.0.1 
+~~Suggesting the recognize image data by SSL instead of using CNN for reinforcement learning.
+
+~~# v 6.0.1 --alpha
+~~# New : multi thread for the Control flow Graphc Process (./usg_AI.exe --setting multion)
+~~# v 6.0.0 --alpha
+~~Hot fix
+~~## PPO
+~~![image](https://user-images.githubusercontent.com/47798805/192146860-daf28060-fef6-4694-b67b-342b355a9577.png)
+~~## RNN
+~~![image](https://user-images.githubusercontent.com/47798805/192253684-bcaa3060-6af6-41c1-8433-572f0803f63d.png)\
 
 
-# Quick PPO reinforcement Test
-1. Install the program
-2. open game.py then place at the left top corner
-3. open usg_AI.exe
-4. click the RUN GRAPH
-5. click the SET then type save/test.txt, 100, result.txt
-6. click the pygame window then wait
-7. wait 100 times the test iteration (average 10000 times requires but only for test)
-8. after fininsh, check the save file _0_result.txt and _1_result.txt file exists.
-9. if you want to test for game, click the SET then type save/simul.txt, 100, none
-10. click the pygame window then wait
+~~# Quick PPO reinforcement Test
+~~1. Install the program
+~~2. open game.py then place at the left top corner
+~~3. open usg_AI.exe
+~~4. click the RUN GRAPH
+~~5. click the SET then type save/test.txt, 100, result.txt
+~~6. click the pygame window then wait
+~~7. wait 100 times the test iteration (average 10000 times requires but only for test)
+~~8. after fininsh, check the save file _0_result.txt and _1_result.txt file exists.
+~~9. if you want to test for game, click the SET then type save/simul.txt, 100, none
+~~10. click the pygame window then wait
 
-# Q&A
 
-## Why test is so slow?
-It is not the algorithm problem it is problem for the extrafn shared library dll file.\
-I wrote a very simple shared lib file for just checking and testing small games, so don't use the test dll file for the real problems it is just for testing the program.\
-As referencing the form of the extrafn.cpp resource file make your own reward, action, and state functions.\
-As giving a tip, most take time part is OpenCV part and Keyboard input part, if you directly get those data from your own program, the speed dramatically increase.
-
-## Only Json file format allowed?
-No!, I just wrote the file format as json, it is not required. you can change the extension name anything but plase keep the format.\
-Another tip Neural Network weight and bias valuse are base on base64 by Nyffenegger rene.nyffenegger@adp-gmbh.ch.\
-Please see his homepage if you have question or interseted in webformating.
-
-## Program unexpectibly shutdown what can I do?
-If you don't have idea please open the termina than type 'usg_AI --setting verboseon'\
-It shows very detail of the algorithm process. asc font please as it show colored
-
-## On GUI, block doesn't move and can't click!
-Press Enter twice.
-
-## Can I use the graphical method for other program?
-Yes you can make not only Machine learning algorithm but also any thing that using the FUNC shared library block.\
-Only if you keep the format of it, the input and output are working as the same as others.\
-Here is the another example for making button click macro by GUI *not machine learning, just a macro program using OpenCV then moving keybord step by step\
-
-## Where I can see the format?
-Open terminal then type "usg_AI.exe --create [type]" or see user guid for 5.0.2 version
 __
 <BLOCKQUOTE>
    <summary># PATCH NOTE 4.1.1</summary>
