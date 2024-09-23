@@ -1,13 +1,13 @@
-/*
- * DEPRECATION NOTICE
+```
+#DEPRECATION NOTICE
  * ------------------
  * This project has been deprecated since 2022.
  * Developing a custom C++ with CUDA neural network is no longer necessary.
  * 
  * Please consider using modern, well-maintained deep learning frameworks
  * for your neural network needs.
- */
-
+ *
+```
 ~~# v 6.0.3 --alpha
 ~~Quantization deep learning model.
 
