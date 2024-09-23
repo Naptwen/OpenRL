@@ -8,36 +8,24 @@
  * for your neural network needs.
  *
 ```
-~~# v 6.0.3 --alpha
-~~Quantization deep learning model.
 
-~~# v 6.0.2 --alpha
-~~## I am researching the SSL (self-supervised learning) now.
-~~I found the model which relates to improving the model for data optimization is SSL
-~~It is easy to construct by using usg_AI 6.0.1 
-~~Suggesting the recognize image data by SSL instead of using CNN for reinforcement learning.
-
-~~# v 6.0.1 --alpha
-~~# New : multi thread for the Control flow Graphc Process (./usg_AI.exe --setting multion)
-~~# v 6.0.0 --alpha
-~~Hot fix
-~~## PPO
-~~![image](https://user-images.githubusercontent.com/47798805/192146860-daf28060-fef6-4694-b67b-342b355a9577.png)
-~~## RNN
-~~![image](https://user-images.githubusercontent.com/47798805/192253684-bcaa3060-6af6-41c1-8433-572f0803f63d.png)\
+## PPO
+![image](https://user-images.githubusercontent.com/47798805/192146860-daf28060-fef6-4694-b67b-342b355a9577.png)
+## RNN
+![image](https://user-images.githubusercontent.com/47798805/192253684-bcaa3060-6af6-41c1-8433-572f0803f63d.png)\
 
 
-~~# Quick PPO reinforcement Test
-~~1. Install the program
-~~2. open game.py then place at the left top corner
-~~3. open usg_AI.exe
-~~4. click the RUN GRAPH
-~~5. click the SET then type save/test.txt, 100, result.txt
-~~6. click the pygame window then wait
-~~7. wait 100 times the test iteration (average 10000 times requires but only for test)
-~~8. after fininsh, check the save file _0_result.txt and _1_result.txt file exists.
-~~9. if you want to test for game, click the SET then type save/simul.txt, 100, none
-~~10. click the pygame window then wait
+# Quick PPO reinforcement Test
+1. Install the program
+2. open game.py then place at the left top corner
+3. open usg_AI.exe
+4. click the RUN GRAPH
+5. click the SET then type save/test.txt, 100, result.txt
+6. click the pygame window then wait
+7. wait 100 times the test iteration (average 10000 times requires but only for test)
+8. after fininsh, check the save file _0_result.txt and _1_result.txt file exists.
+9. if you want to test for game, click the SET then type save/simul.txt, 100, none
+10. click the pygame window then wait
 
 
 __
